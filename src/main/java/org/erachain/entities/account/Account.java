@@ -6,11 +6,52 @@ import java.util.Arrays;
 
 public class Account {
 
-    protected byte[] bytes;
-    protected String address;
-    protected byte[] shortBytes;
-    private int accountId;
+    private String accountUrl;
+    private String publicKey;
+    private String privateKey;
+    private String user;
+    private int    accountId;
+    private String passWord ;
 
+    public void setAccountUrl(String accountUrl) {
+        this.accountUrl = accountUrl;
+    }
+
+    public String getPublicKey() {
+        return publicKey;
+    }
+
+    public void setPublicKey(String publicKey) {
+        this.publicKey = publicKey;
+    }
+
+    public String getPrivateKey() {
+        return privateKey;
+    }
+
+    public void setPrivateKey(String privateKey) {
+        this.privateKey = privateKey;
+    }
+
+    public String getUser() {
+        return user;
+    }
+
+    public void setUser(String user) {
+        this.user = user;
+    }
+
+    public String getPassWord() {
+        return passWord;
+    }
+
+    public void setPassWord(String passWord) {
+        this.passWord = passWord;
+    }
+
+    public String getAccountUrl() {
+        return accountUrl;
+    }
     public int getAccountId() {
         return accountId;
     }
@@ -19,14 +60,5 @@ public class Account {
         this.accountId = accountId;
     }
 
-    public String getAddress() {
-        return address;
-    }
-
-    public Account(String address) {
-        this.bytes = Base58.decode(address);
-        this.shortBytes = Arrays.copyOfRange(bytes, 1, bytes.length - 4);
-        this.address = address;
-    }
 
 }

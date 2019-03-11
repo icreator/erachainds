@@ -1,47 +1,35 @@
-create table IF NOT EXISTS Accounts
+create table IF NOT EXISTS Account
 (
-  PublicKey VarChar(255),
-  TimeStamp datetime,
-  Creator   varchar(255),
-  Id        Integer not null
-    primary key autoincrement
+  id integer not null
+    primary key autoincrement,
+  accountUrl VarChar(255),
+  publicKey VarChar(255),
+  privateKey VarChar(255),
+  user    varchar(50),
+  passWord varchar(50),
+  createDate datetime
 );
 
-create table IF NOT EXISTS Blocks
+create table IF NOT EXISTS DataInfo
 (
-  id            integer   not null
-    primary key
-                    autoincrement,
-  startDate       timestamp not null,
-  endDate        timestamp not null,
-  numberOfTrans int default 0 not null,
-  par_block_id  int       not null,
-  block         blob      not null,
+  id  integer   not null
+    primary key autoincrement,
+  accountId       int ,
+  runDate        timestamp not null,
+  numberOfRecs int default 0 not null,
+  records         blob      not null,
   createDate    timestamp
 );
 
-create table if NOT EXISTS TransactionInfo
+create table if NOT EXISTS RequestInfo
 (
-   ID          INTEGER not null
+   id          INTEGER not null
        primary key autoincrement,
-
-  TypeId      int,
-  FieldName   VarChar(255),
-  FieldLength int,
-  FieldType   varchar(50),
-  MaxValue    int,
+  accountId   int,
+  period      varchar(10) ,
+  fieldName   VarChar(50),
   OrderId     int
 );
 
 
-create table IF NOT EXISTS TransactionTypes
-(
-  Name      Varchar(50),
-  TypeId    int,
-  UNIQUE(Name, TypeId)
-);
-create table IF NOT EXISTS Valid_Signatures
-(
-  Signature VarChar(255)
-);
 

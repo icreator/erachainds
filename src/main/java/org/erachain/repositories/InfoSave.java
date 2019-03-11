@@ -1,7 +1,6 @@
 package org.erachain.repositories;
 
-import org.erachain.utils.loggers.LoggableBlock;
-import org.erachain.entities.blocks.Block;
+import org.erachain.entities.datainfo.DataInfo;
 import org.erachain.utils.crypto.Crypto;
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -9,17 +8,16 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.context.annotation.PropertySources;
 import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.stereotype.Repository;
 
 import java.sql.*;
 import java.util.Date;
 
 //@Repository
 @PropertySources({@PropertySource("classpath:queries.properties"), @PropertySource("classpath:db.properties")})
-public class BlockSave {
+public class InfoSave {
 
-    @Value("${INSERT_INTO_BLOCKS}")
-    private String INSERT_INTO_BLOCKS;
+    @Value("${INSERT_INTO_DATA}")
+    private String INSERT_INTO_DATA;
 
     private static int lastId = 0;
 
@@ -28,15 +26,14 @@ public class BlockSave {
     @Autowired
     private Logger logger;
 
-    @LoggableBlock
-    public void save(Block block) {
+    public void save(DataInfo dataInfo) {
         try (Connection connection = jdbcTemplate.getDataSource().getConnection()) {
-            PreparedStatement stm = connection.prepareStatement(INSERT_INTO_BLOCKS);
-            stm.setTimestamp(1, new Timestamp(block.getStart().getTime()));
-            stm.setTimestamp(2, new Timestamp(block.getEnd().getTime()));
-            stm.setInt(3, block.getTransactionCount());
+            PreparedStatement stm = connection.prepareStatement(INSERT_INTO_DATA);
+//            stm.setTimestamp(1, new Timestamp(DataInfo.getStart().getTime()));
+//            stm.setTimestamp(2, new Timestamp(DataInfo.getEnd().getTime()));
+//            stm.setInt(3, DataInfo.getTransactionCount());
             stm.setInt(4, lastId);
-            stm.setBytes(5, block.getBlob(Crypto.getInstance()));
+//            stm.setBytes(5, DataInfo.getBlob(Crypto.getInstance()));
             stm.setTimestamp(6, new Timestamp(new Date().getTime()));
             stm.executeUpdate();
             ResultSet rs = stm.getGeneratedKeys();
@@ -49,7 +46,7 @@ public class BlockSave {
     }
 
     @Autowired
-    public BlockSave(JdbcTemplate jdbcTemplate) {
+    public InfoSave(JdbcTemplate jdbcTemplate) {
         this.jdbcTemplate = jdbcTemplate;
     }
 }
