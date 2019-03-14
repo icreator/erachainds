@@ -1,7 +1,6 @@
 package org.erachain.repositories;
 
 import org.erachain.entities.datainfo.DataInfo;
-import org.erachain.utils.crypto.Crypto;
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;

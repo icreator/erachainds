@@ -6,8 +6,7 @@ create table IF NOT EXISTS Account
   publicKey VarChar(255),
   privateKey VarChar(255),
   user    varchar(50),
-  passWord varchar(50),
-  createDate datetime
+  password varchar(50)
 );
 
 create table IF NOT EXISTS DataInfo
@@ -18,7 +17,9 @@ create table IF NOT EXISTS DataInfo
   runDate        timestamp not null,
   numberOfRecs int default 0 not null,
   records         blob      not null,
-  createDate    timestamp
+  createDate   timestamp,
+  blockId      int default 0,
+  blockInd     int default 0
 );
 
 create table if NOT EXISTS RequestInfo

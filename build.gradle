@@ -102,6 +102,7 @@ dependencies {
     compile "org.springframework.boot:spring-boot-starter-websocket:${springbootStarterVersion}"
     compile "org.bouncycastle:bcprov-jdk15on:${bouncycastleVersion}"
     compile "com.google.guava:guava:${guavaVersion}"
+    compile 'org.json:json:20171018'
     compile "com.google.code.gson:gson:${gsonVersion}"
     compile "org.springframework.boot:spring-boot-starter-actuator"
     compile "org.springframework.boot:spring-boot-starter-aop:${springbootStarterVersion}"
