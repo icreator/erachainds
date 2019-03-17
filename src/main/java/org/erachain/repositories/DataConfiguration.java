@@ -8,14 +8,14 @@ import org.springframework.jdbc.datasource.DriverManagerDataSource;
 
 import javax.sql.DataSource;
 
-@Configuration
+//@Configuration
 @PropertySource("classpath:db.properties")
 public class DataConfiguration {
     @Value("${spring.datasource.driver-class-name}")
     private String className;
     @Value("${spring.datasource.url}")
     private String url;
-    @Bean
+//    @Bean
     public DataSource dataSource() {
         final DriverManagerDataSource dataSource = new DriverManagerDataSource();
         dataSource.setDriverClassName(className);

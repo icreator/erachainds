@@ -82,7 +82,6 @@ public class JsonService {
         List<String> list =  new ArrayList<>();
         result.toList().forEach(o -> {
             String id = ((Map) o).get("id").toString();
-//            System.out.println(id);
             list.add(id);
         });
         return list;

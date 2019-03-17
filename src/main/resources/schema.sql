@@ -11,15 +11,18 @@ create table IF NOT EXISTS Account
 
 create table IF NOT EXISTS DataInfo
 (
-  id  integer   not null
-    primary key autoincrement,
-  accountId       int ,
-  runDate        timestamp not null,
-  numberOfRecs int default 0 not null,
-  records         blob      not null,
-  createDate   timestamp,
-  blockId      int default 0,
-  blockInd     int default 0
+  id        integer     not null
+    primary key
+  autoincrement,
+  accountId int,
+  runDate   timestamp   not null,
+  data      blob        not null,
+  identity  varchar(50) not null,
+  subDate   timestamp,
+  transcash varchar(64),
+  accDate   timestamp,
+  blockId   int,
+  transId   int
 );
 
 create table if NOT EXISTS RequestInfo

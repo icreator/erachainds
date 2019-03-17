@@ -15,13 +15,13 @@ public class EnergyService implements ServiceInterface {
 
     @Override
     public void login(Map<String, String> params) {
-        clientEnergy.ClientLogin(params);
+        clientEnergy.clientLogin(params);
     }
 
     @Override
     public List<String> getIdentityList(Map<String, String> params) {
         List<String> list = new ArrayList<>();
-        clientEnergy.getNetWorkList().forEach(o -> {
+        clientEnergy.getNetWorkList(params).forEach(o -> {
             list.addAll(clientEnergy.getMeterList(o));
         });
         return list;
