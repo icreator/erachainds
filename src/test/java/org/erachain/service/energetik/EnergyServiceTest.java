@@ -24,14 +24,14 @@ public class EnergyServiceTest {
     Map<String, String> params = new HashMap<>();
 
     private void setParams() {
-        params.put("url", "https://app.yaenergetik.ru/api?v2");
+        params.put("accountUrl", "https://app.yaenergetik.ru/api?v2");
         params.put("user", "s.klokov@erachain.org");
         params.put("password", "erachain");
         params.put("meter", "13857");
-    //    params.put("type", "month");
-    //    params.put("value", "2019-01");
-        params.put("type", "day");
-        params.put("value", "2019-01-05");
+        params.put("type", "month");
+        params.put("value", "2019-01");
+//        params.put("type", "day");
+//        params.put("value", "2019-01-05");
     }
 
     @Test

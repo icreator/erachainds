@@ -1,17 +1,17 @@
 package org.erachain.entities.datainfo;
 
-import java.util.Date;
+import java.sql.Timestamp;
 
 public class DataInfo {
 
     private int id;
     private int accountId;
-    private Date runDate;
+    private Timestamp runDate;
     private byte[] data;
     private String identity;
-    private Date subDate;
-    private byte[] transcash;
-    private Date accDate;
+    private Timestamp subDate;
+    private String transcash;
+    private Timestamp accDate;
     private int blockId;
     private int transId;
 
@@ -31,11 +31,11 @@ public class DataInfo {
         this.accountId = accountId;
     }
 
-    public Date getRunDate() {
+    public Timestamp getRunDate() {
         return runDate;
     }
 
-    public void setRunDate(Date runDate) {
+    public void setRunDate(Timestamp runDate) {
         this.runDate = runDate;
     }
 
@@ -55,28 +55,28 @@ public class DataInfo {
         this.identity = identity;
     }
 
-    public Date getSubDate() {
+    public Timestamp getSubDate() {
         return subDate;
     }
 
-    public void setSubDate(Date subDate) {
+    public void setSubDate(Timestamp subDate) {
         this.subDate = subDate;
     }
 
 
-    public byte[] getTranscash() {
+    public String getTranscash() {
         return transcash;
     }
 
-    public void setTranscash(byte[] transcash) {
+    public void setTranscash(String transcash) {
         this.transcash = transcash;
     }
 
-    public Date getAccDate() {
+    public Timestamp getAccDate() {
         return accDate;
     }
 
-    public void setAccDate(Date accDate) {
+    public void setAccDate(Timestamp accDate) {
         this.accDate = accDate;
     }
 

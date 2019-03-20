@@ -47,10 +47,11 @@ public class InfoSave {
             Arrays.stream(fields).forEach(f -> {
                 if (row.get(f.getName()) != null) {
                     try {
+                        logger.info("set field " + f.getName());
                        f.setAccessible(true);
                        f.set(dataInfo, row.get(f.getName()));
                    } catch (IllegalAccessException e) {
-                       e.printStackTrace();
+                        logger.info(e.getMessage());
                    }
                 }
             });
@@ -60,37 +61,36 @@ public class InfoSave {
     }
     public void afterAccept(DataInfo dataInfo,
                             int blockId, int transId) throws SQLException {
-        dataInfo.setAccDate(new Date());
+        dataInfo.setAccDate(new Timestamp(System.currentTimeMillis()));
         dataInfo.setBlockId(blockId);
         dataInfo.setTransId(transId);
         try (Connection connection = jdbcTemplate.getDataSource().getConnection()) {
             PreparedStatement stm = connection.prepareStatement(UPDATE_DATA_AFTER_ACCEPT);
-            stm.setTimestamp(1, new Timestamp(dataInfo.getAccDate().getTime()));
+            stm.setTimestamp(1, dataInfo.getAccDate());
             stm.setInt(2, dataInfo.getBlockId());
             stm.setInt(3, dataInfo.getTransId());
             stm.setInt(4, dataInfo.getId());
             stm.executeUpdate();
         }
     }
-    public void afterSubmit(DataInfo dataInfo, byte[] transcash) throws SQLException {
-        dataInfo.setSubDate(new Date());
+    public void afterSubmit(DataInfo dataInfo, String transcash) throws SQLException {
+        dataInfo.setSubDate(new Timestamp(System.currentTimeMillis()));
         dataInfo.setTranscash(transcash);
         try (Connection connection = jdbcTemplate.getDataSource().getConnection()) {
             PreparedStatement stm = connection.prepareStatement(UPDATE_DATA_AFTER_SUBMIT);
-            stm.setTimestamp(1,
-                    new Timestamp(dataInfo.getSubDate().getTime()));
-            stm.setBytes(2, dataInfo.getTranscash());
+            stm.setTimestamp(1, dataInfo.getSubDate());
+            stm.setString(2, dataInfo.getTranscash());
             stm.setInt(3, dataInfo.getId());
             stm.executeUpdate();
         }
     }
     public void saveData(DataInfo dataInfo) throws SQLException {
+        dataInfo.setRunDate(new Timestamp(System.currentTimeMillis()));
         try (Connection connection = jdbcTemplate.getDataSource().getConnection()) {
             if (dataInfo.getId() == 0) {
                 PreparedStatement stm = connection.prepareStatement(INSERT_INTO_DATA);
                 stm.setInt(1, dataInfo.getAccountId());
-                stm.setTimestamp(2,
-                        new Timestamp(dataInfo.getRunDate().getTime()));
+                stm.setTimestamp(2, dataInfo.getRunDate());
                 stm.setBytes(3, dataInfo.getData());
                 stm.setString(4, dataInfo.getIdentity());
                 stm.executeUpdate();
@@ -98,6 +98,8 @@ public class InfoSave {
                 rs.next();
                 lastId = rs.getInt(1);
                 dataInfo.setId(lastId);
+//                connection.commit();
+                connection.close();
                 return;
             }
         }

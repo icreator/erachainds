@@ -1,3 +1,4 @@
+
 create table IF NOT EXISTS Account
 (
   id integer not null
@@ -6,14 +7,16 @@ create table IF NOT EXISTS Account
   publicKey VarChar(255),
   privateKey VarChar(255),
   user    varchar(50),
-  password varchar(50)
+  password varchar(50),
+  identityName varchar(20),
+  type       varchar(10),
+  runDate    timestamp
 );
 
 create table IF NOT EXISTS DataInfo
 (
   id        integer     not null
-    primary key
-  autoincrement,
+    primary key   autoincrement,
   accountId int,
   runDate   timestamp   not null,
   data      blob        not null,
@@ -25,15 +28,7 @@ create table IF NOT EXISTS DataInfo
   transId   int
 );
 
-create table if NOT EXISTS RequestInfo
-(
-   id          INTEGER not null
-       primary key autoincrement,
-  accountId   int,
-  period      varchar(10) ,
-  fieldName   VarChar(50),
-  OrderId     int
-);
+
 
 
 
