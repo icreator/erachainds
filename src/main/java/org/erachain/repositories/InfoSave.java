@@ -37,28 +37,24 @@ public class InfoSave {
     @Autowired
     private Logger logger;
 
+    @Autowired
+    private DbUtils dbUtils;
+
     private static final Field[] fields = DataInfo.class.getDeclaredFields();
 
     public List<DataInfo> fetchData() {
         List<Map<String, Object>> rows = jdbcTemplate.queryForList(FETCH_DATA);
+        logger.info("rows " + rows.size());
         List<DataInfo> list = new ArrayList<>();
         for (Map<String, Object> row: rows){
             DataInfo  dataInfo = new DataInfo();
-            Arrays.stream(fields).forEach(f -> {
-                if (row.get(f.getName()) != null) {
-                    try {
-                        logger.info("set field " + f.getName());
-                       f.setAccessible(true);
-                       f.set(dataInfo, row.get(f.getName()));
-                   } catch (IllegalAccessException e) {
-                        logger.info(e.getMessage());
-                   }
-                }
-            });
+
+            dbUtils.setObj(dataInfo, fields, row);
             list.add(dataInfo);
        }
        return list;
     }
+
     public void afterAccept(DataInfo dataInfo,
                             int blockId, int transId) throws SQLException {
         dataInfo.setAccDate(new Timestamp(System.currentTimeMillis()));
@@ -73,13 +69,13 @@ public class InfoSave {
             stm.executeUpdate();
         }
     }
-    public void afterSubmit(DataInfo dataInfo, String transcash) throws SQLException {
+    public void afterSubmit(DataInfo dataInfo) throws SQLException {
         dataInfo.setSubDate(new Timestamp(System.currentTimeMillis()));
-        dataInfo.setTranscash(transcash);
+//        dataInfo.setSignature(signature);
         try (Connection connection = jdbcTemplate.getDataSource().getConnection()) {
             PreparedStatement stm = connection.prepareStatement(UPDATE_DATA_AFTER_SUBMIT);
             stm.setTimestamp(1, dataInfo.getSubDate());
-            stm.setString(2, dataInfo.getTranscash());
+            stm.setString(2, dataInfo.getSignature());
             stm.setInt(3, dataInfo.getId());
             stm.executeUpdate();
         }
@@ -91,8 +87,8 @@ public class InfoSave {
                 PreparedStatement stm = connection.prepareStatement(INSERT_INTO_DATA);
                 stm.setInt(1, dataInfo.getAccountId());
                 stm.setTimestamp(2, dataInfo.getRunDate());
-                stm.setBytes(3, dataInfo.getData());
-                stm.setString(4, dataInfo.getIdentity());
+                stm.setBytes(4, dataInfo.getData());
+                stm.setString(3, dataInfo.getIdentity());
                 stm.executeUpdate();
                 ResultSet rs = stm.getGeneratedKeys();
                 rs.next();

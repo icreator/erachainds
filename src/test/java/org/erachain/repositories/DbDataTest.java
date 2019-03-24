@@ -29,8 +29,9 @@ public class DbDataTest {
     public void accountTest() {
         List<Account> list = accountProc.getAccounts();
         logger.info(" size " + list.size());
-        Account account = list.get(0);
-        logger.info(account.getAccountUrl() + " " + account.getRunDate() );
+        list.stream().forEach(account -> {
+            logger.info(account.getAccountUrl() + " " + account.getCreator() + " " +  account.getIdentityName());
+        });
     }
     @Test
     public void dataFetch() {
@@ -45,7 +46,7 @@ public class DbDataTest {
         DataInfo dataInfo = new DataInfo();
         dataInfo.setData("111111111111111111111111111111111111".getBytes());
         dataInfo.setAccountId(1);
-        dataInfo.setIdentity("111111111");
+        dataInfo.setIdentity("2222222");
         try {
             infoSave.saveData(dataInfo);
             logger.info(" dataInfo saved  " + dataInfo.getId());

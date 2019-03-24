@@ -1,4 +1,4 @@
-INSERT OR IGNORE INTO Account (id, accountUrl , publicKey , privateKey , user, password, identityName, type, runDate) VALUES
-(1, 'https://app.yaenergetik.ru/api?v2','publicKey','privateKey','s.klokov@erachain.org', 'erachain', 'meter', 'month', '1553103894272');
+INSERT OR IGNORE INTO Account (id, accountUrl , creator , recipient , user, password, identityName, type) VALUES
+(1, 'https://app.yaenergetik.ru/api?v2','7Ea2hBkevqRE7N12mTqXiUc2zWLxurWzH3','7LghJWXYwq8yJESBri4FbUcoiectMEw393','s.klokov@erachain.org', 'erachain', 'meter', 'month');
 
 

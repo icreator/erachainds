@@ -10,10 +10,18 @@ public class DataInfo {
     private byte[] data;
     private String identity;
     private Timestamp subDate;
-    private String transcash;
+    private String signature;
     private Timestamp accDate;
     private int blockId;
     private int transId;
+
+    public String getSignature() {
+        return signature;
+    }
+
+    public void setSignature(String signature) {
+        this.signature = signature;
+    }
 
     public int getId() {
         return id;
@@ -61,15 +69,6 @@ public class DataInfo {
 
     public void setSubDate(Timestamp subDate) {
         this.subDate = subDate;
-    }
-
-
-    public String getTranscash() {
-        return transcash;
-    }
-
-    public void setTranscash(String transcash) {
-        this.transcash = transcash;
     }
 
     public Timestamp getAccDate() {

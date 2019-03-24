@@ -13,9 +13,7 @@ public class ServiceFactory {
     private  Map<String, ServiceInterface> services = new HashMap<>();
 
     @Autowired
-    private EnergyService energyService;
-
-    public ServiceFactory() {
+    public ServiceFactory(EnergyService energyService) {
         services.put("https://app.yaenergetik.ru/api?v2", energyService);
     }
 

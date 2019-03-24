@@ -10,6 +10,7 @@ import java.util.Map;
 
 @Service
 public class EnergyService implements ServiceInterface {
+
     @Autowired
     ClientEnergy clientEnergy;
 

@@ -77,7 +77,7 @@ sourceSets {
 bootJar {
     finalizedBy = ["CopyResourse"]
 }
-
+/*
 task CopyResourse() {
     copy {
         from 'db'
@@ -90,7 +90,7 @@ task CopyResourse() {
         include '*.json'
     }
 }
-
+*/
 ext.springbootVersion = '2.0.6.RELEASE'
 ext.springbootStarterVersion = '2.1.1.RELEASE'
 ext.junitVersion = '5.3.1'

@@ -13,8 +13,8 @@ public class Account {
 
     private int    id;
     private String accountUrl;
-    private String publicKey;
-    private String privateKey;
+    private String creator;
+    private String recipient;
     private String user;
     private String identityName;
     private String password ;
@@ -26,6 +26,21 @@ public class Account {
 
     private int lastAccepted = 0;
 
+    public String getCreator() {
+        return creator;
+    }
+
+    public void setCreator(String creator) {
+        this.creator = creator;
+    }
+
+    public String getRecipient() {
+        return recipient;
+    }
+
+    public void setRecipient(String recipient) {
+        this.recipient = recipient;
+    }
 
     public int getLastReceived() {
         return lastReceived;
@@ -39,7 +54,6 @@ public class Account {
         return lastAccepted;
     }
 
-
     public void addReceived() {
         lastReceived ++;
     }
@@ -51,11 +65,10 @@ public class Account {
     public void addAccepted() {
         lastAccepted ++;
     }
+
     public void reset() {
         lastReceived = 0;
-
         lastSubmitted = 0;
-
         lastAccepted = 0;
     }
 
@@ -118,22 +131,6 @@ public class Account {
 
     public void setAccountUrl(String accountUrl) {
         this.accountUrl = accountUrl;
-    }
-
-    public String getPublicKey() {
-        return publicKey;
-    }
-
-    public void setPublicKey(String publicKey) {
-        this.publicKey = publicKey;
-    }
-
-    public String getPrivateKey() {
-        return privateKey;
-    }
-
-    public void setPrivateKey(String privateKey) {
-        this.privateKey = privateKey;
     }
 
     public String getUser() {
