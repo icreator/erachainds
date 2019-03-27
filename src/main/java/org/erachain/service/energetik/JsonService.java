@@ -86,11 +86,11 @@ public class JsonService {
         });
         return list;
     }
-    public String getValue(String jsonString, String key) {
+    public <T> T getValue(String jsonString, String key) {
         JSONObject jsonObject = new JSONObject(jsonString);
-        return jsonObject.get(key).toString();
+        return (T) jsonObject.get(key);
     }
-    private String getValue(JSONObject jsonObject, String key) {
-        return jsonObject.get(key).toString();
+    private <T> T getValue(JSONObject jsonObject, String key) {
+        return (T) jsonObject.get(key);
     }
 }

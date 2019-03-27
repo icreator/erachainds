@@ -1,11 +1,13 @@
 package org.erachain.process;
 
+import org.apache.commons.lang3.time.DateUtils;
 import org.erachain.entities.account.Account;
 import org.erachain.entities.datainfo.DataInfo;
 import org.erachain.repositories.AccountProc;
 import org.erachain.repositories.InfoSave;
 import org.erachain.service.ServiceFactory;
 import org.erachain.service.ServiceInterface;
+import org.erachain.service.energetik.JsonService;
 import org.erachain.service.eraService.EraClient;
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,6 +17,7 @@ import org.springframework.stereotype.Service;
 
 import java.sql.SQLException;
 import java.sql.Timestamp;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
@@ -36,6 +39,9 @@ public class ServiceMonitor {
     @Autowired
     private EraClient eraClient;
 
+    @Autowired
+    private JsonService jsonService;
+
     @Value("${Service_Url}")
     private String Service_Url;
 
@@ -49,7 +55,7 @@ public class ServiceMonitor {
                 ServiceInterface service = serviceFactory.getService(params.get(Service_Url));
                 logger.info(" account service " + service);
                 List<String> idents = service.getIdentityList(params);
-                idents.stream().forEach(ident -> {
+                idents.forEach(ident -> {
                     params.put(account.getIdentityName(), ident);
                     String json = service.getIdentityValues(params);
                     if (json != null && !json.isEmpty()) {
@@ -81,7 +87,7 @@ public class ServiceMonitor {
     public void checkData() {
         List<DataInfo> dataInfos = infoSave.fetchData();
 
-        dataInfos.stream().forEach(dataInfo ->{
+        dataInfos.forEach(dataInfo ->{
             if(dataInfo.getRunDate() != null && dataInfo.getSubDate() == null) {
                 Account account = accountProc.getAccountById(dataInfo.getAccountId());
                 eraClient.setSignature(dataInfo, account);
@@ -89,6 +95,27 @@ public class ServiceMonitor {
                     infoSave.afterSubmit(dataInfo);
                 } catch (SQLException e) {
                     logger.info(e.getMessage());
+                }
+            }
+        });
+    }
+    public void checkDataAccept() {
+        List<DataInfo> dataInfos = infoSave.fetchData();
+
+        dataInfos.forEach(dataInfo ->{
+            if(dataInfo.getSubDate() != null && dataInfo.getAccDate() == null) {
+                Timestamp timestamp = dataInfo.getSubDate();
+                Date date = new Date(timestamp.getTime());
+                DateUtils.addMinutes(date, 5);
+                int confirmations = 0;
+                if (date.before(new Date())) {
+                    String result = eraClient.checkChain(dataInfo);
+                    confirmations = jsonService.getValue(result, "confirmations");
+                }
+                if (confirmations == 0) {
+                    logger.info(" unconfirmed " + dataInfo.getSignature());
+                } else {
+                    logger.info(" confirmed " + dataInfo.getSignature());
                 }
             }
         });

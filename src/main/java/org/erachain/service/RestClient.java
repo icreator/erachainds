@@ -4,6 +4,7 @@ import org.springframework.http.HttpEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
+import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 
 import java.util.HashMap;
@@ -38,6 +39,11 @@ public class RestClient {
 
         return response;
     }
+    public String getResult(String url) throws RestClientException {
+        String response = new RestTemplate().getForObject(url, String.class);
+
+        return response;
+    }
     public  String addParams(String url, String[] urlParams, Map<String, String> params) {
         final StringBuffer result = new StringBuffer(url);
         if (urlParams != null) {
@@ -45,11 +51,11 @@ public class RestClient {
                 result.append("/" + p);
             }
         }
-        if (params.isEmpty())
+        if (params == null || params.isEmpty())
             return result.toString();
         result.append("?");
         boolean started = false;
-        params.keySet().stream().forEach(name -> {
+        params.keySet().forEach(name -> {
 
             result.append(name + "=" + params.get(name) + "&");
 

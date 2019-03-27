@@ -28,4 +28,9 @@ public class ServiceMonitorTest {
         serviceMonitor.checkData();
     }
 
+    @Test
+    public void testDataAccept() {
+        serviceMonitor.checkDataAccept();
+    }
+
 }

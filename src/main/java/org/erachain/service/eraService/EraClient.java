@@ -4,7 +4,6 @@ import org.erachain.entities.account.Account;
 import org.erachain.entities.datainfo.DataInfo;
 import org.erachain.service.RestClient;
 import org.erachain.service.energetik.JsonService;
-import org.graalvm.compiler.lir.LIRInstruction;
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -23,6 +22,9 @@ public class EraClient {
 
     @Value("${EraService_Url}")
     private String EraService_Url;
+
+    @Value("${EraService_Url_Signature}")
+    private String EraService_Url_Signature;
 
     @Value("${EraService_password}")
     private String EraService_password;
@@ -52,7 +54,10 @@ public class EraClient {
         String signature = jsonService.getValue(result, "signature");
         logger.info(" signature " + signature);
         dataInfo.setSignature(signature);
-//        dataInfo.setSubDate(new Timestamp(System.currentTimeMillis()));
     }
-
+    public String checkChain(DataInfo dataInfo) {
+        String signature = dataInfo.getSignature();
+        String result = restClient.getResult(EraService_Url_Signature + "/" + signature);
+        return result;
+    }
 }
