@@ -33,4 +33,13 @@ public class EnergyService implements ServiceInterface {
         return clientEnergy.getMeterResult(params);
     }
 
+    @Override
+    public String setIdentityValues(Map<String, String> params) {
+        return clientEnergy.setMeterResult(params);
+    }
+
+    @Override
+    public String checkIdentityValues(Map<String, String> params) {
+        return clientEnergy.checkMeterResult(params);
+    }
 }

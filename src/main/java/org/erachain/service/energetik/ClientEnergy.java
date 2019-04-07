@@ -64,24 +64,14 @@ public class ClientEnergy {
 
         String type = params.get("type") == null ? "month" : params.get("type");
         String value = params.get("value");
+        //String format = params.get("format");
         if (value == null) {
-            SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd");
+            SimpleDateFormat format = new SimpleDateFormat(params.get("format") == null ? "yyyy-MM-dd" : params.get("format"));
 
             Date date = new Date();
-            switch (type) {
-                case ("month") :
-                    date = DateUtils.addMonths(new Date(), -1);
-                    break;
-                case ("week") :
-                    date = DateUtils.addWeeks(new Date(), -1);
-                    break;
-                case ("day") :
-                    date = DateUtils.addDays(new Date(), -1);
-                    break;
-            }
-            String dateString = format.format( date);
-
-            value = type.equalsIgnoreCase("month") ? dateString.substring(0, 7) : dateString;
+            value = format.format( date);
+            params.put("value", value);
+//            value = type.equalsIgnoreCase("month") ? dateString.substring(0, 7) : dateString;
         }
         return getMeterResult(params.get("meter"), type, value);
     }
@@ -90,5 +80,35 @@ public class ClientEnergy {
        return restClient.getJsonResult(Energy_Url,
                jsonService.getMeterResultJson(meter, type, value).toString());
     }
-
+    public String setMeterResult(Map<String, String> params) {
+        if (params.get("sessionId") == null) {
+            this.clientLogin(params);
+        }
+        String type = params.get("type");
+        String value = params.get("value");
+        return setMeterResult(params.get("meter"), type, value, params.get("transaction"));
+    }
+    private String setMeterResult(String meter, String type, String value, String transaction) {
+        logger.info(" get MeterResult for " + meter + " " + type + " " + value + " transaction " + transaction);
+        String result = restClient.getJsonResult(Energy_Url,
+                jsonService.setMeterResultJson(meter, type, value, transaction).toString());
+        logger.info("  MeterResult  " + result);
+        return result;
+    }
+    public String checkMeterResult(Map<String, String> params) {
+        if (params.get("sessionId") == null) {
+            this.clientLogin(params);
+        }
+        String type = params.get("type");
+        String value = params.get("value");
+        String result = checkMeterResult(params.get("meter"), type, value);
+        return result;
+    }
+    private String checkMeterResult(String meter, String type, String value) {
+        logger.info(" check MeterResult for " + meter + " " + type + " " + value );
+        String result = restClient.getJsonResult(Energy_Url,
+                jsonService.checkMeterResultJson(meter, type, value).toString());
+        logger.info("  MeterResult  " + result);
+        return result;
+    }
 }

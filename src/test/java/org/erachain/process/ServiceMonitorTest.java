@@ -25,12 +25,21 @@ public class ServiceMonitorTest {
 
     @Test
     public void testDataSubmit() {
-        serviceMonitor.checkData();
+        serviceMonitor.checkDataSubmit();
     }
 
     @Test
     public void testDataAccept() {
         serviceMonitor.checkDataAccept();
+    }
+
+    @Test
+    public void testAfterDataAccept() {
+        serviceMonitor.checkSendToClient();
+    }
+    @Test
+    public void testCheckAcceptedByClient() {
+        serviceMonitor.checkAcceptedByClient();
     }
 
 }

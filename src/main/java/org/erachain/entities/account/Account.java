@@ -1,6 +1,7 @@
 package org.erachain.entities.account;
 
 import org.apache.commons.lang3.time.DateUtils;
+import org.erachain.repositories.DbUtils;
 import org.erachain.utils.crypto.Base58;
 
 import java.sql.Timestamp;
@@ -13,26 +14,27 @@ public class Account {
 
     private int    id;
     private String accountUrl;
-    private String creator;
+    private String publicKey;
+    private String privateKey;
     private String recipient;
     private String user;
     private String identityName;
     private String password ;
-    private String type;
-    private Timestamp runDate;
-    private int lastReceived = 0;
+//    private String type;
+//    private Timestamp runDate;
+//    private int lastReceived = 0;
+//
+//    private int lastSubmitted = 0;
+//
+//    private int lastAccepted = 0;
 
-    private int lastSubmitted = 0;
-
-    private int lastAccepted = 0;
-
-    public String getCreator() {
-        return creator;
-    }
-
-    public void setCreator(String creator) {
-        this.creator = creator;
-    }
+//    public String getCreator() {
+//        return creator;
+//    }
+//
+//    public void setCreator(String creator) {
+//        this.creator = creator;
+//    }
 
     public String getRecipient() {
         return recipient;
@@ -42,35 +44,35 @@ public class Account {
         this.recipient = recipient;
     }
 
-    public int getLastReceived() {
-        return lastReceived;
-    }
+//    public int getLastReceived() {
+//        return lastReceived;
+//    }
+//
+//    public int getLastSubmitted() {
+//        return lastSubmitted;
+//    }
+//
+//    public int getLastAccepted() {
+//        return lastAccepted;
+//    }
+//
+//    public void addReceived() {
+//        lastReceived ++;
+//    }
+//
+//    public void addSubmitted() {
+//        lastSubmitted ++;
+//    }
+//
+//    public void addAccepted() {
+//        lastAccepted ++;
+//    }
 
-    public int getLastSubmitted() {
-        return lastSubmitted;
-    }
-
-    public int getLastAccepted() {
-        return lastAccepted;
-    }
-
-    public void addReceived() {
-        lastReceived ++;
-    }
-
-    public void addSubmitted() {
-        lastSubmitted ++;
-    }
-
-    public void addAccepted() {
-        lastAccepted ++;
-    }
-
-    public void reset() {
-        lastReceived = 0;
-        lastSubmitted = 0;
-        lastAccepted = 0;
-    }
+//    public void reset() {
+//        lastReceived = 0;
+//        lastSubmitted = 0;
+//        lastAccepted = 0;
+//    }
 
     public String getIdentityName() {
         return identityName;
@@ -95,39 +97,41 @@ public class Account {
         params.put("accountUrl", accountUrl);
         params.put("user", user);
         params.put("password", password);
-        params.put("type", type);
+        params.put("identityName", identityName);
+
+//        params.put("type", type);
         return params;
     }
-    public boolean checkTime() {
-        if (runDate == null)
-            return true;
-
-        Date date = new Date(runDate.getTime());
-
-        switch (type) {
-            case ("month") :
-                Date incrementedDate = DateUtils.addMonths(date, 1);
-                if (date.after(incrementedDate))
-                    return true;
-                break;
-        }
-        return false;
-    }
-    public String getType() {
-        return type;
-    }
-
-    public void setType(String type) {
-        this.type = type;
-    }
-
-    public Timestamp getRunDate() {
-        return runDate;
-    }
-
-    public void setRunDate(Timestamp runDate) {
-        this.runDate = runDate;
-    }
+//    public boolean checkTime() {
+//        if (runDate == null)
+//            return true;
+//
+//        Date date = new Date(runDate.getTime());
+//
+//        switch (type) {
+//            case ("month") :
+//                Date incrementedDate = DateUtils.addMonths(date, 1);
+//                if (date.after(incrementedDate))
+//                    return true;
+//                break;
+//        }
+//        return false;
+//    }
+//    public String getType() {
+//        return type;
+//    }
+//
+//    public void setType(String type) {
+//        this.type = type;
+//    }
+//
+//    public Timestamp getRunDate() {
+//        return runDate;
+//    }
+//
+//    public void setRunDate(Timestamp runDate) {
+//        this.runDate = runDate;
+//    }
 
     public void setAccountUrl(String accountUrl) {
         this.accountUrl = accountUrl;

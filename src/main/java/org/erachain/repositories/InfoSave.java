@@ -30,6 +30,12 @@ public class InfoSave {
     @Value("${UPDATE_DATA_AFTER_ACCEPT}")
     private String UPDATE_DATA_AFTER_ACCEPT;
 
+    @Value("${UPDATE_DATA_AFTER_SEND_TO_CLIENT}")
+    private String UPDATE_DATA_AFTER_SEND_TO_CLIENT;
+
+    @Value("${UPDATE_DATA_ACCEPTED_BY_CLIENT}")
+    private String UPDATE_DATA_ACCEPTED_BY_CLIENT;
+
     private static int lastId = 0;
 
     private JdbcTemplate jdbcTemplate;
@@ -55,29 +61,48 @@ public class InfoSave {
        return list;
     }
 
-    public void afterAccept(DataInfo dataInfo,
-                            int blockId, int transId) throws SQLException {
+    public void afterAccept(DataInfo dataInfo) throws SQLException {
         dataInfo.setAccDate(new Timestamp(System.currentTimeMillis()));
-        dataInfo.setBlockId(blockId);
-        dataInfo.setTransId(transId);
         try (Connection connection = jdbcTemplate.getDataSource().getConnection()) {
             PreparedStatement stm = connection.prepareStatement(UPDATE_DATA_AFTER_ACCEPT);
             stm.setTimestamp(1, dataInfo.getAccDate());
-            stm.setInt(2, dataInfo.getBlockId());
-            stm.setInt(3, dataInfo.getTransId());
-            stm.setInt(4, dataInfo.getId());
+            stm.setInt(2, dataInfo.getId());
             stm.executeUpdate();
+            stm.close();
+            connection.close();
+        }
+    }
+    public void afterAcceptedByClient(DataInfo dataInfo) throws SQLException {
+        dataInfo.setAcceptClientDate(new Timestamp(System.currentTimeMillis()));
+        try (Connection connection = jdbcTemplate.getDataSource().getConnection()) {
+            PreparedStatement stm = connection.prepareStatement(UPDATE_DATA_ACCEPTED_BY_CLIENT);
+            stm.setTimestamp(1, dataInfo.getAcceptClientDate());
+            stm.setInt(2, dataInfo.getId());
+            stm.executeUpdate();
+            stm.close();
+            connection.close();
+        }
+    }
+    public void afterSendToClient(DataInfo dataInfo) throws SQLException {
+        dataInfo.setSendToClientDate(new Timestamp(System.currentTimeMillis()));
+        try (Connection connection = jdbcTemplate.getDataSource().getConnection()) {
+            PreparedStatement stm = connection.prepareStatement(UPDATE_DATA_AFTER_SEND_TO_CLIENT);
+            stm.setTimestamp(1, dataInfo.getSendToClientDate());
+            stm.setInt(2, dataInfo.getId());
+            stm.executeUpdate();
+            stm.close();
+            connection.close();
         }
     }
     public void afterSubmit(DataInfo dataInfo) throws SQLException {
         dataInfo.setSubDate(new Timestamp(System.currentTimeMillis()));
-//        dataInfo.setSignature(signature);
         try (Connection connection = jdbcTemplate.getDataSource().getConnection()) {
             PreparedStatement stm = connection.prepareStatement(UPDATE_DATA_AFTER_SUBMIT);
             stm.setTimestamp(1, dataInfo.getSubDate());
-            stm.setString(2, dataInfo.getSignature());
-            stm.setInt(3, dataInfo.getId());
+            stm.setInt(2, dataInfo.getId());
             stm.executeUpdate();
+            stm.close();
+            connection.close();
         }
     }
     public void saveData(DataInfo dataInfo) throws SQLException {
@@ -87,19 +112,19 @@ public class InfoSave {
                 PreparedStatement stm = connection.prepareStatement(INSERT_INTO_DATA);
                 stm.setInt(1, dataInfo.getAccountId());
                 stm.setTimestamp(2, dataInfo.getRunDate());
-                stm.setBytes(4, dataInfo.getData());
                 stm.setString(3, dataInfo.getIdentity());
+                stm.setBytes(4, dataInfo.getData());
+                stm.setInt(5, dataInfo.getActRequestId());
                 stm.executeUpdate();
                 ResultSet rs = stm.getGeneratedKeys();
                 rs.next();
                 lastId = rs.getInt(1);
                 dataInfo.setId(lastId);
-//                connection.commit();
+                stm.close();
                 connection.close();
                 return;
             }
         }
-
     }
 
     @Autowired

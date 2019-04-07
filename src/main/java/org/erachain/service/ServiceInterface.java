@@ -9,4 +9,8 @@ public interface ServiceInterface {
     public List<String> getIdentityList(Map<String, String> params);
 
     public String getIdentityValues(Map<String, String> params);
+
+    public String setIdentityValues(Map<String, String> params);
+
+    public String checkIdentityValues(Map<String, String> params);
 }

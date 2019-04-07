@@ -2,6 +2,7 @@ package org.erachain.repositories;
 
 import org.erachain.entities.account.Account;
 import org.erachain.entities.datainfo.DataInfo;
+import org.erachain.entities.request.Request;
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -23,8 +24,11 @@ public class AccountProc {
     @Value("${FETCH_ACCOUNTS}")
     private String FETCH_ACCOUNTS;
 
-    @Value("${UPDATE_ACCOUNT_AFTER_RUN}")
-    private String UPDATE_ACCOUNT_AFTER_RUN;
+    @Value("${FETCH_REQUESTS}")
+    private String FETCH_REQUESTS;
+
+    @Value("${UPDATE_REQUEST_AFTER_RUN}")
+    private String UPDATE_REQUEST_AFTER_RUN;
 
     @Autowired
     private Logger logger;
@@ -38,8 +42,10 @@ public class AccountProc {
     }
 
     private static final Field[] fields = Account.class.getDeclaredFields();
-
+    private static boolean inited;
     private static ConcurrentMap<Integer, Account> cache = new ConcurrentHashMap<>();
+    private static ConcurrentMap<Integer, Request> cacheReq = new ConcurrentHashMap<>();
+    private static ConcurrentMap<Integer, List<Request>> cacheListReq = new ConcurrentHashMap<>();
 
     public   List<Account>  getAccounts() {
         List<Map<String, Object>> rows = jdbcTemplate.queryForList(FETCH_ACCOUNTS);
@@ -52,20 +58,54 @@ public class AccountProc {
         }
         return list;
     }
+
+    public   void  setRequests() {
+        List<Map<String, Object>> rows = jdbcTemplate.queryForList(FETCH_REQUESTS);
+        for (Map<String, Object> row: rows){
+            Request  request = new Request();
+            dbUtils.setObj(request, row);
+            List<Request> list = cacheListReq.get(request.getAccountId());
+            if (list == null) {
+                list = new ArrayList<>();
+                cacheListReq.put(request.getAccountId(), list);
+            }
+            list.add(request);
+            cacheReq.put(request.getId(), request);
+        }
+        inited = true;
+        return;
+    }
+    public   List<Request>  getRequests(int accountId) {
+        if (!inited)
+            setRequests();
+        return cacheListReq.get(accountId);
+    }
     public Account getAccountById(int id)  {
         if (cache.get(id) == null) {
             getAccounts();
         }
         return cache.get(id);
     }
-    public void afterRun(Account account) throws SQLException {
-        account.setRunDate(new Timestamp(System.currentTimeMillis()));
+//    public void afterRun(Account account) throws SQLException {
+//        account.setRunDate(new Timestamp(System.currentTimeMillis()));
+//        try (Connection connection = jdbcTemplate.getDataSource().getConnection()) {
+//            PreparedStatement stm = connection.prepareStatement(UPDATE_ACCOUNT_AFTER_RUN);
+//            stm.setTimestamp(1, account.getRunDate());
+//            stm.setInt(2, account.getId());
+//            stm.executeUpdate();
+//            cache.put(account.getId(), account);
+//        }
+//    }
+
+    public void afterRun(Request request) throws SQLException {
+        request.setLastRun(new Timestamp(System.currentTimeMillis()));
         try (Connection connection = jdbcTemplate.getDataSource().getConnection()) {
-            PreparedStatement stm = connection.prepareStatement(UPDATE_ACCOUNT_AFTER_RUN);
-            stm.setTimestamp(1, account.getRunDate());
-            stm.setInt(2, account.getId());
+            PreparedStatement stm = connection.prepareStatement(UPDATE_REQUEST_AFTER_RUN);
+            stm.setTimestamp(1, request.getLastRun());
+            stm.setInt(2, request.getId());
             stm.executeUpdate();
-            cache.put(account.getId(), account);
+            stm.close();
+            connection.close();
         }
     }
 }

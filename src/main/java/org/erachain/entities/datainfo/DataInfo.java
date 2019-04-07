@@ -1,8 +1,15 @@
 package org.erachain.entities.datainfo;
 
+import org.erachain.repositories.DbUtils;
+
 import java.sql.Timestamp;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 public class DataInfo {
+
+    private static final int TRANS_MAXSIZE = 10000;
 
     private int id;
     private int accountId;
@@ -10,17 +17,73 @@ public class DataInfo {
     private byte[] data;
     private String identity;
     private Timestamp subDate;
-    private String signature;
+//    private String signature;
     private Timestamp accDate;
-    private int blockId;
-    private int transId;
+//    private int blockId;
+//    private int transId;
+//    private String requestType;
+//    private String requestValue;
 
-    public String getSignature() {
-        return signature;
+    private int    actRequestId;
+//    private int    partNo;
+    private Timestamp sendToClientDate;
+    private Timestamp acceptClientDate;
+
+
+    public Timestamp getAcceptClientDate() {
+        return acceptClientDate;
     }
 
-    public void setSignature(String signature) {
-        this.signature = signature;
+    public void setAcceptClientDate(Timestamp acceptClientDate) {
+        this.acceptClientDate = acceptClientDate;
+    }
+
+    public int getActRequestId() {
+        return actRequestId;
+    }
+
+    public void setActRequestId(int actRequestId) {
+        this.actRequestId = actRequestId;
+    }
+
+//    public String getRequestType() {
+//        return requestType;
+//    }
+//
+//    public void setRequestType(String requestType) {
+//        this.requestType = requestType;
+//    }
+//
+//    public String getRequestValue() {
+//        return requestValue;
+//    }
+//
+//    public void setRequestValue(String requestValue) {
+//        this.requestValue = requestValue;
+//    }
+
+    public Timestamp getSendToClientDate() {
+        return sendToClientDate;
+    }
+
+    public void setSendToClientDate(Timestamp sendToClientDate) {
+        this.sendToClientDate = sendToClientDate;
+    }
+
+//    public int getPartNo() {
+//        return partNo;
+//    }
+//
+//    public void setPartNo(int partNo) {
+//        this.partNo = partNo;
+//    }
+//
+//    public String getSignature() {
+//        return signature;
+//    }
+//
+    public void setSignature(String signature, DbUtils dbUtils) {
+//        this.signature = signature;
     }
 
     public int getId() {
@@ -51,6 +114,13 @@ public class DataInfo {
         return data;
     }
 
+    public List<byte[]> getData(DbUtils dbUtils) {
+        return split(data);
+    }
+
+    public List<DataEra> getDataEras(DbUtils dbUtils) {
+        return dbUtils.fetchData(DataEra.class, "DataEra", "dataInfoId = " + id);
+    }
     public void setData(byte[] data) {
         this.data = data;
     }
@@ -79,21 +149,26 @@ public class DataInfo {
         this.accDate = accDate;
     }
 
-    public int getBlockId() {
-        return blockId;
+    private List<byte[]> split(byte[] arrayToCut) {
+        int size = TRANS_MAXSIZE;
+        return split(arrayToCut, size);
     }
+    private List<byte[]> split(byte[] arrayToCut, int size) {
+        List<byte[]> list = new ArrayList<>();
 
-    public void setBlockId(int blockId) {
-        this.blockId = blockId;
+        int num = arrayToCut.length <= size ? 0 : arrayToCut.length/size;
+        if (num == 0) {
+            list.add(arrayToCut);
+            return list;
+        }
+        size =  arrayToCut.length/(num + 1);
+        int pos = 0;
+        for (int i = 0; i < num; i ++) {
+            list.add(Arrays.copyOfRange(arrayToCut, pos, pos + size));
+            pos += size;
+        }
+        list.add(Arrays.copyOfRange(arrayToCut, pos, arrayToCut.length));
+        return list;
     }
-
-    public int getTransId() {
-        return transId;
-    }
-
-    public void setTransId(int transId) {
-        this.transId = transId;
-    }
-
 
 }

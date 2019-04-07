@@ -2,6 +2,8 @@ package org.erachain.service.energetik;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
+import org.slf4j.Logger;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -11,6 +13,10 @@ import java.util.Map;
 
 @Service
 public class JsonService {
+
+    @Autowired
+    private Logger logger;
+
     public  JSONObject getAuth(String user, String password) {
         String verifyCode = null;
         JSONObject requestBody = new JSONObject();
@@ -73,7 +79,57 @@ public class JsonService {
         String[] array = {"zones", "errors"};
         JSONArray include = new JSONArray(Arrays.asList(array));
         params.put("include", include);
-        System.out.println("result " + requestBody.toString());
+     //   System.out.println("result " + requestBody.toString());
+        return requestBody;
+    }
+    public  JSONObject setMeterResultJson(String meter, String type, String value, String transaction) {
+        JSONObject requestBody = new JSONObject();
+        requestBody.put("jsonrpc", "2.0");
+        requestBody.put("method", "reading.setListBlockchain");
+        requestBody.put("id", 1);
+        JSONObject params = new JSONObject();
+        params.put("meter", Integer.parseInt(meter));
+        params.put("mode", "archive");
+        params.put("sort", "asc");
+        params.put("transaction", transaction);
+        JSONObject period = new JSONObject();
+        period.put("type", type);
+        period.put("value", value);
+        params.put("period", period);
+        requestBody.put("params", params);
+        String[] array = {"zones", "errors"};
+        JSONArray include = new JSONArray(Arrays.asList(array));
+        params.put("include", include);
+        logger.info("result " + requestBody.toString());
+    //    System.out.println("result " + requestBody.toString());
+        return requestBody;
+    }
+    public Boolean checkMeterResult(String jsonString) {
+        JSONObject result = getValue(jsonString, "result");
+        Boolean value = getValue(result, "value");
+        logger.info(" checkMeterResult " + value);
+        return value;
+    }
+    public  JSONObject checkMeterResultJson(String meter, String type, String value) {
+        JSONObject requestBody = new JSONObject();
+        requestBody.put("jsonrpc", "2.0");
+        requestBody.put("method", "reading.getListBlockchain");
+        requestBody.put("id", 1);
+        JSONObject params = new JSONObject();
+        params.put("meter", Integer.parseInt(meter));
+        params.put("mode", "archive");
+        params.put("sort", "asc");
+//        params.put("transaction", transaction);
+        JSONObject period = new JSONObject();
+        period.put("type", type);
+        period.put("value", value);
+        params.put("period", period);
+        requestBody.put("params", params);
+        String[] array = {"zones", "errors"};
+        JSONArray include = new JSONArray(Arrays.asList(array));
+        params.put("include", include);
+        logger.info("result " + requestBody.toString());
+        //    System.out.println("result " + requestBody.toString());
         return requestBody;
     }
     public  List<String> getMeterList(String response) {
@@ -88,7 +144,7 @@ public class JsonService {
     }
     public <T> T getValue(String jsonString, String key) {
         JSONObject jsonObject = new JSONObject(jsonString);
-        return (T) jsonObject.get(key);
+        return (T) getValue(jsonObject, key);
     }
     private <T> T getValue(JSONObject jsonObject, String key) {
         return (T) jsonObject.get(key);

@@ -2,8 +2,12 @@ package org.erachain.process;
 
 import org.apache.commons.lang3.time.DateUtils;
 import org.erachain.entities.account.Account;
+import org.erachain.entities.datainfo.DataEra;
 import org.erachain.entities.datainfo.DataInfo;
+import org.erachain.entities.request.ActParams;
+import org.erachain.entities.request.Request;
 import org.erachain.repositories.AccountProc;
+import org.erachain.repositories.DbUtils;
 import org.erachain.repositories.InfoSave;
 import org.erachain.service.ServiceFactory;
 import org.erachain.service.ServiceInterface;
@@ -17,13 +21,12 @@ import org.springframework.stereotype.Service;
 
 import java.sql.SQLException;
 import java.sql.Timestamp;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @Service
 @PropertySource("classpath:custom.properties")
 public class ServiceMonitor {
+
     @Autowired
     private Logger logger;
 
@@ -42,59 +45,94 @@ public class ServiceMonitor {
     @Autowired
     private JsonService jsonService;
 
+    @Autowired
+    private DbUtils dbUtils;
+
     @Value("${Service_Url}")
     private String Service_Url;
 
     public void checkAccounts() {
         List<Account> accounts = accountProc.getAccounts();
-        accounts.stream().forEach(account -> {
-            if(account.checkTime()) {
-                account.reset();
+        accounts.forEach(account -> {
+            checkAccount(account);
+        });
+    }
+    public void checkAccount(Account account) {
+        List<Request> requests = accountProc.getRequests(account.getId());
+        requests.forEach(request -> {
+            if(request.checkTime()) {
+                request.setLastReceived();
                 Map<String, String> params = account.getParams();
+//                params.put("type", request.getType());
+//                params.put("period", request.getPeriod());
+//                params.put("format", request.getFormat());
                 logger.info(" params " + params.get(Service_Url));
                 ServiceInterface service = serviceFactory.getService(params.get(Service_Url));
                 logger.info(" account service " + service);
                 List<String> idents = service.getIdentityList(params);
+                List<DataInfo> dataInfos = new ArrayList<>();
                 idents.forEach(ident -> {
                     params.put(account.getIdentityName(), ident);
+                    request.setParams(params, dbUtils);
                     String json = service.getIdentityValues(params);
                     if (json != null && !json.isEmpty()) {
+                        byte[] data = json.getBytes();
                         DataInfo dataInfo = new DataInfo();
                         dataInfo.setRunDate(new Timestamp(System.currentTimeMillis()));
                         dataInfo.setAccountId(account.getId());
                         dataInfo.setIdentity(ident);
-                        dataInfo.setData(json.getBytes());
+                        dataInfo.setData(data);
+                    //    dataInfo.setRequestType(params.get("type"));
+                    //    dataInfo.setRequestValue(params.get("value"));
+                    //    dataInfo.setRequestId(request.getId());
                         try {
-                            infoSave.saveData(dataInfo);
-                            account.addReceived();
-                            logger.info("data saved  for ident " + ident + " " + dataInfo.getRunDate());
+                        //    infoSave.saveData(dataInfo);
+                            dataInfos.add(dataInfo);
+                            request.addlastReceived();
+                        //    logger.info("data saved  for ident " + ident + " " + dataInfo.getRunDate());
                         } catch (Exception e) {
-                            logger.info(e.getMessage());
+                            logger.error(e.getMessage());
                         }
                     }
                 });
-                if (account.getLastReceived() > 0) {
+                if (request.getLastReceived() > 0) {
                     try {
-                        accountProc.afterRun(account);
+                        logger.info(" set actRequestId ");
+                        int actRequestId = request.setResult(params, dbUtils);
+                        logger.info(" actRequestId " + actRequestId);
+                        accountProc.afterRun(request);
+                        dataInfos.forEach(dataInfo -> {
+                            try {
+                                dataInfo.setActRequestId(actRequestId);
+                                logger.info("data saved  for ident " + dataInfo.getIdentity() + " " + dataInfo.getRunDate());
+                                infoSave.saveData(dataInfo);
+                            } catch (SQLException e) {
+                                logger.info(e.getMessage());
+                            }
+                        });
                         logger.info(" account updated after run " + account.getUser());
                     } catch (Exception e) {
-                        logger.info(e.getMessage());
+                        logger.error(e.getMessage());
                     }
                 }
             }
         });
     }
-    public void checkData() {
+    public void checkDataSubmit() {
         List<DataInfo> dataInfos = infoSave.fetchData();
 
         dataInfos.forEach(dataInfo ->{
             if(dataInfo.getRunDate() != null && dataInfo.getSubDate() == null) {
                 Account account = accountProc.getAccountById(dataInfo.getAccountId());
-                eraClient.setSignature(dataInfo, account);
+                try {
+                    eraClient.setSignature(dataInfo, account);
+                } catch (SQLException e) {
+                    e.printStackTrace();
+                }
                 try {
                     infoSave.afterSubmit(dataInfo);
                 } catch (SQLException e) {
-                    logger.info(e.getMessage());
+                    logger.error(e.getMessage());
                 }
             }
         });
@@ -102,22 +140,88 @@ public class ServiceMonitor {
     public void checkDataAccept() {
         List<DataInfo> dataInfos = infoSave.fetchData();
 
-        dataInfos.forEach(dataInfo ->{
-            if(dataInfo.getSubDate() != null && dataInfo.getAccDate() == null) {
-                Timestamp timestamp = dataInfo.getSubDate();
-                Date date = new Date(timestamp.getTime());
-                DateUtils.addMinutes(date, 5);
-                int confirmations = 0;
-                if (date.before(new Date())) {
-                    String result = eraClient.checkChain(dataInfo);
-                    confirmations = jsonService.getValue(result, "confirmations");
-                }
-                if (confirmations == 0) {
-                    logger.info(" unconfirmed " + dataInfo.getSignature());
-                } else {
-                    logger.info(" confirmed " + dataInfo.getSignature());
+        dataInfos.forEach(dataInfo -> {
+            if (dataInfo.getSubDate() != null && dataInfo.getAccDate() == null) {
+//                Timestamp timestamp = dataInfo.getSubDate();
+//                Date date = new Date(timestamp.getTime());
+//                DateUtils.addMinutes(date, 5);
+
+//                if (date.before(new Date())) {
+                    dataInfo.getDataEras(dbUtils).forEach(dataEra -> {
+                        int confirmations = 0;
+                        String result = eraClient.checkChain(dataEra);
+                        confirmations = jsonService.getValue(result, "confirmations");
+
+                        if (confirmations == 0) {
+                            logger.info(" unconfirmed " + dataEra.getSignature());
+                        } else {
+                            logger.info(" confirmed " + dataEra.getSignature());
+                            int height = jsonService.getValue(result, "height");
+                            int sequence = jsonService.getValue(result, "sequence");
+                            dataEra.setBlockTrId(height + "-" + sequence);
+                        }
+                    });
+                    try {
+                        infoSave.afterAccept(dataInfo);
+                    } catch (SQLException e) {
+                        logger.error(e.getMessage());
+                    }
+//                }
+            }
+        });
+    }
+    public void checkSendToClient() {
+        List<DataInfo> dataInfos = infoSave.fetchData();
+
+        dataInfos.forEach(dataInfo -> {
+            if (dataInfo.getAccDate() != null && dataInfo.getSendToClientDate() == null) {
+                Account account = accountProc.getAccountById(dataInfo.getAccountId());
+                Map<String, String> params = account.getParams();
+                logger.info(" params " + params.get(Service_Url));
+                ServiceInterface service = serviceFactory.getService(params.get(Service_Url));
+                logger.info(" account service " + service);
+                params.put(account.getIdentityName(), dataInfo.getIdentity());
+                DataEra dataEra = dbUtils.fetchData(DataEra.class, "DataEra", "dataInfoId = " + dataInfo.getId()).get(0);
+                params.put("transaction", dataEra.getBlockTrId());
+                List<ActParams> actParams = dbUtils.fetchData(ActParams.class, "ActParams", " actRequestId = " + dataInfo.getActRequestId());
+                actParams.forEach(actParam -> {
+                   params.put(actParam.getParamName(), actParam.getParamValue());
+                });
+                service.setIdentityValues(params);
+                try {
+                    infoSave.afterSendToClient(dataInfo);
+                } catch (SQLException e) {
+                    logger.error(e.getMessage());
                 }
             }
         });
     }
+    public void checkAcceptedByClient() {
+        List<DataInfo> dataInfos = infoSave.fetchData();
+
+        dataInfos.forEach(dataInfo -> {
+            if (dataInfo.getSendToClientDate() != null && dataInfo.getAcceptClientDate() == null) {
+                Account account = accountProc.getAccountById(dataInfo.getAccountId());
+                Map<String, String> params = account.getParams();
+                logger.info(" params " + params.get(Service_Url));
+                ServiceInterface service = serviceFactory.getService(params.get(Service_Url));
+                logger.info(" account service " + service);
+                params.put(account.getIdentityName(), dataInfo.getIdentity());
+                List<ActParams> actParams = dbUtils.fetchData(ActParams.class, "ActParams", " actRequestId = " + dataInfo.getActRequestId());
+                actParams.forEach(actParam -> {
+                    params.put(actParam.getParamName(), actParam.getParamValue());
+                });
+                Boolean result = jsonService.checkMeterResult(service.checkIdentityValues(params));
+                if (!result)
+                    return;
+                try {
+                    infoSave.afterAcceptedByClient(dataInfo);
+                } catch (SQLException e) {
+                    logger.error(e.getMessage());
+                }
+            }
+        });
+    }
+
+
 }
