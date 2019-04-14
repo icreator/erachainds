@@ -21,8 +21,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @AutoConfigureMockMvc
 public class TransactionControllerTest {
 
-    private static final String APPLICATION_JSON_PRODUCER = "application/json;charset=utf-8";
-    private static final String URL = "/transaction/proc";
+//    private static final String APPLICATION_JSON_PRODUCER = "application/json;charset=utf-8";
+    private static final String URL = "/clientdata/proc";
     private MockHttpSession mockHttpSession;
 
     @Autowired
@@ -36,12 +36,12 @@ public class TransactionControllerTest {
 
     }
 
-    @Test
-    public void validateTransaction() throws Exception {
-        var trans_token = "";
-        mockMvc.perform(post(URL)
-                .param("trans_token", trans_token))
-                .andExpect(status().isOk());
-    }
+//    @Test
+//    public void validateTransaction() throws Exception {
+//        var trans_token = "";
+//        mockMvc.perform(post(URL)
+//                .param("trans_token", trans_token))
+//                .andExpect(status().isOk());
+//    }
 
 }

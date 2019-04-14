@@ -15,7 +15,8 @@ import java.util.*;
 import java.util.Date;
 
 @Repository
-@PropertySources({@PropertySource("classpath:queries.properties"), @PropertySource("classpath:db.properties")})
+@PropertySource("classpath:queries.properties")
+@PropertySource("classpath:db.properties")
 public class InfoSave {
 
     @Value("${INSERT_INTO_DATA}")
@@ -36,7 +37,10 @@ public class InfoSave {
     @Value("${UPDATE_DATA_ACCEPTED_BY_CLIENT}")
     private String UPDATE_DATA_ACCEPTED_BY_CLIENT;
 
-    private static int lastId = 0;
+    @Value("${FETCH_DATA_FOR_CLIENT}")
+    private String FETCH_DATA_FOR_CLIENT;
+
+//    private static int lastId = 0;
 
     private JdbcTemplate jdbcTemplate;
 
@@ -49,7 +53,12 @@ public class InfoSave {
     private static final Field[] fields = DataInfo.class.getDeclaredFields();
 
     public List<DataInfo> fetchData() {
-        List<Map<String, Object>> rows = jdbcTemplate.queryForList(FETCH_DATA);
+        return fetchData(FETCH_DATA);
+    }
+
+    public List<DataInfo> fetchData(String sql) {
+        logger.info(" sql " +sql);
+        List<Map<String, Object>> rows = jdbcTemplate.queryForList(sql);
         logger.info("rows " + rows.size());
         List<DataInfo> list = new ArrayList<>();
         for (Map<String, Object> row: rows){
@@ -60,7 +69,27 @@ public class InfoSave {
        }
        return list;
     }
-
+    public String fetchDataForClient(String ident, Map<String, String> params) throws SQLException {
+        try (Connection connection = jdbcTemplate.getDataSource().getConnection()) {
+            PreparedStatement stm = connection.prepareStatement(FETCH_DATA_FOR_CLIENT);
+            int i = 0;
+            stm.setString(++ i, ident);
+            for (String name : params.keySet()) {
+                stm.setString(++ i, params.get(name));
+                stm.setString(++ i, name);
+            }
+            String data = null;
+            try (ResultSet rs = stm.executeQuery()) {
+                rs.next();
+                logger.info(" fetch data for client ident " + ident);
+                data = new String(rs.getBytes(1));
+                logger.info(" fetched data for ident " + ident);
+                stm.close();
+            }
+        //    connection.close();
+            return data;
+        }
+    }
     public void afterAccept(DataInfo dataInfo) throws SQLException {
         dataInfo.setAccDate(new Timestamp(System.currentTimeMillis()));
         try (Connection connection = jdbcTemplate.getDataSource().getConnection()) {
@@ -69,7 +98,7 @@ public class InfoSave {
             stm.setInt(2, dataInfo.getId());
             stm.executeUpdate();
             stm.close();
-            connection.close();
+        //    connection.close();
         }
     }
     public void afterAcceptedByClient(DataInfo dataInfo) throws SQLException {
@@ -80,7 +109,7 @@ public class InfoSave {
             stm.setInt(2, dataInfo.getId());
             stm.executeUpdate();
             stm.close();
-            connection.close();
+        //    connection.close();
         }
     }
     public void afterSendToClient(DataInfo dataInfo) throws SQLException {
@@ -91,7 +120,7 @@ public class InfoSave {
             stm.setInt(2, dataInfo.getId());
             stm.executeUpdate();
             stm.close();
-            connection.close();
+        //    connection.close();
         }
     }
     public void afterSubmit(DataInfo dataInfo) throws SQLException {
@@ -102,7 +131,7 @@ public class InfoSave {
             stm.setInt(2, dataInfo.getId());
             stm.executeUpdate();
             stm.close();
-            connection.close();
+        //    connection.close();
         }
     }
     public void saveData(DataInfo dataInfo) throws SQLException {
@@ -118,10 +147,9 @@ public class InfoSave {
                 stm.executeUpdate();
                 ResultSet rs = stm.getGeneratedKeys();
                 rs.next();
-                lastId = rs.getInt(1);
-                dataInfo.setId(lastId);
+                dataInfo.setId(rs.getInt(1));
                 stm.close();
-                connection.close();
+            //    connection.close();
                 return;
             }
         }

@@ -1,7 +1,5 @@
 package org.erachain.repositories;
 
-import org.erachain.entities.datainfo.DataEra;
-import org.erachain.entities.datainfo.DataInfo;
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -11,7 +9,7 @@ import java.lang.reflect.Field;
 import java.sql.*;
 import java.util.*;
 
-import static org.aspectj.bridge.Version.getTime;
+//import static org.aspectj.bridge.Version.getTime;
 
 @Service
 public class DbUtils {
@@ -26,6 +24,22 @@ public class DbUtils {
     @Autowired
     public DbUtils(JdbcTemplate jdbcTemplate) {
         this.jdbcTemplate = jdbcTemplate;
+    }
+
+    public int checkData(String sql) throws SQLException {
+        logger.info(" sql " + sql);
+        int result = 0;
+        try (Connection connection = jdbcTemplate.getDataSource().getConnection()) {
+            PreparedStatement statement = connection.prepareStatement(sql);
+            ResultSet resultset = statement.executeQuery();
+
+            if (resultset != null) {
+                resultset.next(); // exactly one result so allowed
+                result = resultset.getInt(1);
+            }
+            statement.close();
+        }
+        return result;
     }
 
     public <T> List<T> fetchData(Class<T> clazz, String table, String where) {
@@ -143,52 +157,7 @@ public class DbUtils {
 
         return exSqlStatement(sql);
     }
-//    public int updObjById(Object data, String table) {
-//        String sql = updDbObjById(data, table);
-//        return exSqlStatement(sql, true);
-//    }
-//    private String updDbObjById(Object data, String table) {
-//        final StringBuffer campos = new StringBuffer("");
-//        final StringBuffer id = new StringBuffer("");
-//        Set<String> names = getColumnNames(table);
-//        Arrays.stream(data.getClass().getDeclaredFields()).forEach(f -> {
-//            try {
-//                f.setAccessible(true);
-//                String name = f.getName();
-//                if (!names.contains(name)) {
-//                    return;
-//                }
-//                String value = f.get(data) == null ? null
-//                                          : f.get(data).toString();
-//
-//                if (value == null)
-//                    return;
-//
-//                logger.info(" name " + name + " value " + value);
-//                if ("id".equalsIgnoreCase(name)) {
-//                    id.append(" WHERE " + name + " = " + value);
-//                    return;
-//                }
-//
-//                if (campos.length() != 0) {
-//                    campos.append(",");
-//                 }
-//                if (f.get(data) instanceof String) {
-//                    value = "'" + value + "'";
-//                }
-//                if (f.get(data) instanceof Timestamp) {
-//                    Long val =  ((Timestamp) f.get(data)).getTime();
-//                    value =  val.toString();
-//                }
-//                campos.append(name + " = " + value);
-//            } catch (IllegalAccessException ex) {
-//                logger.info(ex.getMessage());
-//            }
-//        });
-//        String sql = "UPDATE " + table + " SET " + campos.toString() + id.toString();
-//        logger.info("sql = " + sql);
-//        return sql;
-//    }
+
     public Set<String> getColumnNames(String table) {
         Set<String> names = new HashSet<>();
         Arrays.stream(getColumnNameArray(table)).forEach(name -> {

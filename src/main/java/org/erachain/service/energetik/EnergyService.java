@@ -14,6 +14,9 @@ public class EnergyService implements ServiceInterface {
     @Autowired
     ClientEnergy clientEnergy;
 
+    @Autowired
+    private JsonService jsonService;
+
     @Override
     public void login(Map<String, String> params) {
         clientEnergy.clientLogin(params);
@@ -39,7 +42,7 @@ public class EnergyService implements ServiceInterface {
     }
 
     @Override
-    public String checkIdentityValues(Map<String, String> params) {
-        return clientEnergy.checkMeterResult(params);
+    public Boolean checkIdentityValues(Map<String, String> params) {
+        return jsonService.checkMeterResult(clientEnergy.checkMeterResult(params));
     }
 }

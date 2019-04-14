@@ -12,5 +12,5 @@ public interface ServiceInterface {
 
     public String setIdentityValues(Map<String, String> params);
 
-    public String checkIdentityValues(Map<String, String> params);
+    public Boolean checkIdentityValues(Map<String, String> params);
 }

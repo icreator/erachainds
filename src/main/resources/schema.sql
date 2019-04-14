@@ -57,7 +57,8 @@ create table IF NOT EXISTS Params
   paramName    varchar(25),
   dateType    varchar(10),
   format  varchar(10),
-  defValue varchar(50)
+  defValue varchar(50),
+  current  boolean
 );
 
 create table IF NOT EXISTS ActRequest

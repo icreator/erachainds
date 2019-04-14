@@ -8,6 +8,17 @@ public class Params {
     private String dateType;
     private String format;
     private String defValue;
+    private boolean current;
+
+    public boolean isCurrent() {
+        return current;
+    }
+
+    public void setCurrent(boolean current) {
+        this.current = current;
+    }
+
+
 
     public int getId() {
         return id;

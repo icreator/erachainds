@@ -46,17 +46,32 @@ public class AccountProc {
     private static ConcurrentMap<Integer, Account> cache = new ConcurrentHashMap<>();
     private static ConcurrentMap<Integer, Request> cacheReq = new ConcurrentHashMap<>();
     private static ConcurrentMap<Integer, List<Request>> cacheListReq = new ConcurrentHashMap<>();
+    private static List<Account> listAct ;
 
     public   List<Account>  getAccounts() {
+        if (listAct != null)
+            return listAct;
         List<Map<String, Object>> rows = jdbcTemplate.queryForList(FETCH_ACCOUNTS);
-        List<Account> list = new ArrayList<>();
+        listAct = new ArrayList<>();
         for (Map<String, Object> row: rows){
             Account  account = new Account();
             dbUtils.setObj(account, fields, row);
-            list.add(account);
+            listAct.add(account);
             cache.put(account.getId(), account);
         }
-        return list;
+         return listAct;
+    }
+
+    public   void  setAccounts() {
+        List<Map<String, Object>> rows = jdbcTemplate.queryForList(FETCH_ACCOUNTS);
+    //    List<Account> list = new ArrayList<>();
+        for (Map<String, Object> row: rows){
+            Account  account = new Account();
+            dbUtils.setObj(account, fields, row);
+//            list.add(account);
+            cache.put(account.getId(), account);
+        }
+        return;
     }
 
     public   void  setRequests() {
@@ -82,20 +97,10 @@ public class AccountProc {
     }
     public Account getAccountById(int id)  {
         if (cache.get(id) == null) {
-            getAccounts();
+            setAccounts();
         }
         return cache.get(id);
     }
-//    public void afterRun(Account account) throws SQLException {
-//        account.setRunDate(new Timestamp(System.currentTimeMillis()));
-//        try (Connection connection = jdbcTemplate.getDataSource().getConnection()) {
-//            PreparedStatement stm = connection.prepareStatement(UPDATE_ACCOUNT_AFTER_RUN);
-//            stm.setTimestamp(1, account.getRunDate());
-//            stm.setInt(2, account.getId());
-//            stm.executeUpdate();
-//            cache.put(account.getId(), account);
-//        }
-//    }
 
     public void afterRun(Request request) throws SQLException {
         request.setLastRun(new Timestamp(System.currentTimeMillis()));

@@ -69,6 +69,12 @@ public class Request {
 
         Date date = new Date(lastRun.getTime());
         switch (period) {
+            case ("month") :
+                date = DateUtils.addMonths(date, 1);
+                break;
+            case ("week") :
+                date = DateUtils.addWeeks(date, 1);
+                break;
             case ("day") :
                 date = DateUtils.addDays(date, 1);
                 break;
@@ -88,7 +94,7 @@ public class Request {
         List<Params> pars = dbUtils.fetchData(Params.class, "Params" , " requestId = " + id);
         pars.forEach(param -> {
             String value = param.getDefValue();
-            if ((value == null || value.isEmpty()) &&
+            if (param.isCurrent() &&
                  "date".equalsIgnoreCase(param.getDateType())) {
                 SimpleDateFormat format = new SimpleDateFormat(param.getFormat());
 
