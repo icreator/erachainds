@@ -19,13 +19,8 @@ public class DataInfo {
     private Timestamp subDate;
 //    private String signature;
     private Timestamp accDate;
-//    private int blockId;
-//    private int transId;
-//    private String requestType;
-//    private String requestValue;
 
     private int    actRequestId;
-//    private int    partNo;
     private Timestamp sendToClientDate;
     private Timestamp acceptClientDate;
 

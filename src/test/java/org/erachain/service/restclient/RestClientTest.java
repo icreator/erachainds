@@ -38,7 +38,12 @@ public class RestClientTest {
     @Test
     public void getConfSign() {
         String signature = "2HruaxXzRWcwHjoAxsgZdYF9JaBJXXqWwuQ1VXonXJbADov9WaFkuCtPwWroeEKTK33G6sYsit3i8Fhzi8MXezW5";
-        String result = restClient.getResult(EraService_Url_Signature + "/" + signature);
+        String result = null;
+        try {
+            result = restClient.getResult(EraService_Url_Signature + "/" + signature);
+        } catch (Exception e) {
+            logger.error(e.getMessage());
+        }
         int confirmations = jsonService.getValue(result, "confirmations");
         logger.info(  "confirmations " + confirmations );
     }

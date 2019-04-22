@@ -40,6 +40,9 @@ public class InfoSave {
     @Value("${FETCH_DATA_FOR_CLIENT}")
     private String FETCH_DATA_FOR_CLIENT;
 
+    @Value("${UPDATE_DATA_AFTER_RUN}")
+    private String UPDATE_DATA_AFTER_RUN;
+
 //    private static int lastId = 0;
 
     private JdbcTemplate jdbcTemplate;
@@ -52,8 +55,21 @@ public class InfoSave {
 
     private static final Field[] fields = DataInfo.class.getDeclaredFields();
 
-    public List<DataInfo> fetchData() {
-        return fetchData(FETCH_DATA);
+    public List<DataInfo> fetchDataWhere(String where) {
+        return fetchData(FETCH_DATA + " where " + where);
+    }
+
+    public void afterRun(DataInfo dataInfo) throws SQLException {
+        dataInfo.setAccDate(new Timestamp(System.currentTimeMillis()));
+        try (Connection connection = jdbcTemplate.getDataSource().getConnection()) {
+            PreparedStatement stm = connection.prepareStatement(UPDATE_DATA_AFTER_RUN);
+            stm.setTimestamp(1, dataInfo.getRunDate());
+            stm.setBytes(2, dataInfo.getData());
+            stm.setInt(3, dataInfo.getId());
+            stm.executeUpdate();
+            stm.close();
+            //    connection.close();
+        }
     }
 
     public List<DataInfo> fetchData(String sql) {
@@ -75,6 +91,7 @@ public class InfoSave {
             int i = 0;
             stm.setString(++ i, ident);
             for (String name : params.keySet()) {
+                logger.info(name + " " + params.get(name));
                 stm.setString(++ i, params.get(name));
                 stm.setString(++ i, name);
             }

@@ -18,31 +18,31 @@ public class EnergyService implements ServiceInterface {
     private JsonService jsonService;
 
     @Override
-    public void login(Map<String, String> params) {
+    public void login(Map<String, String> params) throws Exception {
         clientEnergy.clientLogin(params);
     }
 
     @Override
-    public List<String> getIdentityList(Map<String, String> params) {
+    public List<String> getIdentityList(Map<String, String> params) throws Exception {
         List<String> list = new ArrayList<>();
-        clientEnergy.getNetWorkList(params).forEach(o -> {
+        for (String o : clientEnergy.getNetWorkList(params)) {
             list.addAll(clientEnergy.getMeterList(o));
-        });
+        }
         return list;
     }
 
     @Override
-    public String getIdentityValues(Map<String, String> params) {
+    public String getIdentityValues(Map<String, String> params) throws Exception {
         return clientEnergy.getMeterResult(params);
     }
 
     @Override
-    public String setIdentityValues(Map<String, String> params) {
+    public String setIdentityValues(Map<String, String> params) throws Exception {
         return clientEnergy.setMeterResult(params);
     }
 
     @Override
-    public Boolean checkIdentityValues(Map<String, String> params) {
+    public Boolean checkIdentityValues(Map<String, String> params) throws Exception {
         return jsonService.checkMeterResult(clientEnergy.checkMeterResult(params));
     }
 }

@@ -53,11 +53,11 @@ public class EraClient {
         this.restClient = restClient;
     }
 
-    public void setSignature(DataInfo dataInfo, Account account) throws SQLException {
+    public void setSignature(DataInfo dataInfo, Account account) throws Exception {
 //        String data = new String(dataInfo.getData());
 
         List<DataEra> dataEras = new ArrayList<>();
-        dataInfo.getData(dbUtils).forEach(dt -> {
+        for (byte[] dt : dataInfo.getData(dbUtils)) {
             String data = new String(dt);
             DataEra dataEra = new DataEra();
             dataEra.setDataInfoId(dataInfo.getId());
@@ -67,12 +67,18 @@ public class EraClient {
             params.put("title", EraService_title);
             String url = restClient.addParams(EraService_Url, urlParams, params);
             logger.info(" url " + url);
-            String result = restClient.getResult(url, data);
+            String result = null;
+            try {
+                result = restClient.getResult(url, data);
+            } catch (Exception e) {
+                logger.error(e.getMessage());
+                throw new Exception(EraService_Url + " " + e.getMessage());
+            }
             String signature = jsonService.getValue(result, "signature");
             logger.info(" signature " + signature);
             dataEra.setSignature(signature);
             dataEras.add(dataEra);
-        });
+        }
         int partNo = 0;
         for (DataEra dataEra : dataEras) {
             dataEra.setPartNo(partNo ++);
@@ -80,9 +86,16 @@ public class EraClient {
         }
     }
 
-    public String checkChain(DataEra dataEra) {
+    public String checkChain(DataEra dataEra) throws Exception {
         String signature = dataEra.getSignature();
-        String result = restClient.getResult(EraService_Url_Signature + "/" + signature);
+        String result = null;
+        try {
+            result = restClient.getResult(EraService_Url_Signature + "/" + signature);
+        } catch (Exception e) {
+         //   logger.error(e.getMessage());
+            throw new Exception(EraService_Url_Signature + " " + e.getMessage());
+
+        }
         return result;
     }
 }

@@ -44,7 +44,8 @@ create table IF NOT EXISTS Request
   id        integer     not null
   primary key   autoincrement,
   accountId int,
-  period  varchar(10),
+  runPeriod  varchar(10),
+  reqPeriod  varchar(10),
   lastRun   timestamp
 );
 

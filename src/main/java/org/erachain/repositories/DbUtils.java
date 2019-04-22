@@ -2,6 +2,7 @@ package org.erachain.repositories;
 
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 
@@ -16,6 +17,10 @@ public class DbUtils {
 
     static String fetch = "SELECT * FROM ";
 
+    @Value("${FETCH_ACTREQ_ID_PARAM}")
+    private String FETCH_ACTREQ_ID_PARAM;
+
+
     @Autowired
     private Logger logger;
 
@@ -26,6 +31,27 @@ public class DbUtils {
         this.jdbcTemplate = jdbcTemplate;
     }
 
+    public int getActRequestId(String paramName, String paramValue) throws Exception {
+        int result = 0;
+        try (Connection connection = jdbcTemplate.getDataSource().getConnection()) {
+            PreparedStatement statement = connection.prepareStatement(FETCH_ACTREQ_ID_PARAM);
+            statement.setString(1, paramName);
+            statement.setString(2, paramValue);
+            ResultSet resultset = statement.executeQuery();
+
+            if (resultset != null) {
+                try {
+                    resultset.next(); // exactly one result so allowed
+                    result = resultset.getInt(1);
+                } catch (SQLException e) {
+                    return 0;
+                }
+
+            }
+            statement.close();
+        }
+        return result;
+    }
     public int checkData(String sql) throws SQLException {
         logger.info(" sql " + sql);
         int result = 0;
@@ -141,10 +167,10 @@ public class DbUtils {
             }
             ResultSet rs = stm.getGeneratedKeys();
             rs.next();
-            connection.close();
+//            connection.close();
             return rs.getInt(1);
         } catch (SQLException e) {
-             logger.info(e.getMessage());
+             logger.error(e.getMessage());
         }
 
         return 0;
@@ -154,7 +180,7 @@ public class DbUtils {
     }
     public int setDbObj(Object data, String table, boolean noId) throws SQLException {
         String sql = setObjToDb(data, table, noId);
-
+        logger.info(" sql " + sql);
         return exSqlStatement(sql);
     }
 

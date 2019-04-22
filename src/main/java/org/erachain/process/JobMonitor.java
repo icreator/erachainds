@@ -7,14 +7,18 @@ import org.erachain.entities.account.Account;
 import org.erachain.entities.datainfo.DataInfo;
 import org.erachain.entities.request.Request;
 import org.erachain.repositories.AccountProc;
+import org.erachain.repositories.DataClient;
 import org.erachain.repositories.DbUtils;
 import org.erachain.repositories.InfoSave;
+import org.erachain.utils.DateUtl;
 import org.slf4j.Logger;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import java.sql.SQLException;
+import java.util.AbstractList;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.concurrent.ArrayBlockingQueue;
@@ -54,6 +58,12 @@ public class JobMonitor implements InitializingBean {
     @Autowired
     private ServiceMonitor serviceMonitor;
 
+    @Autowired
+    private DateUtl dateUtl;
+
+    @Autowired
+    private DataClient dataClient;
+
     private static final int QUEUE_SIZE = 100;
 
     private static BlockingQueue<ActiveJob> queue = new ArrayBlockingQueue<>(QUEUE_SIZE);
@@ -67,8 +77,8 @@ public class JobMonitor implements InitializingBean {
 
     @Override
     public void afterPropertiesSet() throws Exception {
-        checkAccounts();
-        setData();
+     //   checkAccounts();
+     //   setData();
     }
 
     public void setData() {
@@ -91,13 +101,26 @@ public class JobMonitor implements InitializingBean {
                             logger.info(" Service " + o.getState().toString());
                             switch (o.getState()) {
                                 case READY:
-                                    serviceMonitor.checkAccounts();
-                                break;
+                            //        serviceMonitor.checkAccounts();
+                                    try {
+                                        dataClient.getDataFromClient(o.getAccountId(), o.getAccountId());
+                                    } catch (Exception e) {
+                                        logger.error(e.getMessage());
+                                    }
+                                    break;
                                 case STARTED :
-                                    serviceMonitor.checkDataSubmit();
-                                break;
+                                    try {
+                                        serviceMonitor.checkDataSubmit();
+                                    } catch (Exception e) {
+                                        logger.error(e.getMessage());
+                                    }
+                                    break;
                                 case DATA_SUB :
-                                    serviceMonitor.checkDataAccept();
+                                    try {
+                                        serviceMonitor.checkDataAccept();
+                                    } catch (Exception e) {
+                                        logger.error(e.getMessage());
+                                    }
                                     break;
                                 case DATA_ACC :
                                     serviceMonitor.checkSendToClient();
@@ -127,11 +150,10 @@ public class JobMonitor implements InitializingBean {
             @Override
             public void run() {
                 while (true) {
-
+                    mutex.lock();
                     logger.info(" started Job Monitor " + new Date().toString());
 
                     try {
-                        mutex.lock();
                         checkData(queue);
                         checkReadyAccounts(queue);
                     } catch (Exception e) {
@@ -157,24 +179,30 @@ public class JobMonitor implements InitializingBean {
     public void checkReadyAccounts(BlockingQueue<ActiveJob> queue) {
         List<Account> accounts = accountProc.getAccounts();
         accounts.forEach(account -> {
-            ActiveJob activeJob = checkReadyAccount(account);
-            if (activeJob != null) {
+            List<ActiveJob> activeJobs = checkReadyAccount(account);
+            for (ActiveJob activeJob : activeJobs) {
                 activeJob.setState(JobState.READY);
                 queue.add(activeJob);
-                logger.info(" added ActiveJob " + activeJob.getState().name());
+                logger.info(" added ActiveJob " + activeJob.getState().name() + " requestId " +
+                        activeJob.getRequestId() + " accountId " + activeJob.getAccountId());
             }
         });
         return;
     }
 
-    public ActiveJob checkReadyAccount(Account account) {
+    public List<ActiveJob> checkReadyAccount(Account account) {
         List<Request> requests = accountProc.getRequests(account.getId());
+        List<ActiveJob> activeJobs = new ArrayList<ActiveJob>();
         for (Request request : requests) {
-            if (request.checkTime()) {
-                return new ActiveJob(sequenceNumber.incrementAndGet(), account.getId());
+            request.getParams(dbUtils, dateUtl);
+
+            if (request.checkTime(dateUtl)) {
+                ActiveJob activeJob = new ActiveJob(sequenceNumber.incrementAndGet(), account.getId());
+                activeJob.setRequestId(request.getId());
+                activeJobs.add(activeJob);
             }
         }
-        return null;
+        return activeJobs;
     }
     public void checkData() {
         checkData(queue);

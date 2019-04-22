@@ -24,7 +24,7 @@ public class RestClient {
         headers.add(name, value);
     }
 
-    public String getJsonResult(String url, String jsonRequest) {
+    public String getJsonResult(String url, String jsonRequest) throws Exception {
         HttpEntity<String> request = new HttpEntity<>(jsonRequest, headers);
 
         String response = new RestTemplate().postForObject(url, request, String.class);
@@ -32,14 +32,14 @@ public class RestClient {
         return response;
     }
 
-    public String getResult(String url, String anyString) {
+    public String getResult(String url, String anyString) throws Exception  {
         HttpEntity<String> request = new HttpEntity<>(anyString);
 
         String response = new RestTemplate().postForObject(url, request, String.class);
 
         return response;
     }
-    public String getResult(String url) throws RestClientException {
+    public String getResult(String url) throws Exception {
         String response = new RestTemplate().getForObject(url, String.class);
 
         return response;

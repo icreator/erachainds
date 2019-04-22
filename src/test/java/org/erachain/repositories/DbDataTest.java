@@ -150,10 +150,14 @@ public class DbDataTest {
     }
     @Test
     public void testFetchData() {
-        List<DataEra> dataEras = dbUtils.fetchData(DataEra.class, "DataEra", "dataInfoId =1" );
-        dataEras.forEach(dt -> {
-            logger.info(dt.getSignature());
+        List<DataInfo> dataInfos = infoSave.fetchDataWhere(" actRequestId = " + 1);
+        dataInfos.forEach(dataInfo -> {
+            logger.info(" dataInfo " + dataInfo.getIdentity());
         });
+//        List<DataEra> dataEras = dbUtils.fetchData(DataEra.class, "DataEra", "dataInfoId =1" );
+//        dataEras.forEach(dt -> {
+//            logger.info(dt.getSignature());
+//        });
     }
 
     private void exSql(String sql) {

@@ -74,6 +74,12 @@ public class AccountProc {
         return;
     }
 
+    public Request getRequestById(int requestId) {
+        if (!inited)
+            setRequests();
+          return cacheReq.get(requestId);
+    }
+
     public   void  setRequests() {
         List<Map<String, Object>> rows = jdbcTemplate.queryForList(FETCH_REQUESTS);
         for (Map<String, Object> row: rows){
