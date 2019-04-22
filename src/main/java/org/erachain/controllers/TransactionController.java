@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.sql.SQLException;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.logging.Logger;
 
@@ -24,14 +25,21 @@ public class TransactionController {
     private InfoSave infoSave;
 
     @LoggableController
-    @RequestMapping(value = "/proc/{ident}", method = RequestMethod.GET, produces = {"text/json", "text/xml"})
-    public String getClientData(@PathVariable("ident") String ident, @RequestParam("type") String type, @RequestParam("value") String value, @RequestParam(value = "xml", required = false) String xml) throws InterruptedException {
+    @RequestMapping(value = "/proc/{ident}", method = RequestMethod.GET, produces = {"text/plain"})
+   //         produces = {"text/json", "text/xml"})
+    public String getClientData(@PathVariable("ident") String ident,
+                                @RequestParam List<String> names,
+                                @RequestParam List<String> values,
+                                @RequestParam(value = "xml", required = false) String xml
+                                ) throws InterruptedException {
 
 //        byte[] data = Base58.decode(rawDataBase58);
 
         Map<String, String> params = new HashMap<>();
-        params.put("type", type);
-        params.put("value", value);
+        int i = 0;
+        for (String name : names) {
+            params.put(name, values.get(i ++));
+        }
         String result = "";
         try {
             result = infoSave.fetchDataForClient(ident, params);

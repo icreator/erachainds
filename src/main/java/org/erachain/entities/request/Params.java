@@ -5,20 +5,17 @@ public class Params {
     private int id;
     private int requestId;
     private String paramName;
-    private String dateType;
+    private String dataType;
     private String format;
     private String defValue;
-    private boolean current;
-
-    public boolean isCurrent() {
-        return current;
+    private int curValue;
+    public int getCurValue() {
+        return curValue;
     }
 
-    public void setCurrent(boolean current) {
-        this.current = current;
+    public void setCurValue(int curValue) {
+        this.curValue = curValue;
     }
-
-
 
     public int getId() {
         return id;
@@ -44,12 +41,12 @@ public class Params {
         this.paramName = paramName;
     }
 
-    public String getDateType() {
-        return dateType;
+    public String getDataType() {
+        return dataType;
     }
 
-    public void setDateType(String dateType) {
-        this.dateType = dateType;
+    public void setDataType(String dataType) {
+        this.dataType = dataType;
     }
 
     public String getFormat() {

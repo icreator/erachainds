@@ -1,12 +1,13 @@
 package org.erachain.entities.request;
 
-import org.apache.commons.lang3.time.DateUtils;
 import org.erachain.repositories.DbUtils;
+import org.erachain.utils.DateUtl;
 
 import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -14,8 +15,66 @@ public class Request {
 
     private int id;
     private int accountId;
-    private String period;  // hour day minute second
+    private String runPeriod;  // hour day minute second
     private Timestamp lastRun;
+    private String submitPeriod;  // hour day minute second
+    private String offUnit;   // unit offset - hour day minute second
+    private int offValue;     // offset from the beginning of period
+
+    private String paramValue;
+
+    private String paramName;
+
+    private Date submitDate;
+
+    public boolean isCurrentDate() {
+        return isCurrentDate;
+    }
+
+
+    private boolean isCurrentDate;
+
+    private Map<String, String> params;
+
+    public String getParamName() {
+        return paramName;
+    }
+
+    public String getParamValue() {
+        return paramValue;
+    }
+
+    public String getSubmitPeriod() {
+        return submitPeriod;
+    }
+
+    public void setSubmitPeriod(String submitPeriod) {
+        this.submitPeriod = submitPeriod;
+    }
+
+    public String getOffUnit() {
+        return offUnit;
+    }
+
+    public void setOffUnit(String offUnit) {
+        this.offUnit = offUnit;
+    }
+
+    public int getOffValue() {
+        return offValue;
+    }
+
+    public void setOffValue(int offValue) {
+        this.offValue = offValue;
+    }
+
+    public String getRunPeriod() {
+        return runPeriod;
+    }
+
+    public void setRunPeriod(String runPeriod) {
+        this.runPeriod = runPeriod;
+    }
 
     public int getLastReceived() {
         return lastReceived;
@@ -26,7 +85,7 @@ public class Request {
     }
 
     public void addlastReceived() {
-        lastReceived ++;
+        lastReceived++;
     }
 
     private int lastReceived = 0;
@@ -47,14 +106,6 @@ public class Request {
         this.accountId = accountId;
     }
 
-    public String getPeriod() {
-        return period;
-    }
-
-    public void setPeriod(String period) {
-        this.period = period;
-    }
-
     public Timestamp getLastRun() {
         return lastRun;
     }
@@ -63,55 +114,78 @@ public class Request {
         this.lastRun = lastRun;
     }
 
-    public boolean checkTime() {
+    public boolean checkTime(DateUtl dateUtl) {
+
         if (lastRun == null)
             return true;
 
+        if (!isCurrentDate)
+            return false;
+
         Date date = new Date(lastRun.getTime());
-        switch (period) {
-            case ("month") :
-                date = DateUtils.addMonths(date, 1);
-                break;
-            case ("week") :
-                date = DateUtils.addWeeks(date, 1);
-                break;
-            case ("day") :
-                date = DateUtils.addDays(date, 1);
-                break;
-            case ("hour") :
-                date = DateUtils.addHours(date, 1);
-                 break;
-            case ("minute") :
-                date = DateUtils.addMinutes(date, 1);
-                break;
-        }
+        date = dateUtl.addUnit(date, runPeriod, 1);
+
         if (date.before(new Date()))
             return true;
 
         return false;
     }
-    public void setParams(Map<String, String> params, DbUtils dbUtils) {
-        List<Params> pars = dbUtils.fetchData(Params.class, "Params" , " requestId = " + id);
-        pars.forEach(param -> {
+    public Map<String, String> getParams(DbUtils dbUtils, DateUtl dateUtl) {
+        if (params != null)
+            return params;
+        List<Params> pars = dbUtils.fetchData(Params.class, "Params", " requestId = " + id);
+        SimpleDateFormat format = null;
+        params = new HashMap<>();
+        boolean isCurrent;
+        for (Params param : pars) {
             String value = param.getDefValue();
-            if (param.isCurrent() &&
-                 "date".equalsIgnoreCase(param.getDateType())) {
-                SimpleDateFormat format = new SimpleDateFormat(param.getFormat());
+            isCurrent = param.getCurValue() > 0 ? true : false;
+            boolean isDate = "date".equalsIgnoreCase(param.getDataType());
+            if (isDate) {
+                paramName = param.getParamName();
+                paramValue = value;
+                isCurrentDate = isCurrent;
+            }
+            if (isCurrent && isDate) {
+                format = new SimpleDateFormat(param.getFormat());
+                if (offUnit != null && offValue != 0 && format != null) {
+                    Date date = new Date();
+                    date = dateUtl.addUnit(date, offUnit, - offValue);
+                    value = format.format(date);
+                    submitDate = dateUtl.getFirst(date, submitPeriod);
+                    submitDate = dateUtl.addUnit(submitDate, submitPeriod,  1);
+                    submitDate = dateUtl.addUnit(submitDate, offUnit,  offValue);
+                }
 
-                Date date = new Date();
-                value = format.format( date);
             }
             params.put(param.getParamName(), value);
-        });
+        }
+        return params;
     }
-    public int setResult(Map<String, String> params, DbUtils dbUtils) throws SQLException {
+    public int getActRequestId(DbUtils dbUtils, DateUtl dateUtl) throws Exception {
+        if (params == null) {
+            params = this.getParams(dbUtils, dateUtl);
+            if (params == null)
+                throw new Exception(" missing params for a request");
+        }
+
+        int actRequestId = dbUtils.getActRequestId(paramName, paramValue);
+        if (actRequestId > 0)
+            return actRequestId;
         ActRequest actRequest = new ActRequest();
-        actRequest.setRequestId(id);
-        actRequest.setPeriod(period);
+        actRequest.setRequestId(getId());
+        actRequest.setPeriod(getRunPeriod());
         actRequest.setDateRun(new Timestamp(System.currentTimeMillis()));
-        int actRequestId = dbUtils.setDbObj(actRequest, "ActRequest", true);
+        if (submitDate != null)
+            actRequest.setDateSubmit(new Timestamp(submitDate.getTime()));
+        try {
+            actRequestId = dbUtils.setDbObj(actRequest, "ActRequest", true);
+        } catch (SQLException e) {
+            throw new SQLException(" create  ActRequest " + e.getMessage());
+        }
         actRequest.setId(actRequestId);
-        params.keySet().stream().forEach(name -> {
+
+        for (String name : params.keySet()) {
             ActParams actParams = new ActParams();
             actParams.setActRequestId(actRequestId);
             actParams.setParamName(name);
@@ -120,11 +194,13 @@ public class Request {
             try {
                 actParamsId = dbUtils.setDbObj(actParams, "ActParams", true);
             } catch (SQLException e) {
-                e.printStackTrace();
+                throw  new SQLException(" create act params " + e.getMessage());
             }
             actParams.setId(actParamsId);
-        });
+        }
         return actRequestId;
     }
+
+//
 
 }

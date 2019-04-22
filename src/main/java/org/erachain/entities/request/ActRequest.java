@@ -9,6 +9,16 @@ public class ActRequest {
     private int requestId;
     private String period;  // hour day minute second
     private Timestamp DateRun;
+    private Timestamp DateSubmit;
+
+    public Timestamp getDateSubmit() {
+        return DateSubmit;
+    }
+
+    public void setDateSubmit(Timestamp dateSubmit) {
+        DateSubmit = dateSubmit;
+    }
+
 
     public int getId() {
         return id;

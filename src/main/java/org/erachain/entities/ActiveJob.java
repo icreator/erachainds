@@ -4,7 +4,23 @@ package org.erachain.entities;
 public class ActiveJob {
 
     private int jobId;
-    private int records;
+
+    private int accountId;
+    private int requestId;
+
+    public int getAccountId() {
+        return accountId;
+    }
+
+
+    public int getRequestId() {
+        return requestId;
+    }
+
+    public void setRequestId(int requestId) {
+        this.requestId = requestId;
+    }
+
     private JobState state = JobState.READY;
 
     public void setState(JobState state) {
@@ -24,9 +40,9 @@ public class ActiveJob {
         return state;
     }
 
-    public ActiveJob(int jobId, int records) {
+    public ActiveJob(int jobId, int accountId) {
         this.jobId = jobId;
-        this.records = records;
+        this.accountId = accountId;
     }
 
 }
