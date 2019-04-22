@@ -4,12 +4,13 @@ import java.sql.Timestamp;
 
 public class ActRequest {
 
-
+    // db
     private int id;
     private int requestId;
     private String period;  // hour day minute second
     private Timestamp DateRun;
     private Timestamp DateSubmit;
+    // db end
 
     public Timestamp getDateSubmit() {
         return DateSubmit;

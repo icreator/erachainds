@@ -17,10 +17,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import java.sql.SQLException;
-import java.util.AbstractList;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.TimeUnit;
@@ -77,8 +74,8 @@ public class JobMonitor implements InitializingBean {
 
     @Override
     public void afterPropertiesSet() throws Exception {
-     //   checkAccounts();
-     //   setData();
+        checkAccounts();
+        setData();
     }
 
     public void setData() {
@@ -103,7 +100,8 @@ public class JobMonitor implements InitializingBean {
                                 case READY:
                             //        serviceMonitor.checkAccounts();
                                     try {
-                                        dataClient.getDataFromClient(o.getAccountId(), o.getAccountId());
+                                        Map<String, byte[]> data = dataClient.getDataFromClient(o.getAccountId(), o.getRequestId());
+                                        dataClient.setClientData(o.getRequestId(), data);
                                     } catch (Exception e) {
                                         logger.error(e.getMessage());
                                     }
@@ -154,7 +152,7 @@ public class JobMonitor implements InitializingBean {
                     logger.info(" started Job Monitor " + new Date().toString());
 
                     try {
-                        checkData(queue);
+                    //    checkData(queue);
                         checkReadyAccounts(queue);
                     } catch (Exception e) {
                         logger.error(e.getMessage());

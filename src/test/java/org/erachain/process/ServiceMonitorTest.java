@@ -18,10 +18,10 @@ public class ServiceMonitorTest {
     @Autowired
     private ServiceMonitor serviceMonitor;
 
-    @Test
-    public void testAccounts() {
-        serviceMonitor.checkAccounts();
-    }
+//    @Test
+//    public void testAccounts() {
+//        serviceMonitor.checkAccounts();
+//    }
 
     @Test
     public void testDataSubmit() {

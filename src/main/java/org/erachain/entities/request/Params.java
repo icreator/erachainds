@@ -1,7 +1,7 @@
 package org.erachain.entities.request;
 
 public class Params {
-
+    // db
     private int id;
     private int requestId;
     private String paramName;
@@ -9,6 +9,8 @@ public class Params {
     private String format;
     private String defValue;
     private int curValue;
+    // end db
+
     public int getCurValue() {
         return curValue;
     }

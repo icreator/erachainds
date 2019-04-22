@@ -12,6 +12,7 @@ import java.util.Map;
 
 public class Account {
 
+    // db
     private int    id;
     private String accountUrl;
     private String publicKey;
@@ -20,21 +21,7 @@ public class Account {
     private String user;
     private String identityName;
     private String password ;
-//    private String type;
-//    private Timestamp runDate;
-//    private int lastReceived = 0;
-//
-//    private int lastSubmitted = 0;
-//
-//    private int lastAccepted = 0;
-
-//    public String getCreator() {
-//        return creator;
-//    }
-//
-//    public void setCreator(String creator) {
-//        this.creator = creator;
-//    }
+    // end db
 
     public String getRecipient() {
         return recipient;
@@ -44,35 +31,7 @@ public class Account {
         this.recipient = recipient;
     }
 
-//    public int getLastReceived() {
-//        return lastReceived;
-//    }
-//
-//    public int getLastSubmitted() {
-//        return lastSubmitted;
-//    }
-//
-//    public int getLastAccepted() {
-//        return lastAccepted;
-//    }
-//
-//    public void addReceived() {
-//        lastReceived ++;
-//    }
-//
-//    public void addSubmitted() {
-//        lastSubmitted ++;
-//    }
-//
-//    public void addAccepted() {
-//        lastAccepted ++;
-//    }
 
-//    public void reset() {
-//        lastReceived = 0;
-//        lastSubmitted = 0;
-//        lastAccepted = 0;
-//    }
 
     public String getIdentityName() {
         return identityName;
@@ -102,36 +61,7 @@ public class Account {
 //        params.put("type", type);
         return params;
     }
-//    public boolean checkTime() {
-//        if (runDate == null)
-//            return true;
-//
-//        Date date = new Date(runDate.getTime());
-//
-//        switch (type) {
-//            case ("month") :
-//                Date incrementedDate = DateUtl.addMonths(date, 1);
-//                if (date.after(incrementedDate))
-//                    return true;
-//                break;
-//        }
-//        return false;
-//    }
-//    public String getType() {
-//        return type;
-//    }
-//
-//    public void setType(String type) {
-//        this.type = type;
-//    }
-//
-//    public Timestamp getRunDate() {
-//        return runDate;
-//    }
-//
-//    public void setRunDate(Timestamp runDate) {
-//        this.runDate = runDate;
-//    }
+
 
     public void setAccountUrl(String accountUrl) {
         this.accountUrl = accountUrl;

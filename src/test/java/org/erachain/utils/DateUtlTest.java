@@ -33,4 +33,8 @@ public class DateUtlTest {
         logger.info(" submitDate " + submitDate);
 
     }
+    @Test
+    public void testDate1() {
+        logger.info("result of shift " + dateUtl.addUnit(new Date(), "day", -10).toString());
+    }
 }

@@ -83,7 +83,9 @@ public class DataClient {
         }
         return identData;
     }
-
+    public void setClientData(int requestId, Map<String, byte[]> data) throws Exception {
+        setClientData(accountProc.getRequestById(requestId), data);
+    }
     public void setClientData(Request request, Map<String, byte[]> data) throws Exception {
 //        try {
         logger.info(" get act req id ");

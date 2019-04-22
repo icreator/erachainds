@@ -50,7 +50,7 @@ public class DataClientTest {
     @Test
     public void DataClient1() {
         Account account= accountProc.getAccounts().get(0);
-        Request request = accountProc.getRequests(account.getId()).get(0);
+        Request request = accountProc.getRequests(account.getId()).get(1);
 
         try {
             Map<String, byte[]> data = dataClient.getDataFromClient(account, request);
@@ -58,7 +58,7 @@ public class DataClientTest {
                 logger.info(" ident " + ident);
                 logger.info( " data " + data.get(ident).toString());
             });
-            dataClient.setClientData(request, data);
+//            dataClient.setClientData(request, data);
             logger.info(" isCurrent " + request.isCurrentDate() + " run date " + request.getLastRun());
         } catch (Exception e) {
             logger.error(" test " + e.getMessage());

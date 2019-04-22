@@ -5,7 +5,7 @@ public class ActiveJob {
 
     private int jobId;
 
-    private int accountId;
+    private int accountId;  // for data number of info records affected
     private int requestId;
 
     public int getAccountId() {

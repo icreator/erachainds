@@ -13,6 +13,7 @@ import java.util.Map;
 
 public class Request {
 
+    // db values
     private int id;
     private int accountId;
     private String runPeriod;  // hour day minute second
@@ -20,7 +21,7 @@ public class Request {
     private String submitPeriod;  // hour day minute second
     private String offUnit;   // unit offset - hour day minute second
     private int offValue;     // offset from the beginning of period
-
+    // end of db values
     private String paramValue;
 
     private String paramName;

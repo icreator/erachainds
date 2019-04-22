@@ -2,11 +2,13 @@ package org.erachain.entities.datainfo;
 
 public class DataEra {
 
+    // db
     private int id;
     private int dataInfoId;
     private String signature;
     private String blockTrId;
     private int partNo;
+    // end db
 
     public int getId() {
         return id;

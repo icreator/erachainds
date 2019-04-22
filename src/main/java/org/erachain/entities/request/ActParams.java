@@ -3,12 +3,12 @@ package org.erachain.entities.request;
 
 public class ActParams {
 
-
+    // db
     private int id;
     private int actRequestId;
     private String paramName;
     private String paramValue;
-
+    // end db
     public int getActRequestId() {
         return actRequestId;
     }

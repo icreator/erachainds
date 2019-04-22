@@ -11,19 +11,19 @@ public class DataInfo {
 
     private static final int TRANS_MAXSIZE = 10000;
 
+    // db
     private int id;
     private int accountId;
     private Timestamp runDate;
     private byte[] data;
     private String identity;
     private Timestamp subDate;
-//    private String signature;
     private Timestamp accDate;
 
     private int    actRequestId;
     private Timestamp sendToClientDate;
     private Timestamp acceptClientDate;
-
+    // end db
 
     public Timestamp getAcceptClientDate() {
         return acceptClientDate;
@@ -41,21 +41,6 @@ public class DataInfo {
         this.actRequestId = actRequestId;
     }
 
-//    public String getRequestType() {
-//        return requestType;
-//    }
-//
-//    public void setRequestType(String requestType) {
-//        this.requestType = requestType;
-//    }
-//
-//    public String getRequestValue() {
-//        return requestValue;
-//    }
-//
-//    public void setRequestValue(String requestValue) {
-//        this.requestValue = requestValue;
-//    }
 
     public Timestamp getSendToClientDate() {
         return sendToClientDate;
@@ -65,18 +50,7 @@ public class DataInfo {
         this.sendToClientDate = sendToClientDate;
     }
 
-//    public int getPartNo() {
-//        return partNo;
-//    }
-//
-//    public void setPartNo(int partNo) {
-//        this.partNo = partNo;
-//    }
-//
-//    public String getSignature() {
-//        return signature;
-//    }
-//
+
     public void setSignature(String signature, DbUtils dbUtils) {
 //        this.signature = signature;
     }
