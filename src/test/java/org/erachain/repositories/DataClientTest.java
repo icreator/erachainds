@@ -38,7 +38,7 @@ public class DataClientTest {
     @Test
     public void DataClient2() {
         Account account= accountProc.getAccounts().get(0);
-        Request request = accountProc.getRequests(account.getId()).get(0);
+        Request request = accountProc.getRequests(account.getId()).get(1);
         try {
             int id = request.getActRequestId(dbUtils, dateUtl);
             logger.info(" getActRequestId " + id);

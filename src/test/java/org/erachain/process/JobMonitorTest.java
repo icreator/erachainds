@@ -19,7 +19,7 @@ public class JobMonitorTest {
 
     @Test
     public void checkReady() {
-        jobMonitor.checkData();
+//        jobMonitor.checkData();
         jobMonitor.checkReadyAccounts();
     }
 

@@ -16,10 +16,7 @@ import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.sql.Timestamp;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest
@@ -52,17 +49,25 @@ public class DbDataTest {
     @Value("${UPDATE_DATA_ACCEPTED_BY_CLIENT}")
     private String UPDATE_DATA_ACCEPTED_BY_CLIENT;
 
-    @Value("${FETCH_DATA_AFTER_RUN}")
-    private String FETCH_DATA_AFTER_RUN;
+//    @Value("${FETCH_DATA_AFTER_RUN}")
+//    private String FETCH_DATA_AFTER_RUN;
 
-    @Value("${CHECK_DATA_AFTER_RUN}")
-    private String CHECK_DATA_AFTER_RUN;
+//    @Value("${CHECK_DATA_AFTER_RUN}")
+//    private String CHECK_DATA_AFTER_RUN;
 
     @Value("${FETCH_DATA_AFTER_SUBMIT}")
     private String FETCH_DATA_AFTER_SUBMIT;
 
     @Value("${CHECK_DATA_AFTER_SUBMIT}")
     private String CHECK_DATA_AFTER_SUBMIT;
+
+    @Value("${CHECK_DATA_FOR_SUBMIT}")
+    private String CHECK_DATA_FOR_SUBMIT;
+
+    @Value("${FETCH_DATA_FOR_SUBMIT}")
+    private String FETCH_DATA_FOR_SUBMIT;
+
+
 
     @Value("${FETCH_DATA_AFTER_ACCEPT}")
     private String FETCH_DATA_AFTER_ACCEPT;
@@ -79,7 +84,10 @@ public class DbDataTest {
     @Test
     public void checkData() {
         try {
-            int result = dbUtils.checkData(CHECK_DATA_AFTER_SUBMIT);
+//            String sql = CHECK_DATA_FOR_SUBMIT;
+            String sql = CHECK_DATA_FOR_SUBMIT.replace("?", Long.toString(new Date().getTime()));
+            logger.info(" sql " + sql);
+            int result = dbUtils.checkData(sql);
             logger.info(" result " + result);
 
         } catch (SQLException e) {
@@ -114,7 +122,7 @@ public class DbDataTest {
     }
     @Test
     public void dataFetch() {
-        List<DataInfo> list = infoSave.fetchData(FETCH_DATA_AFTER_SUBMIT);
+        List<DataInfo> list = infoSave.fetchData(FETCH_DATA_FOR_SUBMIT.replace("?", Long.toString(new Date().getTime())));
         logger.info(" size " + list.size());
         list.stream().forEach(dt -> {
             logger.info(dt.getIdentity() + " " + dt.getRunDate());
@@ -150,7 +158,8 @@ public class DbDataTest {
     }
     @Test
     public void testFetchData() {
-        List<DataInfo> dataInfos = infoSave.fetchDataWhere(" actRequestId = " + 1);
+        int actRequestId = 1;
+        List<DataInfo> dataInfos = infoSave.fetchDataWhere(actRequestId);
         dataInfos.forEach(dataInfo -> {
             logger.info(" dataInfo " + dataInfo.getIdentity());
         });

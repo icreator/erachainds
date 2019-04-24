@@ -153,9 +153,10 @@ public class Request {
                     Date date = new Date();
                     date = dateUtl.addUnit(date, offUnit, - offValue);
                     value = format.format(date);
+                    paramValue = value;
                     submitDate = dateUtl.getFirst(date, submitPeriod);
                     submitDate = dateUtl.addUnit(submitDate, submitPeriod,  1);
-                    submitDate = dateUtl.addUnit(submitDate, offUnit,  offValue);
+                    submitDate = dateUtl.addUnit(submitDate, offUnit,  offValue - 1);
                 }
 
             }
@@ -171,8 +172,10 @@ public class Request {
         }
 
         int actRequestId = dbUtils.getActRequestId(paramName, paramValue);
-        if (actRequestId > 0)
-            return actRequestId;
+        return actRequestId;
+    }
+    public int setActRequestId(DbUtils dbUtils, DateUtl dateUtl) throws Exception {
+        int actRequestId = 0;
         ActRequest actRequest = new ActRequest();
         actRequest.setRequestId(getId());
         actRequest.setPeriod(getRunPeriod());

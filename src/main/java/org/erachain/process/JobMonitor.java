@@ -1,10 +1,10 @@
 package org.erachain.process;
 
-import org.apache.commons.lang3.time.DateUtils;
+
 import org.erachain.entities.ActiveJob;
 import org.erachain.entities.JobState;
 import org.erachain.entities.account.Account;
-import org.erachain.entities.datainfo.DataInfo;
+
 import org.erachain.entities.request.Request;
 import org.erachain.repositories.AccountProc;
 import org.erachain.repositories.DataClient;
@@ -28,11 +28,12 @@ import java.util.concurrent.locks.ReentrantLock;
 @Component
 public class JobMonitor implements InitializingBean {
 
-    @Value("${CHECK_DATA_AFTER_RUN}")
-    private String CHECK_DATA_AFTER_RUN;
-
     @Value("${CHECK_DATA_AFTER_SUBMIT}")
     private String CHECK_DATA_AFTER_SUBMIT;
+
+
+    @Value("${CHECK_DATA_FOR_SUBMIT}")
+    private String CHECK_DATA_FOR_SUBMIT;
 
     @Value("${CHECK_DATA_AFTER_ACCEPT}")
     private String CHECK_DATA_AFTER_ACCEPT;
@@ -98,10 +99,10 @@ public class JobMonitor implements InitializingBean {
                             logger.info(" Service " + o.getState().toString());
                             switch (o.getState()) {
                                 case READY:
-                            //        serviceMonitor.checkAccounts();
                                     try {
                                         Map<String, byte[]> data = dataClient.getDataFromClient(o.getAccountId(), o.getRequestId());
-                                        dataClient.setClientData(o.getRequestId(), data);
+                                        if (data != null)
+                                            dataClient.setClientData(o.getRequestId(), data);
                                     } catch (Exception e) {
                                         logger.error(e.getMessage());
                                     }
@@ -126,8 +127,6 @@ public class JobMonitor implements InitializingBean {
                                 case INFO_SEND :
                                     serviceMonitor.checkAcceptedByClient();
                                     break;
-//                                case INFO_ACC:
-//                                    break;
                             }
                             queue.remove();
                         });
@@ -152,7 +151,7 @@ public class JobMonitor implements InitializingBean {
                     logger.info(" started Job Monitor " + new Date().toString());
 
                     try {
-                    //    checkData(queue);
+                        checkData(queue);
                         checkReadyAccounts(queue);
                     } catch (Exception e) {
                         logger.error(e.getMessage());
@@ -207,7 +206,7 @@ public class JobMonitor implements InitializingBean {
     }
     public void checkData(BlockingQueue<ActiveJob> queue) {
 
-        String[] sqls = {CHECK_DATA_AFTER_RUN, CHECK_DATA_AFTER_SUBMIT, CHECK_DATA_AFTER_ACCEPT, CHECK_DATA_AFTER_SEND_TO_CLIENT};
+        String[] sqls = {CHECK_DATA_FOR_SUBMIT.replace("?", Long.toString(new Date().getTime())), CHECK_DATA_AFTER_SUBMIT, CHECK_DATA_AFTER_ACCEPT, CHECK_DATA_AFTER_SEND_TO_CLIENT};
         for (int i = sqls.length; i > 0; i --) {
             String sql = sqls[i - 1];
             int records = 0;

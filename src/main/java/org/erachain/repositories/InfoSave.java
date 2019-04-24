@@ -22,8 +22,12 @@ public class InfoSave {
     @Value("${INSERT_INTO_DATA}")
     private String INSERT_INTO_DATA;
 
-    @Value("${FETCH_DATA}")
-    private String FETCH_DATA;
+    @Value("${FETCH_DATA_BY_ACTREQID}")
+    private String FETCH_DATA_BY_ACTREQID;
+
+    @Value("${CHECK_DATA_BY_ACTREQID}")
+    private String CHECK_DATA_BY_ACTREQID;
+
 
     @Value("${UPDATE_DATA_AFTER_SUBMIT}")
     private  String UPDATE_DATA_AFTER_SUBMIT;
@@ -55,10 +59,17 @@ public class InfoSave {
 
     private static final Field[] fields = DataInfo.class.getDeclaredFields();
 
-    public List<DataInfo> fetchDataWhere(String where) {
-        return fetchData(FETCH_DATA + " where " + where);
+    public List<DataInfo> fetchDataWhere(int actRequestId) {
+        return fetchData(FETCH_DATA_BY_ACTREQID.replace("?", Integer.toString(actRequestId)));
     }
-
+    public int checkDataWhere(int actRequestId) {
+        try {
+            return dbUtils.checkData(CHECK_DATA_BY_ACTREQID.replace("?", Integer.toString(actRequestId)));
+        } catch (SQLException e) {
+            logger.error(e.getMessage());
+        }
+        return 0;
+    }
     public void afterRun(DataInfo dataInfo) throws SQLException {
         dataInfo.setAccDate(new Timestamp(System.currentTimeMillis()));
         try (Connection connection = jdbcTemplate.getDataSource().getConnection()) {

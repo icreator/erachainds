@@ -1,13 +1,10 @@
 package org.erachain.process;
 
-import org.apache.commons.lang3.time.DateUtils;
-import org.erachain.entities.ActiveJob;
-import org.erachain.entities.JobState;
+
 import org.erachain.entities.account.Account;
 import org.erachain.entities.datainfo.DataEra;
 import org.erachain.entities.datainfo.DataInfo;
 import org.erachain.entities.request.ActParams;
-import org.erachain.entities.request.Request;
 import org.erachain.repositories.AccountProc;
 import org.erachain.repositories.DbUtils;
 import org.erachain.repositories.InfoSave;
@@ -23,9 +20,8 @@ import org.springframework.context.annotation.PropertySource;
 import org.springframework.stereotype.Service;
 
 import java.sql.SQLException;
-import java.sql.Timestamp;
+
 import java.util.*;
-import java.util.concurrent.atomic.AtomicInteger;
 
 @Service
 @PropertySource("classpath:custom.properties")
@@ -58,12 +54,13 @@ public class ServiceMonitor {
     @Value("${Service_Url}")
     private String Service_Url;
 
-    @Value("${FETCH_DATA_AFTER_RUN}")
-    private String FETCH_DATA_AFTER_RUN;
 
+    @Value("${FETCH_DATA_FOR_SUBMIT}")
+    private String FETCH_DATA_FOR_SUBMIT;
 
     @Value("${FETCH_DATA_AFTER_SUBMIT}")
     private String FETCH_DATA_AFTER_SUBMIT;
+
 
 
     @Value("${FETCH_DATA_AFTER_ACCEPT}")
@@ -75,7 +72,7 @@ public class ServiceMonitor {
 
 
     public void checkDataSubmit()throws Exception {
-        List<DataInfo> dataInfos = infoSave.fetchData(FETCH_DATA_AFTER_RUN);
+        List<DataInfo> dataInfos = infoSave.fetchData(FETCH_DATA_FOR_SUBMIT.replace("?", Long.toString(new Date().getTime())));
 
         for (DataInfo dataInfo : dataInfos) {
             if (dataInfo.getRunDate() != null && dataInfo.getSubDate() == null) {
@@ -197,6 +194,5 @@ public class ServiceMonitor {
             }
         }
     }
-
 
 }

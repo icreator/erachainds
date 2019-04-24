@@ -32,6 +32,7 @@ public class DbUtils {
     }
 
     public int getActRequestId(String paramName, String paramValue) throws Exception {
+        logger.info(" paramName " + paramName + " paramValue " + paramValue);
         int result = 0;
         try (Connection connection = jdbcTemplate.getDataSource().getConnection()) {
             PreparedStatement statement = connection.prepareStatement(FETCH_ACTREQ_ID_PARAM);
@@ -149,7 +150,7 @@ public class DbUtils {
         });
         table = table == null ? data.getClass().getSimpleName().toLowerCase() : table;
         String sql = "insert into " + table + " (" + campos.toString() + ") values(" + valores.toString() + ");";
-        logger.info("sql = " + sql);
+     //   logger.info("sql = " + sql);
         return sql;
     }
     public int exSqlStatement(String sql) {

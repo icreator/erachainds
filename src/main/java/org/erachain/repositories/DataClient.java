@@ -45,6 +45,7 @@ public class DataClient {
         Request request = accountProc.getRequestById(requestId);
         return getDataFromClient(account, request);
     }
+
     public Map<String, byte[]> getDataFromClient(Account account, Request request) throws Exception {
         Map<String, byte[]> identData = new HashMap<>();
         request.setLastReceived();
@@ -59,7 +60,6 @@ public class DataClient {
             logger.error(e.getMessage());
             throw e;
         }
-        List<DataInfo> dataInfos = new ArrayList<>();
         for (String ident : idents) {
             params.put(account.getIdentityName(), ident);
             Map<String, String> map = request.getParams(dbUtils, dateUtl);
@@ -79,41 +79,57 @@ public class DataClient {
                 identData.put(ident, data);
 
             }
-
         }
         return identData;
     }
+
     public void setClientData(int requestId, Map<String, byte[]> data) throws Exception {
         setClientData(accountProc.getRequestById(requestId), data);
     }
-    public void setClientData(Request request, Map<String, byte[]> data) throws Exception {
+
+    private void setClientData(Request request, Map<String, byte[]> data) throws Exception {
 //        try {
         logger.info(" get act req id ");
         int actRequestId = 0;
         try {
             actRequestId = request.getActRequestId(dbUtils, dateUtl);
-        } catch (SQLException e) {
-            logger.error(" error getting act req id " + e.getMessage());
-            throw e;
-        }
-        logger.info(" act req id " + actRequestId);
-        List<DataInfo> dataInfos = infoSave.fetchDataWhere(" actRequestId = " + actRequestId);
-        if (dataInfos != null && !dataInfos.isEmpty()) {
-            for (DataInfo dataInfo : dataInfos) {
-                String identity = dataInfo.getIdentity();
-                dataInfo.setData(data.get(identity));
-                dataInfo.setRunDate(new Timestamp(new Date().getTime()));
-                try {
-                    logger.info(" save after run ");
-                    infoSave.afterRun(dataInfo);
-                } catch (SQLException e) {
-                    logger.error(" save after run ");
-                    throw e;
+            if (actRequestId == 0) {
+                actRequestId = request.setActRequestId(dbUtils, dateUtl);
+                logger.info(" new act req id " + actRequestId);
+                setData(request, actRequestId, data);
+            } else {
+                if (infoSave.checkDataWhere(actRequestId) > 0) {
+                    logger.info(" found act req id " + actRequestId);
+                    updateData(request, actRequestId, data);
                 }
             }
-            accountProc.afterRun(request);
-            return;
+        } catch (SQLException e) {
+            logger.error(" error setting client for request " + request.getId() + " " + e.getMessage());
+            throw e;
         }
+
+        return;
+    }
+
+    private void updateData(Request request, int actRequestId, Map<String, byte[]> data) throws SQLException {
+        List<DataInfo> dataInfos = infoSave.fetchDataWhere(actRequestId);
+        for (DataInfo dataInfo : dataInfos) {
+            String identity = dataInfo.getIdentity();
+            dataInfo.setData(data.get(identity));
+            dataInfo.setRunDate(new Timestamp(new Date().getTime()));
+            try {
+                logger.info(" save after run ");
+                infoSave.afterRun(dataInfo);
+            } catch (SQLException e) {
+                logger.error(" save after run ");
+                throw e;
+            }
+        }
+        accountProc.afterRun(request);
+        return;
+    }
+
+    private void setData(Request request, int actRequestId, Map<String, byte[]> data) throws SQLException {
         for (String ident : data.keySet()) {
             DataInfo dataInfo = new DataInfo();
             dataInfo.setRunDate(new Timestamp(System.currentTimeMillis()));
@@ -131,5 +147,6 @@ public class DataClient {
         }
         accountProc.afterRun(request);
         return;
+
     }
 }
