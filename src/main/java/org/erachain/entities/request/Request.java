@@ -124,8 +124,13 @@ public class Request {
             return false;
 
         Date date = new Date(lastRun.getTime());
-        date = dateUtl.addUnit(date, runPeriod, 1);
-
+        String[] period = runPeriod.split("_");
+        if (period.length > 1) {
+            int value = Integer.parseInt(period[0]);
+            dateUtl.addUnit(date, period[1], value);
+        } else {
+            date = dateUtl.addUnit(date, runPeriod, 1);
+        }
         if (date.before(new Date()))
             return true;
 

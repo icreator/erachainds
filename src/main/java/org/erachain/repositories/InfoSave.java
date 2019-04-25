@@ -44,6 +44,10 @@ public class InfoSave {
     @Value("${FETCH_DATA_FOR_CLIENT}")
     private String FETCH_DATA_FOR_CLIENT;
 
+    @Value("${FETCH_DATA_FOR_CLIENT_WHERE}")
+    private String FETCH_DATA_FOR_CLIENT_WHERE;
+
+
     @Value("${UPDATE_DATA_AFTER_RUN}")
     private String UPDATE_DATA_AFTER_RUN;
 
@@ -98,7 +102,13 @@ public class InfoSave {
     }
     public String fetchDataForClient(String ident, Map<String, String> params) throws SQLException {
         try (Connection connection = jdbcTemplate.getDataSource().getConnection()) {
-            PreparedStatement stm = connection.prepareStatement(FETCH_DATA_FOR_CLIENT);
+            StringBuffer sqlbuf = new StringBuffer(FETCH_DATA_FOR_CLIENT);
+            params.keySet().forEach(name -> {
+                sqlbuf.append(" ");
+                sqlbuf.append(FETCH_DATA_FOR_CLIENT_WHERE);
+
+            });
+            PreparedStatement stm = connection.prepareStatement(sqlbuf.toString());
             int i = 0;
             stm.setString(++ i, ident);
             for (String name : params.keySet()) {
