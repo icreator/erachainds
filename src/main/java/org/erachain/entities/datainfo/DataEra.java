@@ -8,7 +8,27 @@ public class DataEra {
     private String signature;
     private String blockTrId;
     private int partNo;
+
+    private int offset;
+    private int lengh;
     // end db
+
+
+    public int getOffset() {
+        return offset;
+    }
+
+    public void setOffset(int offset) {
+        this.offset = offset;
+    }
+
+    public int getLengh() {
+        return lengh;
+    }
+
+    public void setLengh(int lengh) {
+        this.lengh = lengh;
+    }
 
     public int getId() {
         return id;

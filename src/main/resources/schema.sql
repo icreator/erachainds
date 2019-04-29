@@ -35,7 +35,9 @@ create table IF NOT EXISTS DataEra
   dataInfoId int,
   signature varchar(64),
   blockTrId   varchar(20),
-  partNo    int
+  partNo    int,
+  offset     int default 0,
+  lengh      int default 0
 );
 
 

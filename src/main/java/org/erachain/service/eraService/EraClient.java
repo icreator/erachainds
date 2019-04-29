@@ -46,6 +46,10 @@ public class EraClient {
     @Autowired
     private DbUtils dbUtils;
 
+    @Value("${TRANS_MAXSIZE}")
+    private int TRANS_MAXSIZE;
+
+
     private RestClient restClient;
 
     @Autowired
@@ -53,30 +57,20 @@ public class EraClient {
         this.restClient = restClient;
     }
 
-    public void setSignature(DataInfo dataInfo, Account account) throws Exception {
-//        String data = new String(dataInfo.getData());
+    public void setSignature(DataInfo dataInfo, Account account, String signiture, int offset) throws Exception {
 
         List<DataEra> dataEras = new ArrayList<>();
-        for (byte[] dt : dataInfo.getData(dbUtils)) {
+        for (byte[] dt : dataInfo.getData(dbUtils, TRANS_MAXSIZE)) {
             String data = new String(dt);
             DataEra dataEra = new DataEra();
             dataEra.setDataInfoId(dataInfo.getId());
-            String[] urlParams = {EraService_creator, account.getRecipient()};
-            Map<String, String> params = new HashMap<>();
-            params.put("password", EraService_password);
-            params.put("title", EraService_title);
-            String url = restClient.addParams(EraService_Url, urlParams, params);
-            logger.info(" url " + url);
-            String result = null;
-            try {
-                result = restClient.getResult(url, data);
-            } catch (Exception e) {
-                logger.error(e.getMessage());
-                throw new Exception(EraService_Url + " " + e.getMessage());
+            if (signiture != null) {
+                dataEra.setSignature(signiture);
+                dataEra.setOffset(offset);
+                dataEra.setLengh(dataInfo.getData().length);
+            } else {
+                dataEra.setSignature(getSignForData(account, data));
             }
-            String signature = jsonService.getValue(result, "signature");
-            logger.info(" signature " + signature);
-            dataEra.setSignature(signature);
             dataEras.add(dataEra);
         }
         int partNo = 0;
@@ -84,6 +78,24 @@ public class EraClient {
             dataEra.setPartNo(partNo ++);
             dbUtils.setDbObj(dataEra, "DataEra");
         }
+    }
+    public String getSignForData(Account account, String data) throws Exception {
+        String[] urlParams = {EraService_creator, account.getRecipient()};
+        Map<String, String> params = new HashMap<>();
+        params.put("password", EraService_password);
+        params.put("title", EraService_title);
+        String url = restClient.addParams(EraService_Url, urlParams, params);
+        logger.info(" url " + url);
+        String result = null;
+        try {
+            result = restClient.getResult(url, data);
+        } catch (Exception e) {
+            logger.error(e.getMessage());
+            throw new Exception(EraService_Url + " " + e.getMessage());
+        }
+        String signature = jsonService.getValue(result, "signature");
+        logger.info(" signature " + signature);
+        return signature;
     }
 
     public String checkChain(DataEra dataEra) throws Exception {

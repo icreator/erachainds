@@ -54,6 +54,10 @@ public class ServiceMonitor {
     @Value("${Service_Url}")
     private String Service_Url;
 
+    @Value("${TRANS_MINSIZE}")
+    private int TRANS_MINSIZE;
+
+
 
     @Value("${FETCH_DATA_FOR_SUBMIT}")
     private String FETCH_DATA_FOR_SUBMIT;
@@ -73,12 +77,21 @@ public class ServiceMonitor {
 
     public void checkDataSubmit()throws Exception {
         List<DataInfo> dataInfos = infoSave.fetchData(FETCH_DATA_FOR_SUBMIT.replace("?", Long.toString(new Date().getTime())));
-
+        if (dataInfos == null || dataInfos.isEmpty()) {
+            return;
+        }
+        String signature = null;
+        int accountId = dataInfos.get(0).getAccountId();
+        Account account = accountProc.getAccountById(accountId);
+        if(getSize(dataInfos) < TRANS_MINSIZE) {
+            String data = getData(dataInfos);
+            signature = eraClient.getSignForData(account, data);
+        }
+        int offset = 0;
         for (DataInfo dataInfo : dataInfos) {
-            if (dataInfo.getRunDate() != null && dataInfo.getSubDate() == null) {
-                Account account = accountProc.getAccountById(dataInfo.getAccountId());
+            if (dataInfo.getRunDate() != null && dataInfo.getSubDate() == null && dataInfo.getAccountId() == accountId) {
                 try {
-                    eraClient.setSignature(dataInfo, account);
+                    eraClient.setSignature(dataInfo, account, signature, offset);
                 } catch (Exception e) {
                     logger.error(e.getMessage());
                     throw e;
@@ -89,10 +102,27 @@ public class ServiceMonitor {
                     logger.error(e.getMessage());
                     throw e;
                 }
+                offset += dataInfo.getData().length;
             }
+
         }
     }
+    private int getSize(List<DataInfo> dataInfos) {
+        int size = 0;
+        for (DataInfo dataInfo : dataInfos) {
+            size += dataInfo.getData().length;
+        }
+        return size;
+    }
 
+    private String getData(List<DataInfo> dataInfos) {
+        int size = 0;
+        StringBuffer stringBuffer = new StringBuffer("");
+        for (DataInfo dataInfo : dataInfos) {
+           stringBuffer.append(dataInfo.getData());
+        }
+        return stringBuffer.toString();
+    }
     public void checkDataAccept() throws Exception {
         List<DataInfo> dataInfos = infoSave.fetchData(FETCH_DATA_AFTER_SUBMIT);
 

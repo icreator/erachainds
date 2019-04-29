@@ -9,7 +9,7 @@ import java.util.List;
 
 public class DataInfo {
 
-    private static final int TRANS_MAXSIZE = 10000;
+//    private static final int TRANS_MAXSIZE = 10000;
 
     // db
     private int id;
@@ -83,8 +83,8 @@ public class DataInfo {
         return data;
     }
 
-    public List<byte[]> getData(DbUtils dbUtils) {
-        return split(data);
+    public List<byte[]> getData(DbUtils dbUtils, int size) {
+        return split(data, size);
     }
 
     public List<DataEra> getDataEras(DbUtils dbUtils) {
@@ -118,10 +118,10 @@ public class DataInfo {
         this.accDate = accDate;
     }
 
-    private List<byte[]> split(byte[] arrayToCut) {
-        int size = TRANS_MAXSIZE;
-        return split(arrayToCut, size);
-    }
+//    private List<byte[]> split(byte[] arrayToCut) {
+//        int size = TRANS_MAXSIZE;
+//        return split(arrayToCut, size);
+//    }
     private List<byte[]> split(byte[] arrayToCut, int size) {
         List<byte[]> list = new ArrayList<>();
 
