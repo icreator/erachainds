@@ -1,6 +1,8 @@
 package org.erachain.repositories;
 
+import org.erachain.entities.datainfo.DataEra;
 import org.erachain.entities.datainfo.DataInfo;
+import org.erachain.entities.request.Request;
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -34,6 +36,9 @@ public class InfoSave {
 
     @Value("${UPDATE_DATA_AFTER_ACCEPT}")
     private String UPDATE_DATA_AFTER_ACCEPT;
+
+    @Value("${UPDATE_BLOCK_TRANS}")
+    private String UPDATE_BLOCK_TRANS;
 
     @Value("${UPDATE_DATA_AFTER_SEND_TO_CLIENT}")
     private String UPDATE_DATA_AFTER_SEND_TO_CLIENT;
@@ -137,6 +142,16 @@ public class InfoSave {
             stm.executeUpdate();
             stm.close();
         //    connection.close();
+        }
+    }
+    public void afterAcceptEra(DataEra dataEra) throws SQLException {
+        try (Connection connection = jdbcTemplate.getDataSource().getConnection()) {
+            PreparedStatement stm = connection.prepareStatement(UPDATE_BLOCK_TRANS);
+            stm.setString(1, dataEra.getBlockTrId());
+            stm.setInt(2, dataEra.getId());
+            stm.executeUpdate();
+            stm.close();
+            connection.close();
         }
     }
     public void afterAcceptedByClient(DataInfo dataInfo) throws SQLException {

@@ -149,6 +149,9 @@ public class ServiceMonitor {
                         int height = jsonService.getValue(result, "height");
                         int sequence = jsonService.getValue(result, "sequence");
                         dataEra.setBlockTrId(height + "-" + sequence);
+                        logger.info(" save block and trans for dataEra " + dataEra.getBlockTrId());
+                        infoSave.afterAcceptEra(dataEra);
+                        logger.info(" save block and trans for dataEra " + dataEra.getId());
                         confirmed ++;
                     }
                 }
