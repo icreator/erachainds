@@ -3,11 +3,15 @@ package org.erachain.utils;
 import java.util.Calendar;
 import java.util.Date;
 import org.apache.commons.lang3.time.DateUtils;
+import org.slf4j.Logger;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 @Component
 public class DateUtl {
 
+    @Autowired
+    private Logger logger;
 
     public  Date getFirst(Date date, String unit){
         Calendar cal = Calendar.getInstance();
@@ -39,7 +43,7 @@ public class DateUtl {
                 res = DateUtils.addDays(date, value);
                 break;
             case ("hour") :
-                date = DateUtils.addHours(date, value);
+                res = DateUtils.addHours(date, value);
                 break;
             case ("minute") :
                 res = DateUtils.addMinutes(date, value);

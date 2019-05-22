@@ -142,10 +142,9 @@ public class Request {
         List<Params> pars = dbUtils.fetchData(Params.class, "Params", " requestId = " + id);
         SimpleDateFormat format = null;
         params = new HashMap<>();
-        boolean isCurrent;
         for (Params param : pars) {
             String value = param.getDefValue();
-            isCurrent = param.getCurValue() > 0 ? true : false;
+            boolean isCurrent = param.getCurValue() > 0 ? true : false;
             boolean isDate = "date".equalsIgnoreCase(param.getDataType());
             if (isDate) {
                 paramName = param.getParamName();
