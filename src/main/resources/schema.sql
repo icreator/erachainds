@@ -70,7 +70,8 @@ create table IF NOT EXISTS ActRequest
   primary key   autoincrement,
   requestId int,
   period  varchar(10),
-  DateRun   timestamp
+  DateRun   timestamp,
+  DateSubmit timestamp
 );
 
 create table IF NOT EXISTS ActParams
