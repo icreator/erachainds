@@ -43,12 +43,14 @@ create table IF NOT EXISTS DataEra
 
 create table IF NOT EXISTS Request
 (
-  id        integer     not null
-  primary key   autoincrement,
-  accountId int,
-  runPeriod  varchar(10),
-  reqPeriod  varchar(10),
-  lastRun   timestamp
+   id           integer not null
+        primary key autoincrement,
+    accountId    int,
+    runPeriod    varchar(10),
+    lastRun      timestamp,
+    submitPeriod varchar(10) default month not null,
+    offUnit      varchar(10),
+    offValue     int         default 0
 );
 
 
