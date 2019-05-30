@@ -26,6 +26,9 @@ public class DateUtl {
             case ("day") :
                 cal.set(Calendar.HOUR_OF_DAY, cal.getActualMinimum(Calendar.HOUR_OF_DAY));
                 break;
+            case ("hour") :
+                cal.set(Calendar.MINUTE, cal.getActualMinimum(Calendar.MINUTE));
+                break;
         }
 
         return cal.getTime();
