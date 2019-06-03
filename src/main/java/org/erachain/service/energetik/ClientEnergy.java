@@ -87,8 +87,8 @@ public class ClientEnergy {
                jsonService.getMeterResultJson(params, meter, type, value).toString());
         String error = jsonService.checkForError(json);
         if (error != null) {
-            logger.error(" login error " + error);
-            throw new Exception(" login error " + error);
+            logger.error(" get meter " + error);
+            throw new Exception(" get meter " + error);
         }
         logger.info(" MeterResult for " + meter + " " + type + " " + value);
         logger.info(json);
