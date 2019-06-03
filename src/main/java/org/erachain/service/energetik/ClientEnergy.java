@@ -36,6 +36,11 @@ public class ClientEnergy {
     private void clientLogin(String url, String user, String pass) throws Exception {
         logger.info(" login " + url + " " + user);
         String json = restClient.getJsonResult(url, jsonService.getAuth(user, pass).toString());
+        String error = jsonService.checkForError(json);
+        if (error != null) {
+            logger.error(" login error " + error);
+            throw new Exception(" login error " + error);
+        }
         sessionId = jsonService.getValue(json, "result");
         restClient.addHeader("X-Session-Id", sessionId);
         Energy_Url = url;
@@ -63,6 +68,7 @@ public class ClientEnergy {
         }
 
         String type = params.get("type") == null ? "month" : params.get("type");
+        params.put("type", type);
         String value = params.get("value");
         //String format = params.get("format");
         if (value == null) {
@@ -73,12 +79,12 @@ public class ClientEnergy {
             params.put("value", value);
 //            value = type.equalsIgnoreCase("month") ? dateString.substring(0, 7) : dateString;
         }
-        return getMeterResult(params.get("meter"), type, value);
+        return getMeterResult(params, params.get("meter"), type, value);
     }
-    private String getMeterResult(String meter, String type, String value) throws Exception {
+    private String getMeterResult(Map<String, String> params, String meter, String type, String value) throws Exception {
        logger.info(" MeterResult for " + meter + " " + type + " " + value);
        return restClient.getJsonResult(Energy_Url,
-               jsonService.getMeterResultJson(meter, type, value).toString());
+               jsonService.getMeterResultJson(params, meter, type, value).toString());
     }
     public String setMeterResult(Map<String, String> params) throws Exception {
         if (params.get("sessionId") == null) {
@@ -86,12 +92,12 @@ public class ClientEnergy {
         }
         String type = params.get("type");
         String value = params.get("value");
-        return setMeterResult(params.get("meter"), type, value, params.get("transaction"));
+        return setMeterResult(params, params.get("meter"), type, value, params.get("transaction"));
     }
-    private String setMeterResult(String meter, String type, String value, String transaction) throws Exception {
+    private String setMeterResult(Map<String, String> params, String meter, String type, String value, String transaction) throws Exception {
         logger.info(" get MeterResult for " + meter + " " + type + " " + value + " transaction " + transaction);
         String result = restClient.getJsonResult(Energy_Url,
-                jsonService.setMeterResultJson(meter, type, value, transaction).toString());
+                jsonService.setMeterResultJson(params, meter, type, value, transaction).toString());
         logger.info("  MeterResult  " + result);
         return result;
     }
@@ -101,13 +107,13 @@ public class ClientEnergy {
         }
         String type = params.get("type");
         String value = params.get("value");
-        String result = checkMeterResult(params.get("meter"), type, value);
+        String result = checkMeterResult(params, params.get("meter"), type, value);
         return result;
     }
-    private String checkMeterResult(String meter, String type, String value) throws Exception {
+    private String checkMeterResult(Map<String, String> params, String meter, String type, String value) throws Exception {
         logger.info(" check MeterResult for " + meter + " " + type + " " + value );
         String result = restClient.getJsonResult(Energy_Url,
-                jsonService.checkMeterResultJson(meter, type, value).toString());
+                jsonService.checkMeterResultJson(params, meter, type, value).toString());
         logger.info("  MeterResult  " + result);
         return result;
     }

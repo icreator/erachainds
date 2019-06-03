@@ -63,14 +63,14 @@ public class JsonService {
         requestBody.put("params", params);
         return requestBody;
     }
-    public  JSONObject getMeterResultJson(String meter, String type, String value) {
+    public  JSONObject getMeterResultJson(Map<String, String> pars, String meter, String type, String value) {
         JSONObject requestBody = new JSONObject();
         requestBody.put("jsonrpc", "2.0");
         requestBody.put("method", "reading.list");
         requestBody.put("id", 1);
         JSONObject params = new JSONObject();
         params.put("meter", Integer.parseInt(meter));
-        params.put("mode", "archive");
+        params.put("mode", pars.get("mode") == null ? "archive" : pars.get("mode"));
         params.put("sort", "asc");
         JSONObject period = new JSONObject();
         period.put("type", type);
@@ -83,14 +83,14 @@ public class JsonService {
      //   System.out.println("result " + requestBody.toString());
         return requestBody;
     }
-    public  JSONObject setMeterResultJson(String meter, String type, String value, String transaction) {
+    public  JSONObject setMeterResultJson(Map<String, String> pars, String meter, String type, String value, String transaction) {
         JSONObject requestBody = new JSONObject();
         requestBody.put("jsonrpc", "2.0");
         requestBody.put("method", "reading.setListBlockchain");
         requestBody.put("id", 1);
         JSONObject params = new JSONObject();
         params.put("meter", Integer.parseInt(meter));
-        params.put("mode", "archive");
+        params.put("mode", pars.get("mode") == null ? "archive" : pars.get("mode"));
         params.put("sort", "asc");
         params.put("transaction", transaction);
         JSONObject period = new JSONObject();
@@ -111,14 +111,14 @@ public class JsonService {
         logger.info(" checkMeterResult " + value);
         return value;
     }
-    public  JSONObject checkMeterResultJson(String meter, String type, String value) {
+    public  JSONObject checkMeterResultJson(Map<String, String> pars, String meter, String type, String value) {
         JSONObject requestBody = new JSONObject();
         requestBody.put("jsonrpc", "2.0");
         requestBody.put("method", "reading.getListBlockchain");
         requestBody.put("id", 1);
         JSONObject params = new JSONObject();
         params.put("meter", Integer.parseInt(meter));
-        params.put("mode", "archive");
+        params.put("mode", pars.get("mode") == null ? "archive" : pars.get("mode"));
         params.put("sort", "asc");
 //        params.put("transaction", transaction);
         JSONObject period = new JSONObject();
@@ -149,5 +149,19 @@ public class JsonService {
     }
     private <T> T getValue(JSONObject jsonObject, String key) {
         return (T) jsonObject.get(key);
+    }
+    public String checkForError(String json) {
+        JSONObject jsonObject = new JSONObject(json);
+        StringBuffer error = new StringBuffer("");
+        jsonObject.keys().forEachRemaining(key -> {
+            if("error".equalsIgnoreCase(key)) {
+                error.append(jsonObject.get(key).toString());
+            }
+        });
+        String message = error.toString();
+        if(!message.isEmpty()) {
+            return message;
+        }
+        return null;
     }
 }

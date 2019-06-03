@@ -29,6 +29,7 @@ public class EnergyServiceTest {
         params.put("password", "erachain");
         params.put("meter", "13857");
         params.put("type", "month");
+        params.put("mode", "all");
         params.put("value", "2019-01");
 //        params.put("type", "day");
 //        params.put("value", "2019-01-05");
