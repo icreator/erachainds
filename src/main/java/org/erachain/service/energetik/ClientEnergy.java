@@ -82,9 +82,17 @@ public class ClientEnergy {
         return getMeterResult(params, params.get("meter"), type, value);
     }
     private String getMeterResult(Map<String, String> params, String meter, String type, String value) throws Exception {
-       logger.info(" MeterResult for " + meter + " " + type + " " + value);
-       return restClient.getJsonResult(Energy_Url,
+
+       String json = restClient.getJsonResult(Energy_Url,
                jsonService.getMeterResultJson(params, meter, type, value).toString());
+        String error = jsonService.checkForError(json);
+        if (error != null) {
+            logger.error(" login error " + error);
+            throw new Exception(" login error " + error);
+        }
+        logger.info(" MeterResult for " + meter + " " + type + " " + value);
+        logger.info(json);
+        return json;
     }
     public String setMeterResult(Map<String, String> params) throws Exception {
         if (params.get("sessionId") == null) {
