@@ -2,6 +2,7 @@ package org.erachain.entities.request;
 
 import org.erachain.repositories.DbUtils;
 import org.erachain.utils.DateUtl;
+import org.slf4j.Logger;
 
 import java.sql.SQLException;
 import java.sql.Timestamp;
@@ -125,12 +126,13 @@ public class Request {
 
         Date date = new Date(lastRun.getTime());
         String[] period = runPeriod.split("_");
+        int value = 1;
+        String periodRun = runPeriod;
         if (period.length > 1) {
-            int value = Integer.parseInt(period[0]);
-            dateUtl.addUnit(date, period[1], value);
-        } else {
-            date = dateUtl.addUnit(date, runPeriod, 1);
+            value = Integer.parseInt(period[0]);
+            periodRun = period[1];
         }
+        date = dateUtl.addUnit(date, periodRun, value);
         if (date.before(new Date()))
             return true;
 
@@ -156,6 +158,7 @@ public class Request {
                 if (offUnit != null && offValue != 0 && format != null) {
                     Date date = new Date();
                     date = dateUtl.addUnit(date, offUnit, - offValue);
+                    date = dateUtl.getAlign(date, submitPeriod);
                     value = format.format(date);
                     paramValue = value;
                     submitDate = dateUtl.getFirst(date, submitPeriod);

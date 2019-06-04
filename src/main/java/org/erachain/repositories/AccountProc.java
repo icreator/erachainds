@@ -97,7 +97,7 @@ public class AccountProc {
         return;
     }
     public   List<Request>  getRequests(int accountId) {
-        if (!inited)
+ //       if (!inited)
             setRequests();
         return cacheListReq.get(accountId);
     }

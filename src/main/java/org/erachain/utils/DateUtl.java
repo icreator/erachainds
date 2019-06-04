@@ -28,12 +28,19 @@ public class DateUtl {
                 break;
             case ("hour") :
                 cal.set(Calendar.MINUTE, cal.getActualMinimum(Calendar.MINUTE));
+                cal.set(Calendar.SECOND, cal.getActualMinimum(Calendar.SECOND));
                 break;
         }
 
         return cal.getTime();
     }
+    public  Date getAlign(Date date, String unit){
+        if ("hour".equalsIgnoreCase(unit))
+            return getFirst(date, unit);
+        return date;
+    }
     public Date addUnit(Date date, String unit, int value) {
+//        logger.info(" addUnit date " + date + " unit " + unit + " value " + value);
         Date res = null;
         switch (unit) {
             case ("month") :
@@ -52,6 +59,7 @@ public class DateUtl {
                 res = DateUtils.addMinutes(date, value);
                 break;
         }
+//        logger.info(" addUnit res " + res);
         return res;
     }
 }

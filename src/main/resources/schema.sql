@@ -56,14 +56,14 @@ create table IF NOT EXISTS Request
 
 create table IF NOT EXISTS Params
 (
-  id        integer     not null
-  primary key   autoincrement,
-  requestId int,
-  paramName    varchar(25),
-  dateType    varchar(10),
-  format  varchar(10),
-  defValue varchar(50),
-  current  boolean
+    id        integer not null
+        primary key autoincrement,
+    requestId int,
+    paramName varchar(25),
+    dataType  varchar(10),
+    format    varchar(30),
+    defValue  varchar(50),
+    curValue  int default 0
 );
 
 create table IF NOT EXISTS ActRequest
