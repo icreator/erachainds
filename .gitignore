@@ -1,0 +1,11 @@
+.gradle/
+.idea/
+out/
+*.0.iml
+build/
+*.iml
+logs/
+db/*
+!db/readme.txt
+CustomInfo/*
+!CustomInfo/readme.txt
