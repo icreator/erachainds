@@ -6,6 +6,7 @@ build/
 *.iml
 logs/
 db/*
+!db/era_empty.s3db
 !db/readme.txt
 CustomInfo/*
 !CustomInfo/readme.txt
