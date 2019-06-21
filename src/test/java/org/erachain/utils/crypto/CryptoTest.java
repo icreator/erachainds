@@ -17,8 +17,8 @@ public class CryptoTest {
     @Test
     public void ripemd160() {
 
-        var publicKey = "AQyCxEXLewJvqzLegTW41xF3qjnTCr7tVvT6639WJsKb";
-        var result = crypto.ripemd160(Base58.decode(publicKey));
+        String publicKey = "AQyCxEXLewJvqzLegTW41xF3qjnTCr7tVvT6639WJsKb";
+        byte[] result = crypto.ripemd160(Base58.decode(publicKey));
 
         Assert.assertEquals("+6sDkzWQBSz8Kr4iSfnJpSagx7A=", Base64.encode(result));
     }

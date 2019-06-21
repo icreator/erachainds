@@ -31,7 +31,6 @@ public class JobMonitor implements InitializingBean {
     @Value("${CHECK_DATA_AFTER_SUBMIT}")
     private String CHECK_DATA_AFTER_SUBMIT;
 
-
     @Value("${CHECK_DATA_FOR_SUBMIT}")
     private String CHECK_DATA_FOR_SUBMIT;
 
@@ -86,7 +85,7 @@ public class JobMonitor implements InitializingBean {
                 while (true) {
                     while (queue.isEmpty()) {
                         try {
-                            TimeUnit.MINUTES.sleep((long) 1);
+                            TimeUnit.SECONDS.sleep((long) 1);
                         } catch (InterruptedException e) {
                             logger.error(e.getMessage());
                         }
@@ -160,7 +159,7 @@ public class JobMonitor implements InitializingBean {
                     }
 
                     try {
-                        TimeUnit.MINUTES.sleep((long) 1);
+                        TimeUnit.SECONDS.sleep((long) 1);
                     } catch (InterruptedException e) {
                         logger.error(e.getMessage());
                     }

@@ -4,6 +4,7 @@ import org.erachain.entities.account.Account;
 import org.erachain.entities.datainfo.DataEra;
 import org.erachain.entities.datainfo.DataInfo;
 import org.erachain.entities.request.ActRequest;
+import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.slf4j.Logger;
@@ -12,6 +13,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringRunner;
 
+import javax.validation.valueextraction.Unwrapping;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
@@ -80,6 +82,7 @@ public class DbDataTest {
 
     @Value("${CHECK_DATA_AFTER_SEND_TO_CLIENT}")
     private String CHECK_DATA_AFTER_SEND_TO_CLIENT;
+    
 
     @Test
     public void checkData() {
