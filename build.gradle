@@ -82,6 +82,7 @@ task CopyResourse() {
     copy {
         from 'db'
         into 'build/libs/db'
+        exclude 'era.s3db'
         include '*'
     }
     copy {
