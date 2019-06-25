@@ -91,7 +91,7 @@ public class ClientEnergy {
             throw new Exception(" get meter " + error);
         }
         logger.info(" MeterResult for " + meter + " " + type + " " + value);
-        logger.info(json);
+        logger.debug(json);
         return json;
     }
     public String setMeterResult(Map<String, String> params) throws Exception {
@@ -106,7 +106,7 @@ public class ClientEnergy {
         logger.info(" get MeterResult for " + meter + " " + type + " " + value + " transaction " + transaction);
         String result = restClient.getJsonResult(Energy_Url,
                 jsonService.setMeterResultJson(params, meter, type, value, transaction).toString());
-        logger.info("  MeterResult  " + result);
+        logger.debug("  MeterResult  " + result);
         return result;
     }
     public String checkMeterResult(Map<String, String> params) throws Exception {
@@ -122,7 +122,7 @@ public class ClientEnergy {
         logger.info(" check MeterResult for " + meter + " " + type + " " + value );
         String result = restClient.getJsonResult(Energy_Url,
                 jsonService.checkMeterResultJson(params, meter, type, value).toString());
-        logger.info("  MeterResult  " + result);
+        logger.debug("  MeterResult  " + result);
         return result;
     }
 }

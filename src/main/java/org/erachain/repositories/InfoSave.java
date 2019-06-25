@@ -93,9 +93,9 @@ public class InfoSave {
     }
 
     public List<DataInfo> fetchData(String sql) {
-        logger.info(" sql " +sql);
+        logger.debug(" sql " +sql);
         List<Map<String, Object>> rows = jdbcTemplate.queryForList(sql);
-        logger.info("rows " + rows.size());
+        logger.debug("rows " + rows.size());
         List<DataInfo> list = new ArrayList<>();
         for (Map<String, Object> row: rows){
             DataInfo  dataInfo = new DataInfo();
@@ -117,16 +117,16 @@ public class InfoSave {
             int i = 0;
             stm.setString(++ i, ident);
             for (String name : params.keySet()) {
-                logger.info(name + " " + params.get(name));
+                logger.debug(name + " " + params.get(name));
                 stm.setString(++ i, params.get(name));
                 stm.setString(++ i, name);
             }
             String data = null;
             try (ResultSet rs = stm.executeQuery()) {
                 rs.next();
-                logger.info(" fetch data for client ident " + ident);
+                logger.debug(" fetch data for client ident " + ident);
                 data = new String(rs.getBytes(1));
-                logger.info(" fetched data for ident " + ident);
+                logger.debug(" fetched data for ident " + ident);
                 stm.close();
             }
         //    connection.close();

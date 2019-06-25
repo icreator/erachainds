@@ -172,9 +172,9 @@ public class ServiceMonitor {
             if (dataInfo.getAccDate() != null && dataInfo.getSendToClientDate() == null) {
                 Account account = accountProc.getAccountById(dataInfo.getAccountId());
                 Map<String, String> params = account.getParams();
-                logger.info(" params " + params.get(Service_Url));
+                logger.debug(" params " + params.get(Service_Url));
                 ServiceInterface service = serviceFactory.getService(params.get(Service_Url));
-                logger.info(" account service " + service);
+                logger.debug(" account service " + service);
                 params.put(account.getIdentityName(), dataInfo.getIdentity());
                 DataEra dataEra = dbUtils.fetchData(DataEra.class, "DataEra", "dataInfoId = " + dataInfo.getId()).get(0);
                 params.put("transaction", dataEra.getBlockTrId());
@@ -204,7 +204,7 @@ public class ServiceMonitor {
             if (dataInfo.getSendToClientDate() != null && dataInfo.getAcceptClientDate() == null) {
                 Account account = accountProc.getAccountById(dataInfo.getAccountId());
                 Map<String, String> params = account.getParams();
-                logger.info(" params " + params.get(Service_Url));
+                logger.debug(" params " + params.get(Service_Url));
                 ServiceInterface service = serviceFactory.getService(params.get(Service_Url));
                 logger.info(" account service " + service);
                 params.put(account.getIdentityName(), dataInfo.getIdentity());
