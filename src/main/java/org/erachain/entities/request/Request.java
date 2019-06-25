@@ -161,8 +161,17 @@ public class Request {
                     date = dateUtl.getAlign(date, submitPeriod);
                     value = format.format(date);
                     paramValue = value;
+
                     submitDate = dateUtl.getFirst(date, submitPeriod);
-                    submitDate = dateUtl.addUnit(submitDate, submitPeriod,  1);
+                    String[] period = submitPeriod.split("_");
+                    int value2 = 1;
+                    String periodRun = submitPeriod;
+                    if (period.length > 1) {
+                        value2 = Integer.parseInt(period[0]);
+                        periodRun = period[1];
+                    }
+                    submitDate = dateUtl.addUnit(date, periodRun, value2);
+
                     submitDate = dateUtl.addUnit(submitDate, offUnit,  offValue - 1);
                 }
 
