@@ -118,7 +118,7 @@ public class DataClient {
             dataInfo.setData(data.get(identity));
             dataInfo.setRunDate(new Timestamp(new Date().getTime()));
             try {
-                logger.info(" save after run ");
+                //logger.info(" save after run ");
                 infoSave.afterRun(dataInfo);
             } catch (SQLException e) {
                 logger.error(" save after run ");
@@ -147,6 +147,5 @@ public class DataClient {
         }
         accountProc.afterRun(request);
         return;
-
     }
 }

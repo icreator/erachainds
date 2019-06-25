@@ -153,7 +153,8 @@ public class JobMonitor implements InitializingBean {
                         checkData(queue);
                         checkReadyAccounts(queue);
                     } catch (Exception e) {
-                        logger.error(e.getMessage());
+                        //logger.error(e.getMessage());
+                        logger.error("No active request");
                     } finally {
                         mutex.unlock();
                     }
