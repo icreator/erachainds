@@ -101,14 +101,14 @@ public class JsonService {
         String[] array = {"zones", "errors"};
         JSONArray include = new JSONArray(Arrays.asList(array));
         params.put("include", include);
-        logger.info("result " + requestBody.toString());
+        logger.debug("result " + requestBody.toString());
     //    System.out.println("result " + requestBody.toString());
         return requestBody;
     }
     public Boolean checkMeterResult(String jsonString) {
         JSONObject result = getValue(jsonString, "result");
         Boolean value = getValue(result, "value");
-        logger.info(" checkMeterResult " + value);
+        logger.debug(" checkMeterResult " + value);
         return value;
     }
     public  JSONObject checkMeterResultJson(Map<String, String> pars, String meter, String type, String value) {
@@ -129,7 +129,7 @@ public class JsonService {
         String[] array = {"zones", "errors"};
         JSONArray include = new JSONArray(Arrays.asList(array));
         params.put("include", include);
-        logger.info("result " + requestBody.toString());
+        logger.debug("result " + requestBody.toString());
         //    System.out.println("result " + requestBody.toString());
         return requestBody;
     }

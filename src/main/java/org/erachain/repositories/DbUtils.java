@@ -81,7 +81,7 @@ public class DbUtils {
             try {
                 dataInfo = clazz.getConstructor().newInstance();
             } catch (Exception e) {
-                logger.info(e.getMessage());
+                logger.error(e.getMessage());
             }
             if (dataInfo != null) {
                 setObj(dataInfo, row);
@@ -105,7 +105,7 @@ public class DbUtils {
                     } else
                         f.set(data, row.get(f.getName()));
                 } catch (IllegalAccessException e) {
-                    logger.info(e.getMessage());
+                    logger.error(e.getMessage());
                 }
             }
         });
@@ -145,12 +145,12 @@ public class DbUtils {
                 }
                 campos.append(name);
             } catch (IllegalAccessException ex) {
-                logger.info(ex.getMessage());
+                logger.error(ex.getMessage());
             }
         });
         table = table == null ? data.getClass().getSimpleName().toLowerCase() : table;
         String sql = "insert into " + table + " (" + campos.toString() + ") values(" + valores.toString() + ");";
-     //   logger.info("sql = " + sql);
+     //   logger.debug("sql = " + sql);
         return sql;
     }
     public int exSqlStatement(String sql) {
@@ -210,7 +210,7 @@ public class DbUtils {
             connection.close();
             return sArray;
         } catch (Exception e) {
-            logger.info(e.getMessage());
+            logger.error(e.getMessage());
 
         }
         return null;

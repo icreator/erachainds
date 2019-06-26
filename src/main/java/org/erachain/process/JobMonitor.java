@@ -93,9 +93,9 @@ public class JobMonitor implements InitializingBean {
                     try {
                         mutex.lock();
 
-                        logger.info(" started Service Monitor " + new Date().toString());
+                        logger.debug(" started Service Monitor " + new Date().toString());
                         queue.stream().forEach(o -> {
-                            logger.info(" Service " + o.getState().toString());
+                            logger.debug(" Service " + o.getState().toString());
                             switch (o.getState()) {
                                 case READY:
                                     try {
@@ -147,14 +147,14 @@ public class JobMonitor implements InitializingBean {
             public void run() {
                 while (true) {
                     mutex.lock();
-                    logger.info(" started Job Monitor " + new Date().toString());
+                    logger.debug(" started Job Monitor " + new Date().toString());
 
                     try {
                         checkData(queue);
                         checkReadyAccounts(queue);
                     } catch (Exception e) {
                         //logger.error(e.getMessage());
-                        logger.error("No active request");
+                        logger.error(" Unhandled end Job Monitor");
                     } finally {
                         mutex.unlock();
                     }
@@ -180,7 +180,7 @@ public class JobMonitor implements InitializingBean {
             for (ActiveJob activeJob : activeJobs) {
                 activeJob.setState(JobState.READY);
                 queue.add(activeJob);
-                logger.info(" added ActiveJob " + activeJob.getState().name() + " requestId " +
+                logger.debug(" added ActiveJob " + activeJob.getState().name() + " requestId " +
                         activeJob.getRequestId() + " accountId " + activeJob.getAccountId());
             }
         });

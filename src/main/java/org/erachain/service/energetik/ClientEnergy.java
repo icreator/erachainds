@@ -83,16 +83,16 @@ public class ClientEnergy {
     }
     private String getMeterResult(Map<String, String> params, String meter, String type, String value) throws Exception {
 
-       String json = restClient.getJsonResult(Energy_Url,
+       String data = restClient.getJsonResult(Energy_Url,
                jsonService.getMeterResultJson(params, meter, type, value).toString());
-        String error = jsonService.checkForError(json);
+        String error = jsonService.checkForError(data);
         if (error != null) {
             logger.error(" get meter " + error);
             throw new Exception(" get meter " + error);
         }
         logger.info(" MeterResult for " + meter + " " + type + " " + value);
-        logger.debug(json);
-        return json;
+        logger.info(data);
+        return data;
     }
     public String setMeterResult(Map<String, String> params) throws Exception {
         if (params.get("sessionId") == null) {
@@ -103,10 +103,10 @@ public class ClientEnergy {
         return setMeterResult(params, params.get("meter"), type, value, params.get("transaction"));
     }
     private String setMeterResult(Map<String, String> params, String meter, String type, String value, String transaction) throws Exception {
-        logger.info(" get MeterResult for " + meter + " " + type + " " + value + " transaction " + transaction);
+        logger.info(" set blockchain link for " + meter + " " + type + " " + value + " transaction " + transaction);
         String result = restClient.getJsonResult(Energy_Url,
                 jsonService.setMeterResultJson(params, meter, type, value, transaction).toString());
-        logger.debug("  MeterResult  " + result);
+        logger.info("  blockchain link  " + result);
         return result;
     }
     public String checkMeterResult(Map<String, String> params) throws Exception {
@@ -122,7 +122,7 @@ public class ClientEnergy {
         logger.info(" check MeterResult for " + meter + " " + type + " " + value );
         String result = restClient.getJsonResult(Energy_Url,
                 jsonService.checkMeterResultJson(params, meter, type, value).toString());
-        logger.debug("  MeterResult  " + result);
+        logger.info("  MeterResult  " + result);
         return result;
     }
 }

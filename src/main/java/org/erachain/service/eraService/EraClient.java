@@ -83,9 +83,9 @@ public class EraClient {
         String[] urlParams = {EraService_creator, account.getRecipient()};
         Map<String, String> params = new HashMap<>();
         params.put("password", EraService_password);
-        params.put("title", EraService_title);
+        params.put("title", "ErachainDS data for "+account.getId());//EraService_title);
         String url = restClient.addParams(EraService_Url, urlParams, params);
-        logger.info(" url " + url);
+        logger.debug(" url " + url);
         String result = null;
         try {
             result = restClient.getResult(url, data);
@@ -94,7 +94,7 @@ public class EraClient {
             throw new Exception(EraService_Url + " " + e.getMessage());
         }
         String signature = jsonService.getValue(result, "signature");
-        logger.info(" signature " + signature);
+        logger.info(" Acquire signature for "+ account.getId() + " : "+ signature);
         return signature;
     }
 

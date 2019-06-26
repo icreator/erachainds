@@ -89,17 +89,17 @@ public class DataClient {
 
     private void setClientData(Request request, Map<String, byte[]> data) throws Exception {
 //        try {
-        logger.info(" get act req id ");
+        logger.debug(" get act req id ");
         int actRequestId = 0;
         try {
             actRequestId = request.getActRequestId(dbUtils, dateUtl);
             if (actRequestId == 0) {
                 actRequestId = request.setActRequestId(dbUtils, dateUtl);
-                logger.info(" new act req id " + actRequestId);
+                logger.debug(" new act req id " + actRequestId);
                 setData(request, actRequestId, data);
             } else {
                 if (infoSave.checkDataWhere(actRequestId) > 0) {
-                    logger.info(" found act req id " + actRequestId);
+                    logger.debug(" found act req id " + actRequestId);
                     updateData(request, actRequestId, data);
                 }
             }
@@ -121,7 +121,7 @@ public class DataClient {
                 //logger.info(" save after run ");
                 infoSave.afterRun(dataInfo);
             } catch (SQLException e) {
-                logger.error(" save after run ");
+                logger.error(" Unable save data for "+dataInfo.getIdentity());
                 throw e;
             }
         }
@@ -137,7 +137,7 @@ public class DataClient {
             dataInfo.setIdentity(ident);
             dataInfo.setData(data.get(ident));
             dataInfo.setActRequestId(actRequestId);
-            logger.info("data saved  for ident " + dataInfo.getIdentity() + " " + dataInfo.getRunDate());
+            logger.info("data saved for ident " + dataInfo.getIdentity() + " " + dataInfo.getRunDate());
             try {
                 infoSave.saveData(dataInfo);
             } catch (SQLException e) {
