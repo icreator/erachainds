@@ -30,12 +30,16 @@ public class DateUtl {
                 cal.set(Calendar.MINUTE, cal.getActualMinimum(Calendar.MINUTE));
                 cal.set(Calendar.SECOND, cal.getActualMinimum(Calendar.SECOND));
                 break;
+            case ("minute") :
+                cal.set(Calendar.SECOND, cal.getActualMinimum(Calendar.SECOND));
+                break;
         }
 
         return cal.getTime();
     }
     public  Date getAlign(Date date, String unit){
-        if ("hour".equalsIgnoreCase(unit))
+        if ("hour".equalsIgnoreCase(unit) ||
+            "minute".equalsIgnoreCase(unit))
             return getFirst(date, unit);
         return date;
     }

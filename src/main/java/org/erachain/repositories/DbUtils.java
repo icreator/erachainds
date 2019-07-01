@@ -17,9 +17,6 @@ public class DbUtils {
 
     static String fetch = "SELECT * FROM ";
 
-    @Value("${FETCH_ACTREQ_ID_PARAM}")
-    private String FETCH_ACTREQ_ID_PARAM;
-
 
     @Autowired
     private Logger logger;
@@ -31,28 +28,54 @@ public class DbUtils {
         this.jdbcTemplate = jdbcTemplate;
     }
 
-    public int getActRequestId(String paramName, String paramValue) throws Exception {
-        logger.debug(" paramName " + paramName + " paramValue " + paramValue);
-        int result = 0;
-        try (Connection connection = jdbcTemplate.getDataSource().getConnection()) {
-            PreparedStatement statement = connection.prepareStatement(FETCH_ACTREQ_ID_PARAM);
-            statement.setString(1, paramName);
-            statement.setString(2, paramValue);
-            ResultSet resultset = statement.executeQuery();
-
-            if (resultset != null) {
-                try {
-                    resultset.next(); // exactly one result so allowed
-                    result = resultset.getInt(1);
-                } catch (SQLException e) {
-                    return 0;
-                }
-
+    public int getDataId(String sql, Object... values)  {
+        try (PreparedStatement statement = jdbcTemplate.getDataSource().getConnection().prepareStatement(sql)) {
+            int i = 0;
+            for (Object value : values) {
+                statement.setObject(++ i, value);
             }
-            statement.close();
+            if (sql.toLowerCase().contains("select")) {
+                ResultSet resultset = statement.executeQuery();
+
+                if (resultset.isClosed())
+                    return 0;
+
+                if (resultset != null) {
+                    resultset.next(); // exactly one result so allowed
+                    return resultset.getInt(1);
+                }
+            } else {
+                return statement.executeUpdate();
+            }
+
+        } catch (SQLException e) {
+            logger.error(e.getMessage());
         }
-        return result;
+        return 0;
     }
+
+//    public int getActRequestId(String paramName, String paramValue) throws Exception {
+//        logger.debug(" paramName " + paramName + " paramValue " + paramValue);
+//        int result = 0;
+//        try (Connection connection = jdbcTemplate.getDataSource().getConnection()) {
+//            PreparedStatement statement = connection.prepareStatement(FETCH_ACTREQ_ID_PARAM);
+//            statement.setString(1, paramName);
+//            statement.setString(2, paramValue);
+//            ResultSet resultset = statement.executeQuery();
+//
+//            if (resultset != null) {
+//                try {
+//                    resultset.next(); // exactly one result so allowed
+//                    result = resultset.getInt(1);
+//                } catch (SQLException e) {
+//                    return 0;
+//                }
+//
+//            }
+//            statement.close();
+//        }
+//        return result;
+//    }
     public int checkData(String sql) throws SQLException {
         logger.debug(" sql " + sql);
         int result = 0;
@@ -68,7 +91,9 @@ public class DbUtils {
         }
         return result;
     }
-
+    public <T> T fetchData(Class<T> clazz, String table, int id) {
+        return  fetchData(clazz, table, " id = " + id).get(0);
+    }
     public <T> List<T> fetchData(Class<T> clazz, String table, String where) {
         return (List<T>) fetchData(clazz, fetch + table + (where = where == null ? "" : " where " + where));
     }

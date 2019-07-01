@@ -2,6 +2,7 @@ package org.erachain.repositories;
 
 import org.erachain.entities.account.Account;
 import org.erachain.entities.datainfo.DataInfo;
+import org.erachain.entities.request.ActRequest;
 import org.erachain.entities.request.Request;
 import org.erachain.service.ServiceFactory;
 import org.erachain.service.ServiceInterface;
@@ -24,6 +25,14 @@ public class DataClient {
     @Value("${Service_Url}")
     private String Service_Url;
 
+    @Value("${FETCH_CURR_ACT_ID}")
+    private String FETCH_CURR_ACT_ID;
+
+    @Value("${FETCH_ACTREQ_ID_PARAM}")
+    private String FETCH_ACTREQ_ID_PARAM;
+
+    @Value("${UPDATE_ACT_PARAMS}")
+    private String UPDATE_ACT_PARAMS;
 
     @Autowired
     private ServiceFactory serviceFactory;
@@ -92,7 +101,7 @@ public class DataClient {
         logger.debug(" get act req id ");
         int actRequestId = 0;
         try {
-            actRequestId = request.getActRequestId(dbUtils, dateUtl);
+            actRequestId = getActRequestId(request);
             if (actRequestId == 0) {
                 actRequestId = request.setActRequestId(dbUtils, dateUtl);
                 logger.debug(" new act req id " + actRequestId);
@@ -147,5 +156,21 @@ public class DataClient {
         }
         accountProc.afterRun(request);
         return;
+    }
+    public ActRequest getCurrActReq(Request request) {
+        int actId = dbUtils.getDataId(FETCH_CURR_ACT_ID, request.getId(), new Date().getTime());
+        if (actId == 0)
+            return null;
+        ActRequest actRequest = dbUtils.fetchData(ActRequest.class, "ActRequest", actId);
+        return actRequest;
+    }
+    public int getActRequestId(Request request) throws Exception {
+        String paramName = request.getParamName();
+        String paramValue = request.getParamValue();
+        int actRequestId = dbUtils.getDataId(FETCH_CURR_ACT_ID, request.getId(), new Date().getTime());
+        if (actRequestId != 0) {
+            dbUtils.getDataId(UPDATE_ACT_PARAMS, paramValue, paramName, actRequestId);
+        }
+        return actRequestId;
     }
 }

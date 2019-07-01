@@ -5,6 +5,7 @@ import org.erachain.entities.ActiveJob;
 import org.erachain.entities.JobState;
 import org.erachain.entities.account.Account;
 
+import org.erachain.entities.request.ActRequest;
 import org.erachain.entities.request.Request;
 import org.erachain.repositories.AccountProc;
 import org.erachain.repositories.DataClient;
@@ -75,70 +76,7 @@ public class JobMonitor implements InitializingBean {
     @Override
     public void afterPropertiesSet() throws Exception {
         checkAccounts();
-        setData();
-    }
-
-    public void setData() {
-        Runnable server = new Runnable() {
-            @Override
-            public void run() {
-                while (true) {
-                    while (queue.isEmpty()) {
-                        try {
-                            TimeUnit.SECONDS.sleep((long) 1);
-                        } catch (InterruptedException e) {
-                            logger.error(e.getMessage());
-                        }
-                    }
-                    try {
-                        mutex.lock();
-
-                        logger.debug(" started Service Monitor " + new Date().toString());
-                        queue.stream().forEach(o -> {
-                            logger.debug(" Service " + o.getState().toString());
-                            switch (o.getState()) {
-                                case READY:
-                                    try {
-                                        Map<String, byte[]> data = dataClient.getDataFromClient(o.getAccountId(), o.getRequestId());
-                                        if (data != null)
-                                            dataClient.setClientData(o.getRequestId(), data);
-                                    } catch (Exception e) {
-                                        logger.error(e.getMessage());
-                                    }
-                                    break;
-                                case STARTED :
-                                    try {
-                                        serviceMonitor.checkDataSubmit();
-                                    } catch (Exception e) {
-                                        logger.error(e.getMessage());
-                                    }
-                                    break;
-                                case DATA_SUB :
-                                    try {
-                                        serviceMonitor.checkDataAccept();
-                                    } catch (Exception e) {
-                                        logger.error(e.getMessage());
-                                    }
-                                    break;
-                                case DATA_ACC :
-                                    serviceMonitor.checkSendToClient();
-                                    break;
-                                case INFO_SEND :
-                                    serviceMonitor.checkAcceptedByClient();
-                                    break;
-                            }
-                            queue.remove();
-                        });
-                    } catch (Exception e) {
-                        logger.error(e.getMessage());
-                    } finally {
-                        mutex.unlock();
-                    }
-                }
-            }
-        };
-
-        new Thread(server).start();
+//        setData();
     }
 
     public void checkAccounts() {
@@ -146,7 +84,7 @@ public class JobMonitor implements InitializingBean {
             @Override
             public void run() {
                 while (true) {
-                    mutex.lock();
+//                    mutex.lock();
                     logger.debug(" started Job Monitor " + new Date().toString());
 
                     try {
@@ -156,9 +94,43 @@ public class JobMonitor implements InitializingBean {
                         //logger.error(e.getMessage());
                         logger.error(" Unhandled end Job Monitor");
                     } finally {
-                        mutex.unlock();
+//                        mutex.unlock();
                     }
-
+                    queue.stream().forEach(o -> {
+                        logger.debug(" Service " + o.getState().toString());
+                        switch (o.getState()) {
+                            case READY:
+                                try {
+                                    Map<String, byte[]> data = dataClient.getDataFromClient(o.getAccountId(), o.getRequestId());
+                                    if (data != null)
+                                        dataClient.setClientData(o.getRequestId(), data);
+                                } catch (Exception e) {
+                                    logger.error(e.getMessage());
+                                }
+                                break;
+                            case STARTED :
+                                try {
+                                    serviceMonitor.checkDataSubmit();
+                                } catch (Exception e) {
+                                    logger.error(e.getMessage());
+                                }
+                                break;
+                            case DATA_SUB :
+                                try {
+                                    serviceMonitor.checkDataAccept();
+                                } catch (Exception e) {
+                                    logger.error(e.getMessage());
+                                }
+                                break;
+                            case DATA_ACC :
+                                serviceMonitor.checkSendToClient();
+                                break;
+                            case INFO_SEND :
+                                serviceMonitor.checkAcceptedByClient();
+                                break;
+                        }
+                        queue.remove();
+                    });
                     try {
                         TimeUnit.SECONDS.sleep((long) 1);
                     } catch (InterruptedException e) {
@@ -191,13 +163,18 @@ public class JobMonitor implements InitializingBean {
         List<Request> requests = accountProc.getRequests(account.getId());
         List<ActiveJob> activeJobs = new ArrayList<ActiveJob>();
         for (Request request : requests) {
+            if (!request.checkTime(dateUtl))
+                continue;
+            ActRequest actRequest = dataClient.getCurrActReq(request);
+            if (actRequest != null) {
+                Date date = new Date(actRequest.getDateSubmit().getTime());
+                request.setSubmitDate(date);
+            }
             request.getParams(dbUtils, dateUtl);
 
-            if (request.checkTime(dateUtl)) {
-                ActiveJob activeJob = new ActiveJob(sequenceNumber.incrementAndGet(), account.getId());
-                activeJob.setRequestId(request.getId());
-                activeJobs.add(activeJob);
-            }
+            ActiveJob activeJob = new ActiveJob(sequenceNumber.incrementAndGet(), account.getId());
+            activeJob.setRequestId(request.getId());
+            activeJobs.add(activeJob);
         }
         return activeJobs;
     }

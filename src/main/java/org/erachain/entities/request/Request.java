@@ -27,6 +27,18 @@ public class Request {
 
     private String paramName;
 
+    public Date getSubmitDate() {
+        return submitDate;
+    }
+
+    public Map<String, String> getParams() {
+        return params;
+    }
+
+    public void setSubmitDate(Date submitDate) {
+        this.submitDate = submitDate;
+    }
+
     private Date submitDate;
 
     public boolean isCurrentDate() {
@@ -121,7 +133,7 @@ public class Request {
         if (lastRun == null)
             return true;
 
-        if (!isCurrentDate)
+        if (runPeriod == null)
             return false;
 
         Date date = new Date(lastRun.getTime());
@@ -149,20 +161,22 @@ public class Request {
             boolean isCurrent = param.getCurValue() > 0 ? true : false;
             boolean isDate = "date".equalsIgnoreCase(param.getDataType());
             if (isDate) {
-                paramName = param.getParamName();
-                paramValue = value;
+
+            //    paramValue = value;
                 isCurrentDate = isCurrent;
             }
             if (isCurrent && isDate) {
+                paramName = param.getParamName();
                 format = new SimpleDateFormat(param.getFormat());
-                if (offUnit != null && offValue != 0 && format != null) {
-                    Date date = new Date();
-                    date = dateUtl.addUnit(date, offUnit, - offValue);
-                    date = dateUtl.getAlign(date, submitPeriod);
-                    value = format.format(date);
-                    paramValue = value;
-
-                    submitDate = dateUtl.getFirst(date, submitPeriod);
+                Date date = new Date();
+                if (offUnit != null && offValue != 0) {
+                    date = dateUtl.addUnit(date, offUnit, -offValue);
+                    date = dateUtl.getAlign(date, offUnit);
+                }
+                value = format.format(date);
+                paramValue = value;
+                if (submitDate == null || submitDate.before(new Date())) {
+                    //                   submitDate = dateUtl.getFirst(date, submitPeriod);
                     String[] period = submitPeriod.split("_");
                     int value2 = 1;
                     String periodRun = submitPeriod;
@@ -171,25 +185,25 @@ public class Request {
                         periodRun = period[1];
                     }
                     submitDate = dateUtl.addUnit(date, periodRun, value2);
-
-                    submitDate = dateUtl.addUnit(submitDate, offUnit,  offValue - 1);
+                    if (offUnit != null && offValue != 0) {
+                        submitDate = dateUtl.addUnit(submitDate, offUnit, offValue - 1);
+                    }
                 }
-
             }
             params.put(param.getParamName(), value);
         }
         return params;
     }
-    public int getActRequestId(DbUtils dbUtils, DateUtl dateUtl) throws Exception {
-        if (params == null) {
-            params = this.getParams(dbUtils, dateUtl);
-            if (params == null)
-                throw new Exception(" missing params for a request");
-        }
-
-        int actRequestId = dbUtils.getActRequestId(paramName, paramValue);
-        return actRequestId;
-    }
+//    public int getActRequestId(DbUtils dbUtils, DateUtl dateUtl) throws Exception {
+//        if (params == null) {
+//            params = this.getParams(dbUtils, dateUtl);
+//            if (params == null)
+//                throw new Exception(" missing params for a request");
+//        }
+//
+//        int actRequestId = dbUtils.getActRequestId(paramName, paramValue);
+//        return actRequestId;
+//    }
     public int setActRequestId(DbUtils dbUtils, DateUtl dateUtl) throws Exception {
         int actRequestId = 0;
         ActRequest actRequest = new ActRequest();
