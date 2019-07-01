@@ -121,7 +121,7 @@ public class Request {
         if (lastRun == null)
             return true;
 
-        if (!isCurrentDate)
+        if (runPeriod == null)
             return false;
 
         Date date = new Date(lastRun.getTime());
@@ -154,22 +154,34 @@ public class Request {
                 isCurrentDate = isCurrent;
             }
             if (isCurrent && isDate) {
+                Date date = new Date();
                 format = new SimpleDateFormat(param.getFormat());
-                if (offUnit != null && offValue != 0 && format != null) {
-                    Date date = new Date();
+                submitDate = getSubmitDate(dateUtl, date, submitPeriod);
+                if (offUnit != null && offValue != 0) {
                     date = dateUtl.addUnit(date, offUnit, - offValue);
                     date = dateUtl.getAlign(date, submitPeriod);
-                    value = format.format(date);
-                    paramValue = value;
-                    submitDate = dateUtl.getFirst(date, submitPeriod);
-                    submitDate = dateUtl.addUnit(submitDate, submitPeriod,  1);
+//                    submitDate = dateUtl.getFirst(date, submitPeriod);
+//                    submitDate = dateUtl.addUnit(submitDate, submitPeriod,  1);
                     submitDate = dateUtl.addUnit(submitDate, offUnit,  offValue - 1);
                 }
-
+                if (format != null)
+                    value = format.format(date);
+                paramValue = value;
             }
             params.put(param.getParamName(), value);
         }
         return params;
+    }
+    private Date getSubmitDate(DateUtl dateUtl, Date date, String submitPeriod) {
+        String[] period = submitPeriod.split("_");
+        int value2 = 1;
+        String periodRun = submitPeriod;
+        if (period.length > 1) {
+            value2 = Integer.parseInt(period[0]);
+            periodRun = period[1];
+        }
+        submitDate = dateUtl.addUnit(date, periodRun, value2);
+        return submitDate;
     }
     public int getActRequestId(DbUtils dbUtils, DateUtl dateUtl) throws Exception {
         if (params == null) {
