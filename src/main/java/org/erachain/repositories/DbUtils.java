@@ -68,7 +68,12 @@ public class DbUtils {
         }
         return result;
     }
-
+    public <T> T fetchData(Class<T> clazz, int id) {
+        return fetchData(clazz, clazz.getSimpleName(), id);
+    }
+    public <T> T fetchData(Class<T> clazz, String table, int id) {
+        return  fetchData(clazz, table, " id = " + id).get(0);
+    }
     public <T> List<T> fetchData(Class<T> clazz, String table, String where) {
         return (List<T>) fetchData(clazz, fetch + table + (where = where == null ? "" : " where " + where));
     }

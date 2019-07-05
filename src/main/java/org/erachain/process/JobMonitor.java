@@ -83,6 +83,11 @@ public class JobMonitor implements InitializingBean {
         Runnable server = new Runnable() {
             @Override
             public void run() {
+                try {
+                    TimeUnit.MINUTES.sleep((long) 1);
+                } catch (InterruptedException e) {
+                    logger.error(e.getMessage());
+                }
                 while (true) {
 //                    mutex.lock();
                     logger.debug(" started Job Monitor " + new Date().toString());
