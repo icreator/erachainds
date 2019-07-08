@@ -101,7 +101,7 @@ public class JsonService {
         String[] array = {"zones", "errors"};
         JSONArray include = new JSONArray(Arrays.asList(array));
         params.put("include", include);
-        logger.info("result " + requestBody.toString());
+        logger.debug("result " + requestBody.toString());
     //    System.out.println("result " + requestBody.toString());
         return requestBody;
     }
@@ -129,7 +129,8 @@ public class JsonService {
         String[] array = {"zones", "errors"};
         JSONArray include = new JSONArray(Arrays.asList(array));
         params.put("include", include);
-        logger.info("result " + requestBody.toString());
+        logger.info(" result size: " + requestBody.toString().length());
+        logger.debug("result " + requestBody.toString());
         //    System.out.println("result " + requestBody.toString());
         return requestBody;
     }
