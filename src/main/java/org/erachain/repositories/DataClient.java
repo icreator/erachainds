@@ -70,7 +70,7 @@ public class DataClient {
             params.put(account.getIdentityName(), ident);
             Map<String, String> map = request.getParams(dbUtils, dateUtl);
             map.keySet().forEach(name -> {
-                logger.info(" name " + name + " value " + map.get(name));
+                logger.debug(" name " + name + " value " + map.get(name));
             });
             params.putAll(map);
             String json = null;

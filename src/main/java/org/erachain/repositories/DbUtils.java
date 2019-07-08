@@ -56,7 +56,7 @@ public class DbUtils {
 //        return result;
 //    }
     public int checkData(String sql) throws SQLException {
-        logger.info(" sql " + sql);
+        logger.debug(" sql " + sql);
         int result = 0;
         try (Connection connection = jdbcTemplate.getDataSource().getConnection()) {
             PreparedStatement statement = connection.prepareStatement(sql);
@@ -87,16 +87,16 @@ public class DbUtils {
         return (List<T>) fetchData(clazz, fetch + table + (where = where == null ? "" : " where " + where));
     }
     private  <T> List<T> fetchData(Class<T> clazz, String sql) {
-        logger.info(" sql " + sql);
+        logger.debug(" sql " + sql);
         List<Map<String, Object>> rows = jdbcTemplate.queryForList(sql);
-        logger.info("rows " + rows.size());
+        logger.debug("rows " + rows.size());
         List<T> list = new ArrayList<>();
         for (Map<String, Object> row: rows){
             Object  dataInfo = null;
             try {
                 dataInfo = clazz.getConstructor().newInstance();
             } catch (Exception e) {
-                logger.info(e.getMessage());
+                logger.debug(e.getMessage());
             }
             if (dataInfo != null) {
                 setObj(dataInfo, row);
@@ -113,7 +113,7 @@ public class DbUtils {
         Arrays.stream(fields).forEach(f -> {
             if (row.get(f.getName()) != null) {
                 try {
-                    logger.info("set field " + f.getName() + " " + row.get(f.getName()));
+                    logger.debug("set field " + f.getName() + " " + row.get(f.getName()));
                     f.setAccessible(true);
                     if (f.getType().getCanonicalName().equals("java.sql.Timestamp")) {
                         f.set(data, new Timestamp((long) row.get(f.getName())));
@@ -140,7 +140,7 @@ public class DbUtils {
                 if (f.get(data) == null)
                     return;
                 String value = f.get(data).toString();
-                logger.info(" name " + name + " value " + value);
+                logger.debug(" name " + name + " value " + value);
                 if ("id".equalsIgnoreCase(name))
                     return;
                 if (value == null)
@@ -196,7 +196,7 @@ public class DbUtils {
     }
     public int setDbObj(Object data, String table, boolean noId) throws SQLException {
         String sql = setObjToDb(data, table, noId);
-        logger.info(" sql " + sql);
+        logger.debug(" sql " + sql);
         return exSqlStatement(sql);
     }
 

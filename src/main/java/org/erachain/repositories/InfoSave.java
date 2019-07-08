@@ -93,9 +93,9 @@ public class InfoSave {
     }
 
     public List<DataInfo> fetchData(String sql) {
-        logger.info(" sql " +sql);
+        logger.debug(" sql " +sql);
         List<Map<String, Object>> rows = jdbcTemplate.queryForList(sql);
-        logger.info("rows " + rows.size());
+        logger.debug("rows " + rows.size());
         List<DataInfo> list = new ArrayList<>();
         for (Map<String, Object> row: rows){
             DataInfo  dataInfo = new DataInfo();
