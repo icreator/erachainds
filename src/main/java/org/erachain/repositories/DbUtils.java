@@ -1,5 +1,6 @@
 package org.erachain.repositories;
 
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -31,28 +32,29 @@ public class DbUtils {
         this.jdbcTemplate = jdbcTemplate;
     }
 
-    public int getActRequestId(String paramName, String paramValue) throws Exception {
-        logger.info(" paramName " + paramName + " paramValue " + paramValue);
-        int result = 0;
-        try (Connection connection = jdbcTemplate.getDataSource().getConnection()) {
-            PreparedStatement statement = connection.prepareStatement(FETCH_ACTREQ_ID_PARAM);
-            statement.setString(1, paramName);
-            statement.setString(2, paramValue);
-            ResultSet resultset = statement.executeQuery();
 
-            if (resultset != null) {
-                try {
-                    resultset.next(); // exactly one result so allowed
-                    result = resultset.getInt(1);
-                } catch (SQLException e) {
-                    return 0;
-                }
-
-            }
-            statement.close();
-        }
-        return result;
-    }
+//    public int getActRequestId(String paramName, String paramValue) throws Exception {
+//        logger.info(" paramName " + paramName + " paramValue " + paramValue);
+//        int result = 0;
+//        try (Connection connection = jdbcTemplate.getDataSource().getConnection()) {
+//            PreparedStatement statement = connection.prepareStatement(FETCH_ACTREQ_ID_PARAM);
+//            statement.setString(1, paramName);
+//            statement.setString(2, paramValue);
+//            ResultSet resultset = statement.executeQuery();
+//
+//            if (resultset != null) {
+//                try {
+//                    resultset.next(); // exactly one result so allowed
+//                    result = resultset.getInt(1);
+//                } catch (SQLException e) {
+//                    return 0;
+//                }
+//
+//            }
+//            statement.close();
+//        }
+//        return result;
+//    }
     public int checkData(String sql) throws SQLException {
         logger.info(" sql " + sql);
         int result = 0;
@@ -68,6 +70,13 @@ public class DbUtils {
         }
         return result;
     }
+    public  <T> List<T>  fetchDataValues(Class<T> clazz, String sql, Object... values) {
+        for(Object value : values) {
+            String strValue = value.getClass().getSimpleName().endsWith("String") ? "'" + value.toString() + "'" : value.toString();
+            sql = StringUtils.replaceOnce(sql, "?", strValue);
+        }
+        return fetchData(clazz, sql);
+    }
     public <T> T fetchData(Class<T> clazz, int id) {
         return fetchData(clazz, clazz.getSimpleName(), id);
     }
@@ -78,6 +87,7 @@ public class DbUtils {
         return (List<T>) fetchData(clazz, fetch + table + (where = where == null ? "" : " where " + where));
     }
     private  <T> List<T> fetchData(Class<T> clazz, String sql) {
+        logger.info(" sql " + sql);
         List<Map<String, Object>> rows = jdbcTemplate.queryForList(sql);
         logger.info("rows " + rows.size());
         List<T> list = new ArrayList<>();

@@ -2,6 +2,8 @@ package org.erachain.repositories;
 
 import org.erachain.entities.account.Account;
 import org.erachain.entities.datainfo.DataInfo;
+import org.erachain.entities.request.ActParams;
+import org.erachain.entities.request.ActRequest;
 import org.erachain.entities.request.Request;
 import org.erachain.service.ServiceFactory;
 import org.erachain.service.ServiceInterface;
@@ -11,9 +13,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Repository;
 
-import java.sql.SQLException;
-import java.sql.Timestamp;
+import java.sql.*;
 import java.util.*;
+import java.util.Date;
 
 @Repository
 public class DataClient {
@@ -23,6 +25,10 @@ public class DataClient {
 
     @Value("${Service_Url}")
     private String Service_Url;
+
+    @Value("${FETCH_ACTREQ_ID_PARAM}")
+    private String FETCH_ACTREQ_ID_PARAM;
+
 
 
     @Autowired
@@ -92,7 +98,7 @@ public class DataClient {
         logger.info(" get act req id ");
         int actRequestId = 0;
         try {
-            actRequestId = request.getActRequestId(dbUtils, dateUtl);
+            actRequestId = request.getActRequestId(this, dbUtils, dateUtl);
             if (actRequestId == 0) {
                 actRequestId = request.setActRequestId(dbUtils, dateUtl);
                 logger.info(" new act req id " + actRequestId);
@@ -148,5 +154,16 @@ public class DataClient {
         accountProc.afterRun(request);
         return;
 
+    }
+    public int getActRequestId(int requestId, String paramName, String paramValue) throws Exception {
+        logger.info(" paramName " + paramName + " paramValue " + paramValue);
+        List<ActParams> actParams = dbUtils.fetchDataValues(ActParams.class, FETCH_ACTREQ_ID_PARAM, paramName, paramValue);
+        for (ActParams actParam : actParams) {
+            ActRequest actRequest = dbUtils.fetchData(ActRequest.class, actParam.getActRequestId());
+            if (actRequest != null && actRequest.getRequestId() == requestId) {
+                return actRequest.getId();
+            }
+        }
+        return 0;
     }
 }

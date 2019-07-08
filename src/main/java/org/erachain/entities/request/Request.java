@@ -1,5 +1,6 @@
 package org.erachain.entities.request;
 
+import org.erachain.repositories.DataClient;
 import org.erachain.repositories.DbUtils;
 import org.erachain.utils.DateUtl;
 import org.slf4j.Logger;
@@ -159,11 +160,9 @@ public class Request {
                 submitDate = getSubmitDate(dateUtl, date, submitPeriod);
                 if (offUnit != null && offValue != 0) {
                     date = dateUtl.addUnit(date, offUnit, - offValue);
-                    date = dateUtl.getAlign(date, submitPeriod);
-//                    submitDate = dateUtl.getFirst(date, submitPeriod);
-//                    submitDate = dateUtl.addUnit(submitDate, submitPeriod,  1);
                     submitDate = dateUtl.addUnit(submitDate, offUnit,  offValue - 1);
                 }
+                date = dateUtl.getAlign(date, submitPeriod);
                 if (format != null)
                     value = format.format(date);
                 paramValue = value;
@@ -183,14 +182,14 @@ public class Request {
         submitDate = dateUtl.addUnit(date, periodRun, value2);
         return submitDate;
     }
-    public int getActRequestId(DbUtils dbUtils, DateUtl dateUtl) throws Exception {
+    public int getActRequestId(DataClient dataClient, DbUtils dbUtils, DateUtl dateUtl) throws Exception {
         if (params == null) {
             params = this.getParams(dbUtils, dateUtl);
             if (params == null)
                 throw new Exception(" missing params for a request");
         }
 
-        int actRequestId = dbUtils.getActRequestId(paramName, paramValue);
+        int actRequestId = dataClient.getActRequestId(id, paramName, paramValue);
         return actRequestId;
     }
     public int setActRequestId(DbUtils dbUtils, DateUtl dateUtl) throws Exception {
