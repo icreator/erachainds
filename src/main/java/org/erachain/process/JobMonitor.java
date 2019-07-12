@@ -106,8 +106,10 @@ public class JobMonitor implements InitializingBean {
                         switch (o.getState()) {
                             case READY:
                                 try {
+                                    logger.info("=================Job 1. Receiving data from client================");
                                     Map<String, byte[]> data = dataClient.getDataFromClient(o.getAccountId(), o.getRequestId());
                                     if (data != null)
+                                        //logger.info("=================Job 1.1 Saving data from client================");
                                         dataClient.setClientData(o.getRequestId(), data);
                                 } catch (Exception e) {
                                     logger.error(e.getMessage());
@@ -115,6 +117,7 @@ public class JobMonitor implements InitializingBean {
                                 break;
                             case STARTED :
                                 try {
+                                    logger.info("=================Job 2. Sending Data to blockchain================");
                                     serviceMonitor.checkDataSubmit();
                                 } catch (Exception e) {
                                     logger.error(e.getMessage());
@@ -122,15 +125,18 @@ public class JobMonitor implements InitializingBean {
                                 break;
                             case DATA_SUB :
                                 try {
+                                    logger.info("=================Job 3. Check saved data in blockchain================");
                                     serviceMonitor.checkDataAccept();
                                 } catch (Exception e) {
                                     logger.error(e.getMessage());
                                 }
                                 break;
                             case DATA_ACC :
+                                logger.info("=================Job 4. Send tx link to client ================");
                                 serviceMonitor.checkSendToClient();
                                 break;
                             case INFO_SEND :
+                                logger.info("=================Job 5. Check tx link to client ================");
                                 serviceMonitor.checkAcceptedByClient();
                                 break;
                         }
@@ -201,7 +207,7 @@ public class JobMonitor implements InitializingBean {
                 ActiveJob activeJob = new ActiveJob(sequenceNumber.incrementAndGet(), records);
                 activeJob.setState(i);
                 queue.add(activeJob);
-                logger.info(" added ActiveJob " + activeJob.getState().name());
+                logger.debug(" added ActiveJob " + activeJob.getState().name());
             }
         }
     }

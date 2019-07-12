@@ -34,7 +34,7 @@ public class DbUtils {
 
 
 //    public int getActRequestId(String paramName, String paramValue) throws Exception {
-//        logger.info(" paramName " + paramName + " paramValue " + paramValue);
+//        logger.debug(" paramName " + paramName + " paramValue " + paramValue);
 //        int result = 0;
 //        try (Connection connection = jdbcTemplate.getDataSource().getConnection()) {
 //            PreparedStatement statement = connection.prepareStatement(FETCH_ACTREQ_ID_PARAM);
@@ -120,7 +120,7 @@ public class DbUtils {
                     } else
                         f.set(data, row.get(f.getName()));
                 } catch (IllegalAccessException e) {
-                    logger.info(e.getMessage());
+                    logger.error(e.getMessage());
                 }
             }
         });
@@ -160,12 +160,12 @@ public class DbUtils {
                 }
                 campos.append(name);
             } catch (IllegalAccessException ex) {
-                logger.info(ex.getMessage());
+                logger.error(ex.getMessage());
             }
         });
         table = table == null ? data.getClass().getSimpleName().toLowerCase() : table;
         String sql = "insert into " + table + " (" + campos.toString() + ") values(" + valores.toString() + ");";
-     //   logger.info("sql = " + sql);
+     //   logger.debug("sql = " + sql);
         return sql;
     }
     public int exSqlStatement(String sql) {
@@ -177,7 +177,7 @@ public class DbUtils {
             PreparedStatement stm = connection.prepareStatement(sql);
             int rc = stm.executeUpdate();
             if (upd) {
-                logger.info(" updated " + rc);
+                logger.debug(" updated " + rc);
                 connection.close();
                 return rc;
             }
@@ -203,7 +203,7 @@ public class DbUtils {
     public Set<String> getColumnNames(String table) {
         Set<String> names = new HashSet<>();
         Arrays.stream(getColumnNameArray(table)).forEach(name -> {
-            logger.info(" col " + name);
+            logger.debug(" col " + name);
             names.add(name);
         });
         return names;
@@ -225,7 +225,7 @@ public class DbUtils {
             connection.close();
             return sArray;
         } catch (Exception e) {
-            logger.info(e.getMessage());
+            logger.error(e.getMessage());
 
         }
         return null;

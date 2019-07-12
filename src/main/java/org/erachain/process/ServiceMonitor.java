@@ -142,7 +142,7 @@ public class ServiceMonitor {
                     confirmations = jsonService.getValue(result, "confirmations");
 
                     if (confirmations == 0) {
-                        logger.info(" unconfirmed " + dataEra.getSignature());
+                        logger.debug(" unconfirmed " + dataEra.getSignature());
                         unConfirmed ++;
                     } else {
                         logger.info(" confirmed " + dataEra.getSignature());

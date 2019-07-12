@@ -95,7 +95,7 @@ public class DataClient {
 
     private void setClientData(Request request, Map<String, byte[]> data) throws Exception {
 //        try {
-        logger.info(" get act req id ");
+        logger.debug(" get act req id ");
         int actRequestId = 0;
         try {
             actRequestId = request.getActRequestId(this, dbUtils, dateUtl);
