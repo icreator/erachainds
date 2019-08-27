@@ -1,5 +1,6 @@
 package org.erachain.entities.request;
 
+import org.erachain.repositories.DataClient;
 import org.erachain.repositories.DbUtils;
 import org.erachain.utils.DateUtl;
 import org.slf4j.Logger;
@@ -26,18 +27,6 @@ public class Request {
     private String paramValue;
 
     private String paramName;
-
-    public Date getSubmitDate() {
-        return submitDate;
-    }
-
-    public Map<String, String> getParams() {
-        return params;
-    }
-
-    public void setSubmitDate(Date submitDate) {
-        this.submitDate = submitDate;
-    }
 
     private Date submitDate;
 
@@ -161,49 +150,48 @@ public class Request {
             boolean isCurrent = param.getCurValue() > 0 ? true : false;
             boolean isDate = "date".equalsIgnoreCase(param.getDataType());
             if (isDate) {
-
-            //    paramValue = value;
+                paramName = param.getParamName();
+                paramValue = value;
                 isCurrentDate = isCurrent;
             }
             if (isCurrent && isDate) {
-                paramName = param.getParamName();
-                format = new SimpleDateFormat(param.getFormat());
                 Date date = new Date();
+                format = new SimpleDateFormat(param.getFormat());
+                submitDate = getSubmitDate(dateUtl, date, submitPeriod);
                 if (offUnit != null && offValue != 0) {
-                    date = dateUtl.addUnit(date, offUnit, -offValue);
-                    date = dateUtl.getAlign(date, offUnit);
+                    date = dateUtl.addUnit(date, offUnit, - offValue);
+                    submitDate = dateUtl.addUnit(submitDate, offUnit,  offValue - 1);
                 }
-                value = format.format(date);
+                date = dateUtl.getAlign(date, submitPeriod);
+                if (format != null)
+                    value = format.format(date);
                 paramValue = value;
-                if (submitDate == null || submitDate.before(new Date())) {
-                    //                   submitDate = dateUtl.getFirst(date, submitPeriod);
-                    String[] period = submitPeriod.split("_");
-                    int value2 = 1;
-                    String periodRun = submitPeriod;
-                    if (period.length > 1) {
-                        value2 = Integer.parseInt(period[0]);
-                        periodRun = period[1];
-                    }
-                    submitDate = dateUtl.addUnit(date, periodRun, value2);
-                    if (offUnit != null && offValue != 0) {
-                        submitDate = dateUtl.addUnit(submitDate, offUnit, offValue - 1);
-                    }
-                }
             }
             params.put(param.getParamName(), value);
         }
         return params;
     }
-//    public int getActRequestId(DbUtils dbUtils, DateUtl dateUtl) throws Exception {
-//        if (params == null) {
-//            params = this.getParams(dbUtils, dateUtl);
-//            if (params == null)
-//                throw new Exception(" missing params for a request");
-//        }
-//
-//        int actRequestId = dbUtils.getActRequestId(paramName, paramValue);
-//        return actRequestId;
-//    }
+    private Date getSubmitDate(DateUtl dateUtl, Date date, String submitPeriod) {
+        String[] period = submitPeriod.split("_");
+        int value2 = 1;
+        String periodRun = submitPeriod;
+        if (period.length > 1) {
+            value2 = Integer.parseInt(period[0]);
+            periodRun = period[1];
+        }
+        submitDate = dateUtl.addUnit(date, periodRun, value2);
+        return submitDate;
+    }
+    public int getActRequestId(DataClient dataClient, DbUtils dbUtils, DateUtl dateUtl) throws Exception {
+        if (params == null) {
+            params = this.getParams(dbUtils, dateUtl);
+            if (params == null)
+                throw new Exception(" missing params for a request");
+        }
+
+        int actRequestId = dataClient.getActRequestId(id, paramName, paramValue);
+        return actRequestId;
+    }
     public int setActRequestId(DbUtils dbUtils, DateUtl dateUtl) throws Exception {
         int actRequestId = 0;
         ActRequest actRequest = new ActRequest();

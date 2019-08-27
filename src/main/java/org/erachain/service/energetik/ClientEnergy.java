@@ -1,10 +1,9 @@
 package org.erachain.service.energetik;
 
-import org.apache.commons.lang3.time.DateUtils;
+import org.erachain.service.JsonService;
 import org.erachain.service.RestClient;
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.text.SimpleDateFormat;
@@ -22,6 +21,9 @@ public class ClientEnergy {
     private RestClient restClient;
 
     @Autowired
+    private JsonServiceEnergy jsonServiceEnergy;
+
+    @Autowired
     private JsonService jsonService;
 
     private String Energy_Url;
@@ -35,8 +37,8 @@ public class ClientEnergy {
     }
     private void clientLogin(String url, String user, String pass) throws Exception {
         logger.info(" login " + url + " " + user);
-        String json = restClient.getJsonResult(url, jsonService.getAuth(user, pass).toString());
-        String error = jsonService.checkForError(json);
+        String json = restClient.getJsonResult(url, jsonServiceEnergy.getAuth(user, pass).toString());
+        String error = jsonServiceEnergy.checkForError(json);
         if (error != null) {
             logger.error(" login error " + error);
             throw new Exception(" login error " + error);
@@ -53,14 +55,14 @@ public class ClientEnergy {
             this.clientLogin(params);
         }
         String response = restClient.getJsonResult(Energy_Url,
-                jsonService.getNetWorkJson().toString());
-        return jsonService.getNetWorkList(response);
+                jsonServiceEnergy.getNetWorkJson().toString());
+        return jsonServiceEnergy.getNetWorkList(response);
     }
     public  List<String> getMeterList(String netWork) throws Exception {
         logger.info(" MeterList for " + netWork);
         String response = restClient.getJsonResult(Energy_Url,
-                jsonService.getMeterJson(netWork).toString());
-        return jsonService.getMeterList(response);
+                jsonServiceEnergy.getMeterJson(netWork).toString());
+        return jsonServiceEnergy.getMeterList(response);
     }
     public String getMeterResult(Map<String, String> params) throws Exception {
         if (params.get("sessionId") == null) {
@@ -83,16 +85,16 @@ public class ClientEnergy {
     }
     private String getMeterResult(Map<String, String> params, String meter, String type, String value) throws Exception {
 
-       String data = restClient.getJsonResult(Energy_Url,
-               jsonService.getMeterResultJson(params, meter, type, value).toString());
-        String error = jsonService.checkForError(data);
+       String json = restClient.getJsonResult(Energy_Url,
+               jsonServiceEnergy.getMeterResultJson(params, meter, type, value).toString());
+        String error = jsonServiceEnergy.checkForError(json);
         if (error != null) {
             logger.error(" get meter " + error);
             throw new Exception(" get meter " + error);
         }
-        logger.info(" MeterResult for " + meter + " " + type + " " + value);
-        logger.info(data);
-        return data;
+        logger.info(" MeterResult for " + meter + " " + type + " " + value + " size: " + String.valueOf(json.length()));
+        logger.debug(json);
+        return json;
     }
     public String setMeterResult(Map<String, String> params) throws Exception {
         if (params.get("sessionId") == null) {
@@ -103,10 +105,10 @@ public class ClientEnergy {
         return setMeterResult(params, params.get("meter"), type, value, params.get("transaction"));
     }
     private String setMeterResult(Map<String, String> params, String meter, String type, String value, String transaction) throws Exception {
-        logger.info(" set blockchain link for " + meter + " " + type + " " + value + " transaction " + transaction);
+        logger.info(" get MeterResult for " + meter + " " + type + " " + value + " transaction " + transaction);
         String result = restClient.getJsonResult(Energy_Url,
-                jsonService.setMeterResultJson(params, meter, type, value, transaction).toString());
-        logger.info("  blockchain link  " + result);
+                jsonServiceEnergy.setMeterResultJson(params, meter, type, value, transaction).toString());
+        logger.info("  MeterResult  " + result);
         return result;
     }
     public String checkMeterResult(Map<String, String> params) throws Exception {
@@ -121,8 +123,8 @@ public class ClientEnergy {
     private String checkMeterResult(Map<String, String> params, String meter, String type, String value) throws Exception {
         logger.info(" check MeterResult for " + meter + " " + type + " " + value );
         String result = restClient.getJsonResult(Energy_Url,
-                jsonService.checkMeterResultJson(params, meter, type, value).toString());
-        logger.info("  MeterResult  " + result);
+                jsonServiceEnergy.checkMeterResultJson(params, meter, type, value).toString());
+        logger.debug("  MeterResult  " + result);
         return result;
     }
 }

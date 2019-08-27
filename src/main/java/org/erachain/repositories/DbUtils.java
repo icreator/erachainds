@@ -1,5 +1,6 @@
 package org.erachain.repositories;
 
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -17,6 +18,9 @@ public class DbUtils {
 
     static String fetch = "SELECT * FROM ";
 
+    @Value("${FETCH_ACTREQ_ID_PARAM}")
+    private String FETCH_ACTREQ_ID_PARAM;
+
 
     @Autowired
     private Logger logger;
@@ -28,31 +32,6 @@ public class DbUtils {
         this.jdbcTemplate = jdbcTemplate;
     }
 
-    public int getDataId(String sql, Object... values)  {
-        try (PreparedStatement statement = jdbcTemplate.getDataSource().getConnection().prepareStatement(sql)) {
-            int i = 0;
-            for (Object value : values) {
-                statement.setObject(++ i, value);
-            }
-            if (sql.toLowerCase().contains("select")) {
-                ResultSet resultset = statement.executeQuery();
-
-                if (resultset.isClosed())
-                    return 0;
-
-                if (resultset != null) {
-                    resultset.next(); // exactly one result so allowed
-                    return resultset.getInt(1);
-                }
-            } else {
-                return statement.executeUpdate();
-            }
-
-        } catch (SQLException e) {
-            logger.error(e.getMessage());
-        }
-        return 0;
-    }
 
 //    public int getActRequestId(String paramName, String paramValue) throws Exception {
 //        logger.debug(" paramName " + paramName + " paramValue " + paramValue);
@@ -91,6 +70,16 @@ public class DbUtils {
         }
         return result;
     }
+    public  <T> List<T>  fetchDataValues(Class<T> clazz, String sql, Object... values) {
+        for(Object value : values) {
+            String strValue = value.getClass().getSimpleName().endsWith("String") ? "'" + value.toString() + "'" : value.toString();
+            sql = StringUtils.replaceOnce(sql, "?", strValue);
+        }
+        return fetchData(clazz, sql);
+    }
+    public <T> T fetchData(Class<T> clazz, int id) {
+        return fetchData(clazz, clazz.getSimpleName(), id);
+    }
     public <T> T fetchData(Class<T> clazz, String table, int id) {
         return  fetchData(clazz, table, " id = " + id).get(0);
     }
@@ -98,6 +87,7 @@ public class DbUtils {
         return (List<T>) fetchData(clazz, fetch + table + (where = where == null ? "" : " where " + where));
     }
     private  <T> List<T> fetchData(Class<T> clazz, String sql) {
+        logger.debug(" sql " + sql);
         List<Map<String, Object>> rows = jdbcTemplate.queryForList(sql);
         logger.debug("rows " + rows.size());
         List<T> list = new ArrayList<>();
@@ -106,7 +96,7 @@ public class DbUtils {
             try {
                 dataInfo = clazz.getConstructor().newInstance();
             } catch (Exception e) {
-                logger.error(e.getMessage());
+                logger.debug(e.getMessage());
             }
             if (dataInfo != null) {
                 setObj(dataInfo, row);
