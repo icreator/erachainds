@@ -37,14 +37,16 @@ public class DateUtl {
 
         return cal.getTime();
     }
-    public  Date getAlign(Date date, String unit){
-        if ("hour".equalsIgnoreCase(unit) ||
-            "minute".equalsIgnoreCase(unit))
-            return getFirst(date, unit);
+
+    public Date getAlign(Date date, String unit) {
+        if (unit.toLowerCase().contains("hour")) {
+            return getFirst(date, "hour");
+        } else if (unit.toLowerCase().contains("minute")) {
+            return getFirst(date, "minute");
+        }
         return date;
     }
     public Date addUnit(Date date, String unit, int value) {
-//        logger.info(" addUnit date " + date + " unit " + unit + " value " + value);
         Date res = null;
         switch (unit) {
             case ("month") :

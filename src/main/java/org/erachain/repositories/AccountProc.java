@@ -75,31 +75,31 @@ public class AccountProc {
     }
 
     public Request getRequestById(int requestId) {
-        if (!inited)
-            setRequests();
-          return cacheReq.get(requestId);
+ //       if (!inited)
+ //           setRequests();
+          return dbUtils.fetchData(Request.class, "Request", requestId);
     }
 
-    public   void  setRequests() {
-        List<Map<String, Object>> rows = jdbcTemplate.queryForList(FETCH_REQUESTS);
-        for (Map<String, Object> row: rows){
-            Request  request = new Request();
-            dbUtils.setObj(request, row);
-            List<Request> list = cacheListReq.get(request.getAccountId());
-            if (list == null) {
-                list = new ArrayList<>();
-                cacheListReq.put(request.getAccountId(), list);
-            }
-            list.add(request);
-            cacheReq.put(request.getId(), request);
-        }
-        inited = true;
-        return;
-    }
+//    public   void  setRequests() {
+//        List<Map<String, Object>> rows = jdbcTemplate.queryForList(FETCH_REQUESTS);
+//        for (Map<String, Object> row: rows){
+//            Request  request = new Request();
+//            dbUtils.setObj(request, row);
+//            List<Request> list = cacheListReq.get(request.getAccountId());
+//            if (list == null) {
+//                list = new ArrayList<>();
+//                cacheListReq.put(request.getAccountId(), list);
+//            }
+//            list.add(request);
+//            cacheReq.put(request.getId(), request);
+//        }
+//        inited = true;
+//        return;
+//    }
     public   List<Request>  getRequests(int accountId) {
- //       if (!inited)
-            setRequests();
-        return cacheListReq.get(accountId);
+        //if (!inited)
+ //           setRequests();
+        return dbUtils.fetchData(Request.class, "Request", " accountId = " + accountId);
     }
     public Account getAccountById(int id)  {
         if (cache.get(id) == null) {
@@ -110,6 +110,7 @@ public class AccountProc {
 
     public void afterRun(Request request) throws SQLException {
         request.setLastRun(new Timestamp(System.currentTimeMillis()));
+//        dbUtils.getDataId(UPDATE_REQUEST_AFTER_RUN, request.getLastRun(), request.getId());
         try (Connection connection = jdbcTemplate.getDataSource().getConnection()) {
             PreparedStatement stm = connection.prepareStatement(UPDATE_REQUEST_AFTER_RUN);
             stm.setTimestamp(1, request.getLastRun());

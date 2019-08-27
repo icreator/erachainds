@@ -2,6 +2,7 @@ package org.erachain.repositories;
 
 import org.erachain.entities.account.Account;
 import org.erachain.entities.datainfo.DataInfo;
+import org.erachain.entities.request.ActParams;
 import org.erachain.entities.request.ActRequest;
 import org.erachain.entities.request.Request;
 import org.erachain.service.ServiceFactory;
@@ -12,9 +13,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Repository;
 
-import java.sql.SQLException;
-import java.sql.Timestamp;
+import java.sql.*;
 import java.util.*;
+import java.util.Date;
 
 @Repository
 public class DataClient {
@@ -25,14 +26,10 @@ public class DataClient {
     @Value("${Service_Url}")
     private String Service_Url;
 
-    @Value("${FETCH_CURR_ACT_ID}")
-    private String FETCH_CURR_ACT_ID;
-
     @Value("${FETCH_ACTREQ_ID_PARAM}")
     private String FETCH_ACTREQ_ID_PARAM;
 
-    @Value("${UPDATE_ACT_PARAMS}")
-    private String UPDATE_ACT_PARAMS;
+
 
     @Autowired
     private ServiceFactory serviceFactory;
@@ -101,14 +98,14 @@ public class DataClient {
         logger.debug(" get act req id ");
         int actRequestId = 0;
         try {
-            actRequestId = getActRequestId(request);
+            actRequestId = request.getActRequestId(this, dbUtils, dateUtl);
             if (actRequestId == 0) {
                 actRequestId = request.setActRequestId(dbUtils, dateUtl);
-                logger.debug(" new act req id " + actRequestId);
+                logger.info(" new act req id " + actRequestId);
                 setData(request, actRequestId, data);
             } else {
                 if (infoSave.checkDataWhere(actRequestId) > 0) {
-                    logger.debug(" found act req id " + actRequestId);
+                    logger.info(" found act req id " + actRequestId);
                     updateData(request, actRequestId, data);
                 }
             }
@@ -127,10 +124,10 @@ public class DataClient {
             dataInfo.setData(data.get(identity));
             dataInfo.setRunDate(new Timestamp(new Date().getTime()));
             try {
-                //logger.info(" save after run ");
+                logger.info(" save after run ");
                 infoSave.afterRun(dataInfo);
             } catch (SQLException e) {
-                logger.error(" Unable save data for "+dataInfo.getIdentity());
+                logger.error(" save after run ");
                 throw e;
             }
         }
@@ -146,7 +143,7 @@ public class DataClient {
             dataInfo.setIdentity(ident);
             dataInfo.setData(data.get(ident));
             dataInfo.setActRequestId(actRequestId);
-            logger.info("data saved for ident " + dataInfo.getIdentity() + " " + dataInfo.getRunDate());
+            logger.info("data saved  for ident " + dataInfo.getIdentity() + " " + dataInfo.getRunDate());
             try {
                 infoSave.saveData(dataInfo);
             } catch (SQLException e) {
@@ -156,21 +153,17 @@ public class DataClient {
         }
         accountProc.afterRun(request);
         return;
+
     }
-    public ActRequest getCurrActReq(Request request) {
-        int actId = dbUtils.getDataId(FETCH_CURR_ACT_ID, request.getId(), new Date().getTime());
-        if (actId == 0)
-            return null;
-        ActRequest actRequest = dbUtils.fetchData(ActRequest.class, "ActRequest", actId);
-        return actRequest;
-    }
-    public int getActRequestId(Request request) throws Exception {
-        String paramName = request.getParamName();
-        String paramValue = request.getParamValue();
-        int actRequestId = dbUtils.getDataId(FETCH_CURR_ACT_ID, request.getId(), new Date().getTime());
-        if (actRequestId != 0) {
-            dbUtils.getDataId(UPDATE_ACT_PARAMS, paramValue, paramName, actRequestId);
+    public int getActRequestId(int requestId, String paramName, String paramValue) throws Exception {
+        logger.info(" paramName " + paramName + " paramValue " + paramValue);
+        List<ActParams> actParams = dbUtils.fetchDataValues(ActParams.class, FETCH_ACTREQ_ID_PARAM, paramName, paramValue);
+        for (ActParams actParam : actParams) {
+            ActRequest actRequest = dbUtils.fetchData(ActRequest.class, actParam.getActRequestId());
+            if (actRequest != null && actRequest.getRequestId() == requestId) {
+                return actRequest.getId();
+            }
         }
-        return actRequestId;
+        return 0;
     }
 }

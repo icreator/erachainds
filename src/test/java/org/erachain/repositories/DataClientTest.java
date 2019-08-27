@@ -35,17 +35,17 @@ public class DataClientTest {
     @Autowired
     private DateUtl dateUtl;
 
-//    @Test
-//    public void DataClient2() {
+    @Test
+    public void DataClient2() {
 //        Account account= accountProc.getAccounts().get(0);
 //        Request request = accountProc.getRequests(account.getId()).get(1);
-//        try {
-//            int id = request.getActRequestId(dbUtils, dateUtl);
-//            logger.info(" getActRequestId " + id);
-//        } catch (Exception e) {
-//            logger.error(e.getMessage());
-//        }
-//    }
+        try {
+            int id = dataClient.getActRequestId(1, "value", "2019-07-05T17:31:44+0300");
+            logger.info(" getActRequestId " + id);
+        } catch (Exception e) {
+            logger.error(e.getMessage());
+        }
+    }
 
     @Test
     public void DataClient1() {
