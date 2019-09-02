@@ -39,6 +39,8 @@ public class JsonServiceMyDom {
 //        System.out.println(requestBody.toString());
         return requestBody;
     }
+
+/*
     public  JSONObject getNetWorkJson() {
         JSONObject requestBody = new JSONObject();
         requestBody.put("jsonrpc", "2.0");
@@ -138,6 +140,7 @@ public class JsonServiceMyDom {
         //    System.out.println("result " + requestBody.toString());
         return requestBody;
     }
+*/
     public  List<String> getProblemList(String response) {
         JSONObject jsonObject = new JSONObject(response);
         JSONObject jsonResponse = jsonObject.getJSONObject("response");
