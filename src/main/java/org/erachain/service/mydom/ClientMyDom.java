@@ -60,6 +60,7 @@ public class ClientMyDom {
         logger.info("end login " + accessToken);
     }
 
+    /*
     public  List<String> getNetWorkList(Map<String, String> params) throws Exception {
         logger.info(" NetWorkList ");
         if (params.get("AccessToken") == null) {
@@ -69,6 +70,7 @@ public class ClientMyDom {
                 jsonServiceMyDom.getNetWorkJson().toString());
         return jsonServiceMyDom.getNetWorkList(response);
     }
+    */
     public  List<String> getProblemList(Map<String, String> params) throws Exception {
         logger.info(" ProblemList ");
 
@@ -106,6 +108,7 @@ public class ClientMyDom {
         logger.debug(json);
         return json;
     }
+    /*
     public String setMeterResult(Map<String, String> params) throws Exception {
         if (params.get("AccessToken") == null) {
             this.clientLogin(params);
@@ -137,4 +140,5 @@ public class ClientMyDom {
         logger.debug("  MeterResult  " + result);
         return result;
     }
+    */
 }
