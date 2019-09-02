@@ -1,7 +1,7 @@
 package org.erachain.service.restclient;
 
 import org.erachain.service.RestClient;
-import org.erachain.service.energetik.JsonService;
+import org.erachain.service.JsonService;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.slf4j.Logger;

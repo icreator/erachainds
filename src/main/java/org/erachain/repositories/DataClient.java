@@ -59,6 +59,13 @@ public class DataClient {
         logger.info(" params " + params.get(Service_Url));
         ServiceInterface service = serviceFactory.getService(params.get(Service_Url));
         logger.info(" account service " + service);
+
+        Map<String, String> map = request.getParams(dbUtils, dateUtl);
+        map.keySet().forEach(name -> {
+            logger.debug(" name " + name + " value " + map.get(name));
+        });
+        params.putAll(map);
+
         List<String> idents = null;
         try {
             idents = service.getIdentityList(params);
@@ -66,13 +73,16 @@ public class DataClient {
             logger.error(e.getMessage());
             throw e;
         }
+
+        int debugIdents = 0;
+
         for (String ident : idents) {
+            if (debugIdents++ > 10){
+                logger.debug(" limits idents in debug {}", debugIdents);
+                break;
+            }
             params.put(account.getIdentityName(), ident);
-            Map<String, String> map = request.getParams(dbUtils, dateUtl);
-            map.keySet().forEach(name -> {
-                logger.debug(" name " + name + " value " + map.get(name));
-            });
-            params.putAll(map);
+
             String json = null;
             try {
                 json = service.getIdentityValues(params);

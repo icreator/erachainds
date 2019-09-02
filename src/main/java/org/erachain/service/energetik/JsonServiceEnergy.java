@@ -1,5 +1,6 @@
 package org.erachain.service.energetik;
 
+import org.erachain.service.JsonService;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -13,10 +14,14 @@ import java.util.List;
 import java.util.Map;
 
 @Service
-public class JsonService {
+public class JsonServiceEnergy {
 
     @Autowired
     private Logger logger;
+
+    @Autowired
+    private JsonService jsonService;
+
 
     public  JSONObject getAuth(String user, String password) {
         String verifyCode = null;
@@ -106,8 +111,8 @@ public class JsonService {
         return requestBody;
     }
     public Boolean checkMeterResult(String jsonString) {
-        JSONObject result = getValue(jsonString, "result");
-        Boolean value = getValue(result, "value");
+        JSONObject result = jsonService.getValue(jsonString, "result");
+        Boolean value = jsonService.getValue(result, "value");
         logger.info(" checkMeterResult " + value);
         return value;
     }
@@ -144,13 +149,14 @@ public class JsonService {
         });
         return list;
     }
-    public <T> T getValue(String jsonString, String key) throws JSONException {
-        JSONObject jsonObject = new JSONObject(jsonString);
-        return (T) getValue(jsonObject, key);
-    }
-    private <T> T getValue(JSONObject jsonObject, String key) {
-        return (T) jsonObject.get(key);
-    }
+//    public <T> T getValue(String jsonString, String key) throws JSONException {
+//        JSONObject jsonObject = new JSONObject(jsonString);
+//        return (T) getValue(jsonObject, key);
+//    }
+//    private <T> T getValue(JSONObject jsonObject, String key) {
+//        return (T) jsonObject.get(key);
+//    }
+
     public String checkForError(String json) {
         JSONObject jsonObject = new JSONObject(json);
         StringBuffer error = new StringBuffer("");

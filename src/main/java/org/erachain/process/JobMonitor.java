@@ -96,8 +96,8 @@ public class JobMonitor implements InitializingBean {
                         checkData(queue);
                         checkReadyAccounts(queue);
                     } catch (Exception e) {
-                        //logger.error(e.getMessage());
-                        logger.error(" Unhandled end Job Monitor");
+                        logger.error(e.getMessage());
+                        //logger.error(" Unhandled end Job Monitor");
                     } finally {
 //                        mutex.unlock();
                     }
