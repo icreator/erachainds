@@ -16,6 +16,8 @@ import org.springframework.stereotype.Repository;
 import java.sql.*;
 import java.util.*;
 import java.util.Date;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 
 @Repository
 public class DataClient {
@@ -45,6 +47,22 @@ public class DataClient {
 
     @Autowired
     private AccountProc accountProc;
+
+    private ConcurrentMap<String, String> dataMap = new ConcurrentHashMap<>();
+
+    private boolean checkData(String ident, String data) {
+        if (dataMap.get(ident) == null) {
+            dataMap.putIfAbsent(ident, data);
+            logger.debug(" set ident " + ident + " data " + data);
+            return false;
+        }
+        if(!dataMap.get(ident).equals(data)) {
+            dataMap.replace(ident, data);
+            logger.debug(" replace ident " + ident + " data " + data);
+            return false;
+        }
+        return true;
+    }
 
     public Map<String, byte[]> getDataFromClient(int accountId, int requestId) throws Exception {
         Account account = accountProc.getAccountById(accountId);
@@ -86,6 +104,8 @@ public class DataClient {
             String json = null;
             try {
                 json = service.getIdentityValues(params);
+                if (checkData(ident, json))
+                    continue;
             } catch (Exception e) {
                 logger.error(e.getMessage());
                 throw e;
