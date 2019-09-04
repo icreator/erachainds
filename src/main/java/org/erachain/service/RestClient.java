@@ -1,6 +1,8 @@
 package org.erachain.service;
 
 import com.google.common.collect.Lists;
+import org.erachain.service.peers.Peers;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.http.*;
 import org.springframework.http.converter.StringHttpMessageConverter;
@@ -47,17 +49,22 @@ public class RestClient {
     }
 
     public String getResult(String url, String anyString) throws Exception  {
-//        HttpHeaders headers = new HttpHeaders();
-//        headers.setAccept(Lists.newArrayList(MediaType.APPLICATION_JSON));
 
 //        HttpEntity<String> request = new HttpEntity<>(anyString, headers);
         HttpEntity<String> request = new HttpEntity<>(anyString);
 
-//        RestTemplate restTemplate  = new RestTemplate();
-//        restTemplate.getMessageConverters()
-//                .add(0, new StringHttpMessageConverter(Charset.forName("UTF-8")));
+        RestTemplate restTemplate = new RestTemplate();
+        StringHttpMessageConverter stringHttpMessageConverter = new StringHttpMessageConverter(Charset.forName("UTF-8"));
+        stringHttpMessageConverter.setWriteAcceptCharset(true);
+        for (int i = 0; i < restTemplate.getMessageConverters().size(); i++) {
+            if (restTemplate.getMessageConverters().get(i) instanceof StringHttpMessageConverter) {
+                restTemplate.getMessageConverters().remove(i);
+                restTemplate.getMessageConverters().add(i, stringHttpMessageConverter);
+                break;
+            }
+        }
 
-        String response = new RestTemplate().postForObject(url, request, String.class);
+        String response = restTemplate.postForObject(url, request, String.class);
 
         return response;
     }
