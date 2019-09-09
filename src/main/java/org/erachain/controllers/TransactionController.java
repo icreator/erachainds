@@ -75,7 +75,7 @@ public class TransactionController {
 
     @LoggableController
     @RequestMapping(value = "/{id}/", method = RequestMethod.GET, produces = {"application/json"})
-    public String getIedntByDate(@PathVariable("id") String ident,
+    public String getIdentByDate(@PathVariable("id") String ident,
                                 @RequestParam(value = "date", required = false)  String date)  throws InterruptedException {
         return "";
 
