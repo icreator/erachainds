@@ -87,22 +87,7 @@ public class TransactionController {
         }
         return result == null ? "{}" : new String(result);
     }
-//    @LoggableController
-//    @RequestMapping(value = "/{ident}", method = RequestMethod.GET, produces = {"text/plain"})
-//    //         produces = {"text/json", "text/xml"})
-//    public String getDataByDate(@PathVariable("ident") String ident,
-//                                @RequestParam(value = "date", required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) Date date)  throws InterruptedException {
 //
-//        byte[] result = null;
-//        try {
-//            Date runDate = (date == null ? new Date() : date);
-//            result = dbUtils.getData(GET_LAST_RECORD_BY_DATE, ident, runDate.getTime());
-//        } catch (Exception e) {
-//            String message = "check parameters - " + e.getMessage();
-//            return "{\"error\"=\"" + message + "\"}";
-//        }
-//        return result == null ? "{}" : new String(result);
-//    }
 }
 
 

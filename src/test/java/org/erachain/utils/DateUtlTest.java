@@ -77,13 +77,14 @@ public class DateUtlTest {
     public void testDate22() {
 //        String s = "2015-12-03T17:00:34";
         String s = "2015-12-03";
+        String s1 = "1567608296825";
 //        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
         try {
             TimeZone localTimezone = TimeZone.getDefault();
             logger.info("5:Diff.Local-GMT(" + localTimezone.getID() + "):" + localTimezone.getRawOffset() );
 
 
-            Date date = dateUtl.stringToDate(s);
+            Date date = dateUtl.stringToDate(s1);
 
             logger.info("date : " + date);
         } catch (Exception ex) {

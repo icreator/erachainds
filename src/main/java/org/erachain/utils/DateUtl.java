@@ -80,9 +80,19 @@ public class DateUtl {
         Date date = null;
         try {
             if (strDate.length() == 10) {
-                 date = simpleDateFormat.parse(strDate);
+                if(strDate.contains("-"))
+                    date = simpleDateFormat.parse(strDate);
+                else {   // Unix epoch time in seconds
+                    long time = Long.parseLong(strDate);
+                    date = new Date(time + 1000);
+                }
             } else {
-                date = simpleDateTimeFormat.parse(strDate);
+                if(strDate.contains("-"))
+                    date = simpleDateTimeFormat.parse(strDate);
+                else {  // // Unix epoch time in milliseconds
+                    long time = Long.parseLong(strDate);
+                    date = new Date(time);
+                }
             }
         } catch (ParseException ex) {
             logger.error("Exception " + ex);
