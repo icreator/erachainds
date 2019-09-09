@@ -8,9 +8,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringRunner;
 
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.format.DateTimeFormatter;
 import java.util.Date;
+import java.util.TimeZone;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest
@@ -70,5 +72,22 @@ public class DateUtlTest {
     private String getDate(Date date) {
         return format.format(date);
 
+    }
+    @Test
+    public void testDate22() {
+//        String s = "2015-12-03T17:00:34";
+        String s = "2015-12-03";
+//        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
+        try {
+            TimeZone localTimezone = TimeZone.getDefault();
+            logger.info("5:Diff.Local-GMT(" + localTimezone.getID() + "):" + localTimezone.getRawOffset() );
+
+
+            Date date = dateUtl.stringToDate(s);
+
+            logger.info("date : " + date);
+        } catch (Exception ex) {
+            logger.info("Exception " + ex);
+        }
     }
 }

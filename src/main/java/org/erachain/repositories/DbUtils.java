@@ -11,8 +11,6 @@ import java.lang.reflect.Field;
 import java.sql.*;
 import java.util.*;
 
-//import static org.aspectj.bridge.Version.getTime;
-
 @Service
 public class DbUtils {
 
@@ -32,43 +30,36 @@ public class DbUtils {
         this.jdbcTemplate = jdbcTemplate;
     }
 
-
-//    public int getActRequestId(String paramName, String paramValue) throws Exception {
-//        logger.debug(" paramName " + paramName + " paramValue " + paramValue);
-//        int result = 0;
-//        try (Connection connection = jdbcTemplate.getDataSource().getConnection()) {
-//            PreparedStatement statement = connection.prepareStatement(FETCH_ACTREQ_ID_PARAM);
-//            statement.setString(1, paramName);
-//            statement.setString(2, paramValue);
-//            ResultSet resultset = statement.executeQuery();
-//
-//            if (resultset != null) {
-//                try {
-//                    resultset.next(); // exactly one result so allowed
-//                    result = resultset.getInt(1);
-//                } catch (SQLException e) {
-//                    return 0;
-//                }
-//
-//            }
-//            statement.close();
-//        }
-//        return result;
-//    }
-    public int checkData(String sql) throws SQLException {
+    public <T> T checkData(String sql) throws SQLException {
         logger.debug(" sql " + sql);
-        int result = 0;
         try (Connection connection = jdbcTemplate.getDataSource().getConnection()) {
             PreparedStatement statement = connection.prepareStatement(sql);
             ResultSet resultset = statement.executeQuery();
 
             if (resultset != null) {
                 resultset.next(); // exactly one result so allowed
-                result = resultset.getInt(1);
+                return (T) resultset.getObject(1);
             }
             statement.close();
         }
-        return result;
+        return (T) null;
+    }
+    public <T> T getData(String sql, Object... values) throws SQLException {
+        for(Object value : values) {
+            String strValue = value.getClass().getSimpleName().endsWith("String") ? "'" + value.toString() + "'" : value.toString();
+            sql = StringUtils.replaceOnce(sql, "?", strValue);
+        }
+        logger.debug(" sql " + sql);
+        try (Connection connection = jdbcTemplate.getDataSource().getConnection()) {
+            PreparedStatement statement = connection.prepareStatement(sql);
+            ResultSet resultset = statement.executeQuery();
+
+            if (resultset != null && !resultset.isClosed()) {
+                resultset.next(); // exactly one result so allowed
+                return (T) resultset.getObject(1);
+            }
+        }
+        return (T) null;
     }
     public  <T> List<T>  fetchDataValues(Class<T> clazz, String sql, Object... values) {
         for(Object value : values) {
@@ -86,7 +77,7 @@ public class DbUtils {
     public <T> List<T> fetchData(Class<T> clazz, String table, String where) {
         return (List<T>) fetchData(clazz, fetch + table + (where = where == null ? "" : " where " + where));
     }
-    private  <T> List<T> fetchData(Class<T> clazz, String sql) {
+    public   <T> List<T> fetchData(Class<T> clazz, String sql) {
         logger.debug(" sql " + sql);
         List<Map<String, Object>> rows = jdbcTemplate.queryForList(sql);
         logger.debug("rows " + rows.size());

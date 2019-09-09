@@ -82,8 +82,23 @@ public class DbDataTest {
 
     @Value("${CHECK_DATA_AFTER_SEND_TO_CLIENT}")
     private String CHECK_DATA_AFTER_SEND_TO_CLIENT;
-    
 
+    @Value("${GET_LAST_RECORD_BY_DATE}")
+    private String GET_LAST_RECORD_BY_DATE;
+
+    @Test
+    public void getData1() {
+        try {
+//            String sql = CHECK_DATA_FOR_SUBMIT;
+//            String sql = CHECK_DATA_FOR_SUBMIT.replace("?", Long.toString(new Date().getTime()));
+//            logger.info(" sql " + sql);
+            byte[] result = dbUtils.getData(GET_LAST_RECORD_BY_DATE, "4403", new Date(1567608297291L).getTime());
+            logger.info(" result " + (result != null ? new String(result) : ""));
+
+        } catch (SQLException e) {
+            logger.error(e.getMessage());
+        }
+    }
     @Test
     public void checkData() {
         try {
@@ -180,6 +195,14 @@ public class DbDataTest {
     public void testTableDacr() {
         Arrays.stream(dbUtils.getColumnNameArray("DataInfo")).forEach(name -> {
             logger.info(" col " + name);
+        });
+    }
+    @Test
+    public void testSql1() {
+        String sql = "select  runDate, data from DataInfo";
+        List<DataInfo> dataInfos = dbUtils.fetchData(DataInfo.class, sql);
+        dataInfos.forEach(dataInfo -> {
+            logger.info(dataInfo.getRunDate() + " " + dataInfo.getData());
         });
     }
 
