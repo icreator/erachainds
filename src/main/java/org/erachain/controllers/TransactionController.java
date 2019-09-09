@@ -27,7 +27,7 @@ import java.util.Map;
 import java.util.logging.Logger;
 
 @RestController
-@RequestMapping("/clientdata")
+@RequestMapping("/api/v1/blockchain")
 public class TransactionController {
 
     @Autowired
@@ -43,9 +43,9 @@ public class TransactionController {
     private String GET_LAST_RECORD_BY_DATE;
 
     @LoggableController
-    @RequestMapping(value = "/proc/{ident}", method = RequestMethod.GET, produces = {"text/plain"})
+    @RequestMapping(value = "/proc/{id}", method = RequestMethod.GET, produces = {"text/plain"})
     //         produces = {"text/json", "text/xml"})
-    public String getClientData(@PathVariable("ident") String ident,
+    public String getClientData(@PathVariable("id") String ident,
                                 @RequestParam List<String> names,
                                 @RequestParam List<String> values,
                                 @RequestParam(value = "xml", required = false) String xml
@@ -71,10 +71,36 @@ public class TransactionController {
         }
         return result;
     }
+
+
     @LoggableController
-    @RequestMapping(value = "/{ident}", method = RequestMethod.GET, produces = {"text/plain"})
+    @RequestMapping(value = "/{id}/", method = RequestMethod.GET, produces = {"application/json"})
+    public String getIedntByDate(@PathVariable("id") String ident,
+                                @RequestParam(value = "date", required = false)  String date)  throws InterruptedException {
+        return "";
+
+/* Формта возвращаемого значения
+        {
+
+            errorcode: "error code", "0" - ok , "Not found"
+            message: "Error message"
+            details: "Detail error description"
+
+            date: "timestamp" - дата запроса данных у внешнего сервиса
+            tx: "BLOCKNO-TXNO" - номер блока и транзакции в блоке
+            pos: 0 - позиция данных в транзакции, необязательный если вся транзакция для одного идентификатора
+            size: 122 - длинна данных в символах UTF-8, необязательный если вся транзакция для одного идентификатора
+
+        }
+*/
+
+    }
+
+
+        @LoggableController
+    @RequestMapping(value = "/{id}/data", method = RequestMethod.GET, produces = {"text/plain"})
     //         produces = {"text/json", "text/xml"})
-    public String getDataByDate(@PathVariable("ident") String ident,
+    public String getDataByDate(@PathVariable("id") String ident,
                                 @RequestParam(value = "date", required = false)  String date)  throws InterruptedException {
 
         byte[] result = null;
