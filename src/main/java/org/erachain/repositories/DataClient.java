@@ -31,6 +31,9 @@ public class DataClient {
     @Value("${FETCH_ACTREQ_ID_PARAM}")
     private String FETCH_ACTREQ_ID_PARAM;
 
+    @Value("${GET_LAST_RECORD}")
+    private String GET_LAST_RECORD;
+
 
 
     @Autowired
@@ -52,6 +55,19 @@ public class DataClient {
 
     private boolean checkData(String ident, String data) {
         if (dataMap.get(ident) == null) {
+            try {
+                byte[] dt = dbUtils.getData(GET_LAST_RECORD, ident);
+                if (dt != null) {
+                    String dbData = new String(dt);
+                    if (dbData.equals(data)) {
+                        dataMap.putIfAbsent(ident, dbData);
+                        logger.debug(" set ident from db " + ident + " data " + dbData);
+                        return true;
+                    }
+                }
+            } catch (SQLException e) {
+                logger.error(e.getMessage());
+            }
             dataMap.putIfAbsent(ident, data);
             logger.debug(" set ident " + ident + " data " + data);
             return false;
