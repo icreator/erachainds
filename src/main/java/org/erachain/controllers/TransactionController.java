@@ -50,7 +50,7 @@ public class TransactionController {
     private String GET_LAST_BLOCK_CHAIN_INFO_BY_DATE;
 
 
-    @LoggableController
+//    @LoggableController
     @RequestMapping(value = "/proc/{id}", method = RequestMethod.GET, produces = {"text/plain"})
     //         produces = {"text/json", "text/xml"})
     public String getClientData(@PathVariable("id") String ident,
@@ -81,8 +81,8 @@ public class TransactionController {
     }
 
 
-    @LoggableController
-    @RequestMapping(value = "/{id}", method = RequestMethod.GET, produces = {"text/plain"})
+//    @LoggableController
+    @RequestMapping(value = "/{id}", method = RequestMethod.GET, produces = "application/json")
     public String getIdentByDate(@PathVariable("id") String ident,
                                 @RequestParam(value = "date", required = false)  String date)  throws InterruptedException {
 
@@ -115,7 +115,7 @@ public class TransactionController {
         }
 */
 
-        @LoggableController
+//        @LoggableController
     @RequestMapping(value = "/data/{id}", method = RequestMethod.GET, produces = {"text/plain"})
     //         produces = {"text/json", "text/xml"})
     public String getDataByDate(@PathVariable("id") String ident,
