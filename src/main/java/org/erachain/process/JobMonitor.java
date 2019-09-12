@@ -75,7 +75,7 @@ public class JobMonitor implements InitializingBean {
 
     @Override
     public void afterPropertiesSet() throws Exception {
-//        checkAccounts();
+        checkAccounts();
 //        setData();
     }
 
