@@ -4,6 +4,8 @@ import org.erachain.entities.account.Account;
 import org.erachain.entities.datainfo.DataEra;
 import org.erachain.entities.datainfo.DataInfo;
 import org.erachain.entities.request.ActRequest;
+import org.erachain.service.JsonService;
+import org.json.JSONObject;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -35,6 +37,9 @@ public class DbDataTest {
 
     @Autowired
     private InfoSave infoSave;
+
+    @Autowired
+    private JsonService jsonService;
 
     @Value("${EraService_creator}")
     private String EraService_creator;
@@ -85,6 +90,24 @@ public class DbDataTest {
 
     @Value("${GET_LAST_RECORD_BY_DATE}")
     private String GET_LAST_RECORD_BY_DATE;
+
+    @Value("${GET_LAST_BLOCK_CHAIN_INFO_BY_DATE}")
+    private String GET_LAST_BLOCK_CHAIN_INFO_BY_DATE;
+
+    @Test
+    public void getDataMap() {
+        try {
+            Map<String, Object> map = dbUtils.getDataMap(GET_LAST_BLOCK_CHAIN_INFO_BY_DATE, "4403", new Date().getTime());
+            map.keySet().forEach(name -> {
+                logger.info(name);
+            });
+            JSONObject jsonObject = jsonService.getJson("response.json");
+            logger.info(jsonService.setMapToObj(map, jsonObject).toString());
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+    }
 
     @Test
     public void getData1() {

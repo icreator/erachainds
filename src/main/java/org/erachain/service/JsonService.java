@@ -12,7 +12,9 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @Service
 public class JsonService {
@@ -28,16 +30,12 @@ public class JsonService {
         return (T) jsonObject.get(key);
     }
 
-    public List<String> getPeers() {
-        JSONObject obj = getJson("peers.json");
-        JSONArray peers = obj.getJSONArray("peers");
-        List<String> list = new ArrayList<>();
-        for (int i = 0; i < peers.length(); i++) {
-            //    logger.info("peer " + peers.get(i).toString());
-            list.add(peers.get(i).toString());
-        }
-        return list;
-
+    public Map<String, Object> getObjToMap(JSONObject jsonObject) {
+        Map<String, Object> map = new HashMap<>();
+        jsonObject.keys().forEachRemaining(key -> {
+            map.put(key, jsonObject.get(key));
+        });
+        return map;
     }
     public JSONObject getJson(String file) {
         File resource = null;
@@ -52,5 +50,11 @@ public class JsonService {
             logger.error(e.getMessage());
         }
         return new JSONObject(payStr);
+    }
+    public JSONObject setMapToObj(Map<String, Object> map, JSONObject jsonObject) {
+        jsonObject.keys().forEachRemaining(key -> {
+            jsonObject.put(key, map.get(key));
+        });
+        return jsonObject;
     }
 }

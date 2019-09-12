@@ -3,6 +3,7 @@ package org.erachain.controllers;
 
 import org.erachain.repositories.DbUtils;
 import org.erachain.repositories.InfoSave;
+import org.erachain.service.JsonService;
 import org.erachain.utils.DateUtl;
 import org.erachain.utils.crypto.Base58;
 import org.erachain.utils.loggers.LoggableController;
@@ -39,8 +40,15 @@ public class TransactionController {
     @Autowired
     private DateUtl dateUtl;
 
+    @Autowired
+    private JsonService jsonService;
+
     @Value("${GET_LAST_RECORD_BY_DATE}")
     private String GET_LAST_RECORD_BY_DATE;
+
+    @Value("${GET_LAST_BLOCK_CHAIN_INFO_BY_DATE}")
+    private String GET_LAST_BLOCK_CHAIN_INFO_BY_DATE;
+
 
     @LoggableController
     @RequestMapping(value = "/proc/{id}", method = RequestMethod.GET, produces = {"text/plain"})
@@ -74,17 +82,30 @@ public class TransactionController {
 
 
     @LoggableController
-    @RequestMapping(value = "/{id}/", method = RequestMethod.GET, produces = {"application/json"})
+    @RequestMapping(value = "/{id}", method = RequestMethod.GET, produces = {"text/plain"})
     public String getIdentByDate(@PathVariable("id") String ident,
                                 @RequestParam(value = "date", required = false)  String date)  throws InterruptedException {
-        return "";
+
+
+        Map<String, Object> map = null;
+        try {
+            Date runDate = (date == null ? new Date() : dateUtl.stringToDate(date));
+            map = dbUtils.getDataMap(GET_LAST_BLOCK_CHAIN_INFO_BY_DATE, ident, runDate.getTime());
+        } catch (Exception e) {
+            String message = "check parameters - " + e.getMessage();
+            return "{\"error\"=\"" + message + "\"}";
+        }
+        if (map == null || map.isEmpty())
+            return "{\"error\":\"Not found\"}";
+        JSONObject jsonObject = jsonService.getJson("response.json");
+        return jsonService.setMapToObj(map, jsonObject).toString();
+    }
 
 /* Формта возвращаемого значения
         {
 
-            errorcode: "error code", "0" - ok , "Not found"
-            message: "Error message"
-            details: "Detail error description"
+            "error" : "Not found"
+
 
             date: "timestamp" - дата запроса данных у внешнего сервиса
             tx: "BLOCKNO-TXNO" - номер блока и транзакции в блоке
@@ -94,11 +115,8 @@ public class TransactionController {
         }
 */
 
-    }
-
-
         @LoggableController
-    @RequestMapping(value = "/{id}/data", method = RequestMethod.GET, produces = {"text/plain"})
+    @RequestMapping(value = "/data/{id}", method = RequestMethod.GET, produces = {"text/plain"})
     //         produces = {"text/json", "text/xml"})
     public String getDataByDate(@PathVariable("id") String ident,
                                 @RequestParam(value = "date", required = false)  String date)  throws InterruptedException {
@@ -109,9 +127,10 @@ public class TransactionController {
             result = dbUtils.getData(GET_LAST_RECORD_BY_DATE, ident, runDate.getTime());
         } catch (Exception e) {
             String message = "check parameters - " + e.getMessage();
-            return "{\"error\"=\"" + message + "\"}";
+            return "{\"error\":\"" + message + "\"}";
         }
-        return result == null ? "{}" : new String(result);
+        return (result == null ? "{\"error\":\"Not found\"}" : new String(result));
+
     }
 //
 }

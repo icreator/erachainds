@@ -30,8 +30,34 @@ public class DbUtils {
         this.jdbcTemplate = jdbcTemplate;
     }
 
+    private String getSql(String sql, Object... values) {
+        for(Object value : values) {
+            String strValue = value.getClass().getSimpleName().endsWith("String") ? "'" + value.toString() + "'" : value.toString();
+            sql = StringUtils.replaceOnce(sql, "?", strValue);
+        }
+        return sql;
+    }
+    public Map<String, Object> getDataMap(String sql, Object... values) throws Exception {
+        sql = getSql(sql, values);
+        Map<String, Object> map = new HashMap<>();
+        try (Connection connection = jdbcTemplate.getDataSource().getConnection()) {
+            PreparedStatement statement = connection.prepareStatement(sql);
+            ResultSet resultset = statement.executeQuery();
+
+            if (resultset != null && !resultset.isClosed()) {
+                ResultSetMetaData rm = resultset.getMetaData();
+                for (int i = 1; i <= rm.getColumnCount(); i ++) {
+                    String name = rm.getColumnName(i);
+                    logger.debug(" name " + name + " value " + resultset.getObject(name).toString());
+                    map.put(name, resultset.getObject(name));
+                }
+                statement.close();
+            }
+        }
+        return map;
+    }
     public <T> T checkData(String sql) throws SQLException {
-        logger.debug(" sql " + sql);
+//        logger.debug(" sql " + sql);
         try (Connection connection = jdbcTemplate.getDataSource().getConnection()) {
             PreparedStatement statement = connection.prepareStatement(sql);
             ResultSet resultset = statement.executeQuery();
@@ -44,12 +70,10 @@ public class DbUtils {
         }
         return (T) null;
     }
+
     public <T> T getData(String sql, Object... values) throws SQLException {
-        for(Object value : values) {
-            String strValue = value.getClass().getSimpleName().endsWith("String") ? "'" + value.toString() + "'" : value.toString();
-            sql = StringUtils.replaceOnce(sql, "?", strValue);
-        }
-        logger.debug(" sql " + sql);
+        sql = getSql(sql, values);
+//        logger.debug(" sql " + sql);
         try (Connection connection = jdbcTemplate.getDataSource().getConnection()) {
             PreparedStatement statement = connection.prepareStatement(sql);
             ResultSet resultset = statement.executeQuery();
