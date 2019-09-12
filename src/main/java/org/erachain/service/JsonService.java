@@ -53,7 +53,8 @@ public class JsonService {
     }
     public JSONObject setMapToObj(Map<String, Object> map, JSONObject jsonObject) {
         jsonObject.keys().forEachRemaining(key -> {
-            jsonObject.put(key, map.get(key));
+            if (map.get(key) != null)
+                jsonObject.put(key, map.get(key));
         });
         return jsonObject;
     }
