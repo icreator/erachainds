@@ -108,10 +108,12 @@ public class JobMonitor implements InitializingBean {
                                 try {
                                     logger.info("=================Job 1. Receiving data from client================");
                                     Map<String, byte[]> data = dataClient.getDataFromClient(o.getAccountId(), o.getRequestId());
+                                    accountProc.afterRun(accountProc.getRequestById(o.getRequestId()));
                                     if (data != null && !data.isEmpty()) {
                                         //logger.info("=================Job 1.1 Saving data from client================");
                                         dataClient.setClientData(o.getRequestId(), data);
                                     }
+
                                 } catch (Exception e) {
                                     logger.error(e.getMessage());
                                 }

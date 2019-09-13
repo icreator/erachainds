@@ -34,7 +34,8 @@ public class DataClient {
     @Value("${GET_LAST_RECORD}")
     private String GET_LAST_RECORD;
 
-
+    @Value("${Same_Data_Option_Send}")
+    private String Same_Data_Option_Send;
 
     @Autowired
     private ServiceFactory serviceFactory;
@@ -53,7 +54,10 @@ public class DataClient {
 
     private ConcurrentMap<String, String> dataMap = new ConcurrentHashMap<>();
 
-    private boolean checkData(String ident, String data) {
+    private boolean checkDataTheSame(String ident, String data) {
+        // check if send to blockchain anyway
+        if ("Yes".equalsIgnoreCase(Same_Data_Option_Send))
+            return false;
         if (dataMap.get(ident) == null) {
             try {
                 byte[] dt = dbUtils.getData(GET_LAST_RECORD, ident);
@@ -120,7 +124,7 @@ public class DataClient {
             String json = null;
             try {
                 json = service.getIdentityValues(params);
-                if (checkData(ident, json))
+                if (checkDataTheSame(ident, json))
                     continue;
             } catch (Exception e) {
                 logger.error(e.getMessage());
@@ -177,7 +181,7 @@ public class DataClient {
                 throw e;
             }
         }
-        accountProc.afterRun(request);
+//        accountProc.afterRun(request);
         return;
     }
 
@@ -197,7 +201,7 @@ public class DataClient {
                 throw e;
             }
         }
-        accountProc.afterRun(request);
+//        accountProc.afterRun(request);
         return;
 
     }
