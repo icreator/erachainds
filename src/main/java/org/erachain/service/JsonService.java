@@ -11,10 +11,7 @@ import org.springframework.stereotype.Service;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @Service
 public class JsonService {
@@ -57,5 +54,24 @@ public class JsonService {
                 jsonObject.put(key, map.get(key));
         });
         return jsonObject;
+    }
+    public String getDataMapList(List<Map<String, Object>> list) throws Exception {
+        String json1 = "{\"result\":[]}";
+        String dt1 = "{\"date\":\"\",\"data\":\"\"}";
+        JSONObject jsonObject = new JSONObject(json1);
+        JSONArray jsonArray = jsonObject.getJSONArray("result");
+        try {
+            list.forEach(map ->  {
+                JSONObject dt = new JSONObject(dt1);
+                dt.put("date", map.get("date"));
+                String data = new String((byte[]) map.get("data"));
+                dt.put("data", new JSONObject(data));
+                jsonArray.put(dt);
+            });
+            jsonObject.put("result", jsonArray);
+        } catch (Exception e) {
+            throw new Exception(e.getMessage());
+        }
+        return jsonObject.toString();
     }
 }

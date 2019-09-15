@@ -10,6 +10,7 @@ import org.erachain.utils.loggers.LoggableController;
 
 import org.json.JSONObject;
 import org.json.XML;
+import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.format.annotation.DateTimeFormat;
@@ -25,7 +26,6 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.logging.Logger;
 
 @RestController
 @RequestMapping("/api/v1/blockchain")
@@ -43,11 +43,17 @@ public class TransactionController {
     @Autowired
     private JsonService jsonService;
 
+    @Autowired
+    private Logger logger;
+
     @Value("${GET_LAST_RECORD_BY_DATE}")
     private String GET_LAST_RECORD_BY_DATE;
 
     @Value("${GET_LAST_BLOCK_CHAIN_INFO_BY_DATE}")
     private String GET_LAST_BLOCK_CHAIN_INFO_BY_DATE;
+
+    @Value("${GET_HISTORY_BY_DATE}")
+    private String GET_HISTORY_BY_DATE;
 
 
 //    @LoggableController
@@ -124,13 +130,35 @@ public class TransactionController {
         byte[] result = null;
         try {
             Date runDate = (date == null ? new Date() : dateUtl.stringToDate(date));
-            result = dbUtils.getData(GET_LAST_RECORD_BY_DATE, ident, runDate.getTime());
+            result = dbUtils.getData(GET_LAST_RECORD_BY_DATE, ident, runDate.getTime(), 1);
         } catch (Exception e) {
             String message = "check parameters - " + e.getMessage();
             return "{\"error\":\"" + message + "\"}";
         }
         return (result == null ? "{\"error\":\"Not found\"}" : new String(result));
 
+    }
+    @RequestMapping(value = "/history/{id}", method = RequestMethod.GET, produces = "application/json")
+    public String getIdentHistoryByDate(@PathVariable("id") String ident,
+                                        @RequestParam(value = "date", required = false)  String date,
+                                        @RequestParam(value = "limit", required = false) String limit)  throws InterruptedException {
+
+        List<Map<String, Object>> list = null;
+        Map<String, Object> map = null;
+        String result = null;
+        try {
+            Date runDate = (date == null ? new Date() : dateUtl.stringToDate(date));
+            int lim = (limit == null ? 50 : Integer.parseInt(limit));
+            list = dbUtils.getDataMapList(GET_HISTORY_BY_DATE, ident, runDate.getTime(), lim);
+            if (list == null || list.isEmpty())
+                return "{\"error\":\"Not found\"}";
+            result = jsonService.getDataMapList(list);
+        } catch (Exception e) {
+            String message = "check parameters - " + e.getMessage();
+            return "{\"error\"=\"" + message + "\"}";
+        }
+
+        return result;
     }
 //
 }

@@ -5,6 +5,7 @@ import org.erachain.entities.datainfo.DataEra;
 import org.erachain.entities.datainfo.DataInfo;
 import org.erachain.entities.request.ActRequest;
 import org.erachain.service.JsonService;
+import org.json.JSONArray;
 import org.json.JSONObject;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -94,6 +95,20 @@ public class DbDataTest {
     @Value("${GET_LAST_BLOCK_CHAIN_INFO_BY_DATE}")
     private String GET_LAST_BLOCK_CHAIN_INFO_BY_DATE;
 
+    @Value("${GET_HISTORY_BY_DATE}")
+    private String GET_HISTORY_BY_DATE;
+
+    @Test
+    public void getDataMapList() {
+        try {
+            List<Map<String, Object>> list = dbUtils.getDataMapList(GET_HISTORY_BY_DATE, "4403", new Date().getTime(), 3);
+            logger.info(jsonService.getDataMapList(list));
+
+        } catch (Exception e) {
+            logger.error(e.getMessage());
+        }
+
+    }
     @Test
     public void getDataMap() {
         try {
@@ -115,8 +130,11 @@ public class DbDataTest {
 //            String sql = CHECK_DATA_FOR_SUBMIT;
 //            String sql = CHECK_DATA_FOR_SUBMIT.replace("?", Long.toString(new Date().getTime()));
 //            logger.info(" sql " + sql);
-            byte[] result = dbUtils.getData(GET_LAST_RECORD_BY_DATE, "4403", new Date(1567608297291L).getTime());
-            logger.info(" result " + (result != null ? new String(result) : ""));
+            List<byte[]> result = dbUtils.getDataList(GET_LAST_RECORD_BY_DATE, "4403", new Date().getTime(), 3);
+            result.forEach(res -> {
+                logger.info(" result " + new String(res));
+            });
+
 
         } catch (SQLException e) {
             logger.error(e.getMessage());
