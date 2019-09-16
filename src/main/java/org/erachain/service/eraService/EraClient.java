@@ -81,7 +81,8 @@ public class EraClient {
         String[] urlParams = {EraService_creator, account.getRecipient()};
         Map<String, String> params = new HashMap<>();
         params.put("password", EraService_password);
-        params.put("title", "ErachainDS data for "+account.getId());//EraService_title);
+        //params.put("title", "ErachainDS data for "+account.getId());//EraService_title);
+        params.put("title", EraService_title);
         String url = restClient.addParams(EraService_Url, urlParams, params);
         logger.debug(" url " + url);
         String result = null;

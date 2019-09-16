@@ -122,7 +122,7 @@ public class TransactionController {
 */
 
 //        @LoggableController
-    @RequestMapping(value = "/data/{id}", method = RequestMethod.GET, produces = {"text/plain"})
+    @RequestMapping(value = "/{id}/data", method = RequestMethod.GET, produces = {"text/plain"})
     //         produces = {"text/json", "text/xml"})
     public String getDataByDate(@PathVariable("id") String ident,
                                 @RequestParam(value = "date", required = false)  String date)  throws InterruptedException {
