@@ -116,7 +116,7 @@ public class TransactionController {
             date: "timestamp" - дата запроса данных у внешнего сервиса
             tx: "BLOCKNO-TXNO" - номер блока и транзакции в блоке
             pos: 0 - позиция данных в транзакции, необязательный если вся транзакция для одного идентификатора
-            size: 122 - длинна данных в символах UTF-8, необязательный если вся транзакция для одного идентификатора
+            size: 122 - длинна данных в байтах, необязательный если вся транзакция для одного идентификатора
 
         }
 */
@@ -138,7 +138,7 @@ public class TransactionController {
         return (result == null ? "{\"error\":\"Not found\"}" : new String(result));
 
     }
-    @RequestMapping(value = "/{id}/history/", method = RequestMethod.GET, produces = "application/json")
+    @RequestMapping(value = "/{id}/history", method = RequestMethod.GET, produces = "application/json")
     public String getIdentHistoryByDate(@PathVariable("id") String ident,
                                         @RequestParam(value = "date", required = false)  String date,
                                         @RequestParam(value = "limit", required = false) String limit)  throws InterruptedException {
