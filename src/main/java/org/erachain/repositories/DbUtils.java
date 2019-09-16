@@ -81,8 +81,8 @@ public class DbUtils {
             PreparedStatement statement = connection.prepareStatement(sql);
             ResultSet resultset = statement.executeQuery();
 
-            if (resultset != null && !resultset.isClosed()) {
-                if (resultset.next()) // exactly one result so allowed
+            if (resultset != null && !resultset.isClosed() && resultset.next()) {
+//                 // exactly one result so allowed
                     return (T) resultset.getObject(1);
             }
             statement.close();
@@ -98,8 +98,8 @@ public class DbUtils {
             ResultSet resultset = statement.executeQuery();
 
             if (resultset != null && !resultset.isClosed()) {
-                while(resultset.next()) // exactly one result so allowed
-                list.add ((T) resultset.getObject(1));
+                while(resultset.next())
+                    list.add ((T) resultset.getObject(1));
             }
         }
         return  list;
@@ -111,8 +111,8 @@ public class DbUtils {
             PreparedStatement statement = connection.prepareStatement(sql);
             ResultSet resultset = statement.executeQuery();
 
-            if (resultset != null && !resultset.isClosed()) {
-                if(resultset.next()) // exactly one result so allowed
+            if (resultset != null && !resultset.isClosed() && resultset.next()) {
+ //                // exactly one result so allowed
                     return (T) resultset.getObject(1);
             }
         }
