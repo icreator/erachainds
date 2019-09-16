@@ -138,7 +138,7 @@ public class TransactionController {
         return (result == null ? "{\"error\":\"Not found\"}" : new String(result));
 
     }
-    @RequestMapping(value = "/history/{id}", method = RequestMethod.GET, produces = "application/json")
+    @RequestMapping(value = "/{id}/history/", method = RequestMethod.GET, produces = "application/json")
     public String getIdentHistoryByDate(@PathVariable("id") String ident,
                                         @RequestParam(value = "date", required = false)  String date,
                                         @RequestParam(value = "limit", required = false) String limit)  throws InterruptedException {
