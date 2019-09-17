@@ -52,12 +52,8 @@ public class TransactionController {
     @Value("${GET_LAST_BLOCK_CHAIN_INFO_BY_DATE}")
     private String GET_LAST_BLOCK_CHAIN_INFO_BY_DATE;
 
-    @Value("${GET_HISTORY_BY_DATE}")
-    private String GET_HISTORY_BY_DATE;
-
-
 //    @LoggableController
-    @RequestMapping(value = "/proc/{id}", method = RequestMethod.GET, produces = {"text/plain"})
+    @RequestMapping(value = "/{id}/proc", method = RequestMethod.GET, produces = {"text/plain"})
     //         produces = {"text/json", "text/xml"})
     public String getClientData(@PathVariable("id") String ident,
                                 @RequestParam List<String> names,
@@ -92,19 +88,20 @@ public class TransactionController {
     public String getIdentByDate(@PathVariable("id") String ident,
                                 @RequestParam(value = "date", required = false)  String date)  throws InterruptedException {
 
-
+        JSONObject jsonObject = null;
         Map<String, Object> map = null;
         try {
             Date runDate = (date == null ? new Date() : dateUtl.stringToDate(date));
-            map = dbUtils.getDataMap(GET_LAST_BLOCK_CHAIN_INFO_BY_DATE, ident, runDate.getTime());
+            map = dbUtils.getDataMap(GET_LAST_BLOCK_CHAIN_INFO_BY_DATE, ident, runDate.getTime(), 1);
+            if (map == null || map.isEmpty())
+                return "{\"error\":\"Not found\"}";
+             jsonObject = jsonService.getDataMap(map);
         } catch (Exception e) {
             String message = "check parameters - " + e.getMessage();
             return "{\"error\"=\"" + message + "\"}";
         }
-        if (map == null || map.isEmpty())
-            return "{\"error\":\"Not found\"}";
-        JSONObject jsonObject = jsonService.getJson("response.json");
-        return jsonService.setMapToObj(map, jsonObject).toString();
+
+        return jsonObject.toString();
     }
 
 /* Формта возвращаемого значения
@@ -138,18 +135,17 @@ public class TransactionController {
         return (result == null ? "{\"error\":\"Not found\"}" : new String(result));
 
     }
-    @RequestMapping(value = "/history/{id}", method = RequestMethod.GET, produces = "application/json")
+    @RequestMapping(value = "/{id}/history", method = RequestMethod.GET, produces = "application/json")
     public String getIdentHistoryByDate(@PathVariable("id") String ident,
                                         @RequestParam(value = "date", required = false)  String date,
                                         @RequestParam(value = "limit", required = false) String limit)  throws InterruptedException {
 
         List<Map<String, Object>> list = null;
-        Map<String, Object> map = null;
-        String result = null;
+        JSONObject result = null;
         try {
             Date runDate = (date == null ? new Date() : dateUtl.stringToDate(date));
             int lim = (limit == null ? 50 : Integer.parseInt(limit));
-            list = dbUtils.getDataMapList(GET_HISTORY_BY_DATE, ident, runDate.getTime(), lim);
+            list = dbUtils.getDataMapList(GET_LAST_BLOCK_CHAIN_INFO_BY_DATE, ident, runDate.getTime(), lim);
             if (list == null || list.isEmpty())
                 return "{\"error\":\"Not found\"}";
             result = jsonService.getDataMapList(list);
@@ -157,8 +153,7 @@ public class TransactionController {
             String message = "check parameters - " + e.getMessage();
             return "{\"error\"=\"" + message + "\"}";
         }
-
-        return result;
+        return result.toString();
     }
 //
 }

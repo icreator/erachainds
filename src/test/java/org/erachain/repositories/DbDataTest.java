@@ -95,31 +95,14 @@ public class DbDataTest {
     @Value("${GET_LAST_BLOCK_CHAIN_INFO_BY_DATE}")
     private String GET_LAST_BLOCK_CHAIN_INFO_BY_DATE;
 
-    @Value("${GET_HISTORY_BY_DATE}")
-    private String GET_HISTORY_BY_DATE;
-
     @Test
     public void getDataMapList() {
         try {
-            List<Map<String, Object>> list = dbUtils.getDataMapList(GET_HISTORY_BY_DATE, "4403", new Date().getTime(), 3);
-            logger.info(jsonService.getDataMapList(list));
+            List<Map<String, Object>> list = dbUtils.getDataMapList(GET_LAST_BLOCK_CHAIN_INFO_BY_DATE, "4408", new Date().getTime(), 3);
+            logger.info(jsonService.getDataMapList(list).toString());
 
         } catch (Exception e) {
             logger.error(e.getMessage());
-        }
-
-    }
-    @Test
-    public void getDataMap() {
-        try {
-            Map<String, Object> map = dbUtils.getDataMap(GET_LAST_BLOCK_CHAIN_INFO_BY_DATE, "4403", new Date().getTime());
-            map.keySet().forEach(name -> {
-                logger.info(name);
-            });
-            JSONObject jsonObject = jsonService.getJson("response.json");
-            logger.info(jsonService.setMapToObj(map, jsonObject).toString());
-        } catch (Exception e) {
-            e.printStackTrace();
         }
 
     }

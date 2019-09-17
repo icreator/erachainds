@@ -55,23 +55,30 @@ public class JsonService {
         });
         return jsonObject;
     }
-    public String getDataMapList(List<Map<String, Object>> list) throws Exception {
+    public JSONObject getDataMap(Map<String, Object> map) throws Exception {
+        JSONObject dt = new JSONObject("{}");
+        dt.put("date", map.get("date"));
+        dt.put("tx", map.get("tx"));
+        int partNo = (int) map.get("partNo");
+        if (partNo > 0) {
+            dt.put("pos", map.get("pos"));
+            dt.put("size", map.get("size"));
+        }
+        return dt;
+    }
+    public JSONObject getDataMapList(List<Map<String, Object>> list) throws Exception {
         String json1 = "{\"result\":[]}";
-        String dt1 = "{\"date\":\"\",\"data\":\"\"}";
         JSONObject jsonObject = new JSONObject(json1);
         JSONArray jsonArray = jsonObject.getJSONArray("result");
         try {
-            list.forEach(map ->  {
-                JSONObject dt = new JSONObject(dt1);
-                dt.put("date", map.get("date"));
-                String data = new String((byte[]) map.get("data"));
-                dt.put("data", new JSONObject(data));
+            for (Map<String, Object> map : list) {
+                JSONObject dt = getDataMap(map);
                 jsonArray.put(dt);
-            });
+            }
             jsonObject.put("result", jsonArray);
         } catch (Exception e) {
             throw new Exception(e.getMessage());
         }
-        return jsonObject.toString();
+        return jsonObject;
     }
 }

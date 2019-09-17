@@ -119,10 +119,7 @@ public class DbUtils {
         return (T) null;
     }
     public  <T> List<T>  fetchDataValues(Class<T> clazz, String sql, Object... values) {
-        for(Object value : values) {
-            String strValue = value.getClass().getSimpleName().endsWith("String") ? "'" + value.toString() + "'" : value.toString();
-            sql = StringUtils.replaceOnce(sql, "?", strValue);
-        }
+        sql = getSql(sql, values);
         return fetchData(clazz, sql);
     }
     public <T> T fetchData(Class<T> clazz, int id) {
@@ -135,7 +132,7 @@ public class DbUtils {
         return (List<T>) fetchData(clazz, fetch + table + (where = where == null ? "" : " where " + where));
     }
     public   <T> List<T> fetchData(Class<T> clazz, String sql) {
-        logger.debug(" sql " + sql);
+//        logger.debug(" sql " + sql);
         List<Map<String, Object>> rows = jdbcTemplate.queryForList(sql);
  //       logger.debug("rows " + rows.size());
         List<T> list = new ArrayList<>();
