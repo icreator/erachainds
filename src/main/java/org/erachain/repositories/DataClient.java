@@ -131,7 +131,7 @@ public class DataClient {
                 throw e;
             }
             if (json != null && !json.isEmpty()) {
-                byte[] data = json.getBytes();
+                byte[] data = json.getBytes("UTF8");
                 identData.put(ident, data);
 
             }
