@@ -57,6 +57,9 @@ public class ServiceMonitor {
     @Value("${TRANS_MINSIZE}")
     private int TRANS_MINSIZE;
 
+    @Value("${CONFIRMATION_TO_ACCEPT}")
+    private int CONFIRMATION_TO_ACCEPT;
+
 
 
     @Value("${FETCH_DATA_FOR_SUBMIT}")
@@ -141,11 +144,11 @@ public class ServiceMonitor {
                     }
                     confirmations = jsonService.getValue(result, "confirmations");
 
-                    if (confirmations == 0) {
-                        logger.debug(" unconfirmed " + dataEra.getSignature());
+                    if (confirmations < CONFIRMATION_TO_ACCEPT) {
+                        logger.debug(" unconfirmed " + confirmations);
                         unConfirmed ++;
                     } else {
-                        logger.info(" confirmed " + dataEra.getSignature());
+                        logger.info(" confirmed " + confirmations);
                         int height = jsonService.getValue(result, "height");
                         int sequence = jsonService.getValue(result, "sequence");
                         dataEra.setBlockTrId(height + "-" + sequence);
