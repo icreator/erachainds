@@ -62,14 +62,13 @@ public class DataClient {
             try {
                 byte[] dt = dbUtils.getData(GET_LAST_RECORD, ident);
                 if (dt != null) {
-                    String dbData = new String(dt);
-                    if (dbData.equals(data)) {
-                        dataMap.putIfAbsent(ident, dbData);
-                        logger.debug(" set ident from db " + ident + " data " + dbData);
+                    byte[] dat1 = data.getBytes("UTF8");
+                    if(Arrays.equals(dt, dat1))
+                        dataMap.putIfAbsent(ident, data);
+                        logger.debug(" set ident  " + ident + " data " + data);
                         return true;
-                    }
                 }
-            } catch (SQLException e) {
+            } catch (Exception e) {
                 logger.error(e.getMessage());
             }
             dataMap.putIfAbsent(ident, data);
