@@ -59,7 +59,8 @@ public class EraClient {
 
         List<DataEra> dataEras = new ArrayList<>();
         for (byte[] dt : dataInfo.getData(dbUtils, TRANS_MAXSIZE)) {
-            String data = new String(dt);
+            String data = new String(dt, "UTF8");
+            logger.info(" data to client " + data);
             DataEra dataEra = new DataEra();
             dataEra.setDataInfoId(dataInfo.getId());
             if (signiture != null) {

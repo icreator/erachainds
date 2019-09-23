@@ -19,6 +19,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.stereotype.Service;
 
+import java.io.UnsupportedEncodingException;
 import java.sql.SQLException;
 
 import java.util.*;
@@ -88,6 +89,7 @@ public class ServiceMonitor {
         Account account = accountProc.getAccountById(accountId);
         if(getSize(dataInfos) < TRANS_MINSIZE) {
             String data = getData(dataInfos);
+            logger.info(" data to chain " + data);
             signature = eraClient.getSignForData(account, data);
         }
         int offset = 0;
@@ -122,7 +124,11 @@ public class ServiceMonitor {
         int size = 0;
         StringBuffer stringBuffer = new StringBuffer("");
         for (DataInfo dataInfo : dataInfos) {
-           stringBuffer.append(dataInfo.getData());
+            try {
+                stringBuffer.append(new String(dataInfo.getData(), "UTF8"));
+            } catch (UnsupportedEncodingException e) {
+                logger.error(e.getMessage());
+            }
         }
         return stringBuffer.toString();
     }
