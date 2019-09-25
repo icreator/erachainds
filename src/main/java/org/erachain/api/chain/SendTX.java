@@ -78,6 +78,10 @@ public class SendTX {
         this.setTX(encrypt, (byte) 1, creator, privateKeyString, recipient, publicKeyRecipient, type, head, data, amount, timestamp, key, feePow);
     }
 
+    public byte[] getSignature() {
+        return signature;
+    }
+
     private void setTX(byte encrypted, byte isText, String creator, String privateKeyString, String recipient, String publicKeyRecipient, byte[] type, String head,
                        String data, BigDecimal amount, long timestamp, long key, byte feePow) {
 
