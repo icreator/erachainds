@@ -281,13 +281,10 @@ public class SendTX {
             byte[] dataByte;
 
             if (Arrays.equals(this.encrypted, new byte[]{1})) {
-                Object result = encrypt("{\"message\":" + this.data + ", " +
-                        "\"publicKey\":\"" + Base58.encode(publicKeyRecipient) + "\"," +
-                        "\"privateKey\":\"" + Base58.encode(privateKeyCreator) + "\"}");
-                Object encrypt = ((OutboundJaxrsResponse) result).getEntity();
-                JSONParser jsonParser = new JSONParser();
-                JSONObject jsonObject = (JSONObject) jsonParser.parse(encrypt.toString());
-                dataByte = Base58.decode(jsonObject.get("encrypted").toString());
+                String encrypt = Base58.encode(AEScrypto.dataEncrypt(dataBytes,
+                        privateKeyCreator,
+                        publicKeyRecipient));
+                dataByte = Base58.decode(encrypt);
 
             } else {
                 dataByte = dataBytes;
@@ -315,24 +312,6 @@ public class SendTX {
 
     public void sign(Pair<byte[], byte[]> keysPir) throws Exception {
         this.signature = Crypto.getInstance().sign(keysPir, this.toBytes(false));
-    }
-
-    private Response encrypt(String encrypt) throws Exception {
-        JSONParser jsonParser = new JSONParser();
-        JSONObject jsonObject = (JSONObject) jsonParser.parse(encrypt);
-
-        String message = jsonObject.get("message").toString();
-
-        byte[] publicKey = Base58.decode(jsonObject.get("publicKey").toString());
-        byte[] privateKey = Base58.decode(jsonObject.get("privateKey").toString());
-
-        String result = Base58.encode(AEScrypto.dataEncrypt(message.getBytes(Charset.forName("UTF-8")), privateKey, publicKey));
-        JSONObject jsonObjectResult = new JSONObject();
-        jsonObjectResult.put("encrypted", result);
-        return Response.status(200).header("Content-Type", "application/json; charset=utf-8")
-                .header("Access-Control-Allow-Origin", "*")
-                .entity(jsonObjectResult.toJSONString())
-                .build();
     }
 
 }
