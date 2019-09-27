@@ -56,6 +56,9 @@ public class EraClient {
     private int TRANS_MAXSIZE;
 
 
+    @Value("${ENCRYPT}")
+    private boolean ENCRYPT;
+
     private RestClient restClient;
 
     @Autowired
@@ -91,19 +94,17 @@ public class EraClient {
         String[] urlParams = {EraService_creator, account.getRecipient()};
         Map<String, String> params = new HashMap<>();
         params.put("password", EraService_password);
-        //params.put("title", "ErachainDS data for "+account.getId());//EraService_title);
         params.put("title", EraService_title);
         String url = restClient.addParams(EraService_Url, urlParams, params);
         logger.debug(" url " + url);
-        String result = null;
+        String result;
         SendTX tx;
         try {
-//            result = restClient.getResult(url, data);
-            String privateKeyCreator = "35kw3eQVCntU2wusAFw73KNdLYonhhcci272Yo1nzR6SUmSrJp8kYfh5AXACDvc8VythAMcyT2nCfhHXaC2DwYrY";
-            String publicKeyCreator = "FSZWdsDWE19JriSgEpJQp2zV8KGhKzjYxVEC31hWDx2i";
-            String recipient = "7AjWLhrtBxxsw7zsoqT79FMU6VSY81NCr3";
-            String publicKeyRecipient = "GA8XX9cm4W5ctsQLBcW6hu2LSYBSAT7mxSrsVWBDnJhw";
-            byte encrypt = true ? (byte) 1 : (byte) 0;
+            String privateKeyCreator = account.getPrivateKey();
+            String publicKeyCreator = account.getPublicKey();
+            String recipient = account.getRecipient();
+            String publicKeyRecipient = account.getPublicKeyRecipient();
+            byte encrypt = ENCRYPT ? (byte) 1 : (byte) 0;
             tx = new SendTX(publicKeyCreator, privateKeyCreator, recipient, publicKeyRecipient,
                     EraService_title, data,
                     BigDecimal.valueOf(0),
