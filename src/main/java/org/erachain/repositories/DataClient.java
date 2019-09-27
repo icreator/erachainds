@@ -52,6 +52,9 @@ public class DataClient {
     @Autowired
     private AccountProc accountProc;
 
+    @Value("${spring.profiles.active:}")
+    private String activeProfile;
+
     private ConcurrentMap<String, String> dataMap = new ConcurrentHashMap<>();
 
     private boolean checkDataTheSame(String ident, String data) {
@@ -114,7 +117,7 @@ public class DataClient {
         int debugIdents = 0;
 
         for (String ident : idents) {
-            if (debugIdents++ > 10){
+            if (activeProfile.contains("dev") && debugIdents++ >= 10){
                 logger.debug(" limits idents in debug {}", debugIdents);
                 break;
             }
