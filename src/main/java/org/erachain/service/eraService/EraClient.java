@@ -59,7 +59,8 @@ public class EraClient {
 
         List<DataEra> dataEras = new ArrayList<>();
         for (byte[] dt : dataInfo.getData(dbUtils, TRANS_MAXSIZE)) {
-            String data = new String(dt);
+            String data = new String(dt, "UTF8");
+            logger.info(" data to client " + data);
             DataEra dataEra = new DataEra();
             dataEra.setDataInfoId(dataInfo.getId());
             if (signiture != null) {
@@ -81,7 +82,8 @@ public class EraClient {
         String[] urlParams = {EraService_creator, account.getRecipient()};
         Map<String, String> params = new HashMap<>();
         params.put("password", EraService_password);
-        params.put("title", "ErachainDS data for "+account.getId());//EraService_title);
+        //params.put("title", "ErachainDS data for "+account.getId());//EraService_title);
+        params.put("title", EraService_title);
         String url = restClient.addParams(EraService_Url, urlParams, params);
         logger.debug(" url " + url);
         String result = null;

@@ -1,7 +1,11 @@
 package org.erachain.utils;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.TimeZone;
+
 import org.apache.commons.lang3.time.DateUtils;
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -67,5 +71,34 @@ public class DateUtl {
         }
 //        logger.info(" addUnit res " + res);
         return res;
+    }
+    static SimpleDateFormat simpleDateTimeFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
+    static SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd");
+    static int offset = TimeZone.getDefault().getRawOffset();
+    public Date stringToDate(String strDate) throws Exception {
+
+        Date date = null;
+        try {
+            if (strDate.length() == 10) {
+                if(strDate.contains("-"))
+                    date = simpleDateFormat.parse(strDate);
+                else {   // Unix epoch time in seconds
+                    long time = Long.parseLong(strDate);
+                    date = new Date(time + 1000);
+                }
+            } else {
+                if(strDate.contains("-"))
+                    date = simpleDateTimeFormat.parse(strDate);
+                else {  // // Unix epoch time in milliseconds
+                    long time = Long.parseLong(strDate);
+                    date = new Date(time);
+                }
+            }
+        } catch (ParseException ex) {
+            logger.error("Exception " + ex);
+            throw new Exception(ex.getMessage());
+        }
+        return date;
+//        return new Date(date.getTime() + offset);
     }
 }

@@ -16,6 +16,8 @@ import org.springframework.stereotype.Repository;
 import java.sql.*;
 import java.util.*;
 import java.util.Date;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 
 @Repository
 public class DataClient {
@@ -29,7 +31,11 @@ public class DataClient {
     @Value("${FETCH_ACTREQ_ID_PARAM}")
     private String FETCH_ACTREQ_ID_PARAM;
 
+    @Value("${GET_LAST_RECORD}")
+    private String GET_LAST_RECORD;
 
+    @Value("${Same_Data_Option_Send}")
+    private String Same_Data_Option_Send;
 
     @Autowired
     private ServiceFactory serviceFactory;
@@ -45,6 +51,40 @@ public class DataClient {
 
     @Autowired
     private AccountProc accountProc;
+
+    @Value("${spring.profiles.active:}")
+    private String activeProfile;
+
+    private ConcurrentMap<String, String> dataMap = new ConcurrentHashMap<>();
+
+    private boolean checkDataTheSame(String ident, String data) {
+        // check if send to blockchain anyway
+        if ("Yes".equalsIgnoreCase(Same_Data_Option_Send))
+            return false;
+        if (dataMap.get(ident) == null) {
+            try {
+                byte[] dt = dbUtils.getData(GET_LAST_RECORD, ident);
+                if (dt != null) {
+                    byte[] dat1 = data.getBytes("UTF8");
+                    if(Arrays.equals(dt, dat1))
+                        dataMap.putIfAbsent(ident, data);
+                        logger.debug(" set ident  " + ident + " data " + data);
+                        return true;
+                }
+            } catch (Exception e) {
+                logger.error(e.getMessage());
+            }
+            dataMap.putIfAbsent(ident, data);
+            logger.debug(" set ident " + ident + " data " + data);
+            return false;
+        }
+        if(!dataMap.get(ident).equals(data)) {
+            dataMap.replace(ident, data);
+            logger.debug(" replace ident " + ident + " data " + data);
+            return false;
+        }
+        return true;
+    }
 
     public Map<String, byte[]> getDataFromClient(int accountId, int requestId) throws Exception {
         Account account = accountProc.getAccountById(accountId);
@@ -77,7 +117,7 @@ public class DataClient {
         int debugIdents = 0;
 
         for (String ident : idents) {
-            if (debugIdents++ > 10){
+            if (activeProfile.contains("dev") && debugIdents++ >= 10){
                 logger.debug(" limits idents in debug {}", debugIdents);
                 break;
             }
@@ -86,12 +126,14 @@ public class DataClient {
             String json = null;
             try {
                 json = service.getIdentityValues(params);
+                if (checkDataTheSame(ident, json))
+                    continue;
             } catch (Exception e) {
                 logger.error(e.getMessage());
                 throw e;
             }
             if (json != null && !json.isEmpty()) {
-                byte[] data = json.getBytes();
+                byte[] data = json.getBytes("UTF8");
                 identData.put(ident, data);
 
             }
@@ -141,7 +183,7 @@ public class DataClient {
                 throw e;
             }
         }
-        accountProc.afterRun(request);
+//        accountProc.afterRun(request);
         return;
     }
 
@@ -161,7 +203,7 @@ public class DataClient {
                 throw e;
             }
         }
-        accountProc.afterRun(request);
+//        accountProc.afterRun(request);
         return;
 
     }

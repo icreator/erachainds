@@ -84,7 +84,7 @@ public class JobMonitor implements InitializingBean {
             @Override
             public void run() {
                 try {
-                    TimeUnit.MINUTES.sleep((long) 1);
+                    TimeUnit.SECONDS.sleep((long) 1);
                 } catch (InterruptedException e) {
                     logger.error(e.getMessage());
                 }
@@ -108,9 +108,12 @@ public class JobMonitor implements InitializingBean {
                                 try {
                                     logger.info("=================Job 1. Receiving data from client================");
                                     Map<String, byte[]> data = dataClient.getDataFromClient(o.getAccountId(), o.getRequestId());
-                                    if (data != null)
+                                    accountProc.afterRun(accountProc.getRequestById(o.getRequestId()));
+                                    if (data != null && !data.isEmpty()) {
                                         //logger.info("=================Job 1.1 Saving data from client================");
                                         dataClient.setClientData(o.getRequestId(), data);
+                                    }
+
                                 } catch (Exception e) {
                                     logger.error(e.getMessage());
                                 }
