@@ -281,10 +281,10 @@ public class SendTX {
             byte[] dataByte;
 
             if (Arrays.equals(this.encrypted, new byte[]{1})) {
-                String encrypt = Base58.encode(AEScrypto.dataEncrypt(dataBytes,
+                dataByte = AEScrypto.dataEncrypt(dataBytes,
                         privateKeyCreator,
-                        publicKeyRecipient));
-                dataByte = Base58.decode(encrypt);
+                        publicKeyRecipient);
+
 
             } else {
                 dataByte = dataBytes;

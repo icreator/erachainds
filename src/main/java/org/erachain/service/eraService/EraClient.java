@@ -118,6 +118,7 @@ public class EraClient {
 //        String signature = jsonService.getValue(result, "signature");
         String status = jsonService.getValue(result, "status");
         if (!status.equals("ok")) {
+            logger.error(EraService_Url + " status = " + status);
             throw new Exception(EraService_Url + " status = " + status);
         }
         String signature = Base58.encode(tx.getSignature());
