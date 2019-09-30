@@ -17,9 +17,7 @@ import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 @Service
 @PropertySource("classpath:custom.properties")
@@ -109,12 +107,20 @@ public class EraClient {
             result = restClient.getResult(ERASERVICE_URL_API + "/" + byteCode);
         } catch (Exception e) {
             logger.error(e.getMessage(), e);
-            throw new Exception(EraService_Url + " " + e.getMessage());
+            throw new Exception(ERASERVICE_URL_API + " " + e.getMessage());
         }
-        String status = jsonService.getValue(result, "status");
+        String status;
+        try {
+            status = jsonService.getValue(result, "status");
+        } catch (Exception e) {
+            logger.error("Doesn't find field 'status' in json response, received from blockchain after send data");
+            String message = jsonService.getValue(result, "message");
+            logger.error("message = " + message);
+            throw new Exception(e.getMessage());
+        }
         if (!status.equals("ok")) {
-            logger.error(EraService_Url + " status = " + status);
-            throw new Exception(EraService_Url + " status = " + status);
+            logger.error(ERASERVICE_URL_API + " status = " + status);
+            throw new Exception(ERASERVICE_URL_API + " status = " + status);
         }
         String signature = Base58.encode(tx.getSignature());
         logger.info(" Acquire signature for " + account.getId() + " : " + signature);
