@@ -91,12 +91,7 @@ public class EraClient {
     }
 
     public String getSignForData(Account account, String data) throws Exception {
-        String[] urlParams = {EraService_creator, account.getRecipient()};
-        Map<String, String> params = new HashMap<>();
-        params.put("password", EraService_password);
-        params.put("title", EraService_title);
-        String url = restClient.addParams(EraService_Url, urlParams, params);
-        logger.debug(" url " + url);
+        logger.info("Sending by API...");
         String result;
         SendTX tx;
         try {
@@ -116,7 +111,6 @@ public class EraClient {
             logger.error(e.getMessage(), e);
             throw new Exception(EraService_Url + " " + e.getMessage());
         }
-//        String signature = jsonService.getValue(result, "signature");
         String status = jsonService.getValue(result, "status");
         if (!status.equals("ok")) {
             logger.error(EraService_Url + " status = " + status);
