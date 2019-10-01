@@ -1,0 +1,7 @@
+ALTER TABLE Account ADD COLUMN publicKeyRecipient varchar(255);
+UPDATE Account
+SET privateKey         = '2Tcb6Fr2gPFV25AH5ecUaUk84j7RqQhevphpFVKd61jZkL5U8qiN4Gnyj8CDe2qgmiVzXJLAGRYDb5FnJt7Ew23t',
+    publicKey          = '4eoodjPf3Fr7uz3aM6GuL1R9feau6aPW8AGQRtZEDqVn',
+    recipient          = '7Nv5UaDubU222yynbNQTsUCZUYr1qW6dx9',
+    publicKeyRecipient = 'B9QCMXdDwyD98S2k1GSJMuxJPzvYBJ9Sr5fDPB1zYDV6'
+WHERE id = 1;

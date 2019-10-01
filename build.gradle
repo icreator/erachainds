@@ -50,11 +50,11 @@ repositories {
 }
 
 bootJar {
-    manifest{
+    manifest {
         attributes(
-            'Implementation-Title' : 'Gradle Build: ' + project.name,
-            'Implementation-Version' : project.version,
-            'Build-Time' : new Date().format("yyyy-MM-dd HH:mm:ssZ"),
+                'Implementation-Title': 'Gradle Build: ' + project.name,
+                'Implementation-Version': project.version,
+                'Build-Time': new Date().format("yyyy-MM-dd HH:mm:ssZ"),
                 'Git-Commit': git.head().abbreviatedId,
                 'Git-Branch': git.branch.current().name
         )
@@ -112,7 +112,6 @@ dependencies {
     implementation('org.springframework.boot:spring-boot-starter-jdbc')
     testCompile "org.springframework.boot:spring-boot-starter-test"
     testCompile "org.junit.jupiter:junit-jupiter-api:${junitVersion}"
-
 }
 
 

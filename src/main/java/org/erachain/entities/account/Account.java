@@ -1,12 +1,5 @@
 package org.erachain.entities.account;
 
-import org.apache.commons.lang3.time.DateUtils;
-import org.erachain.repositories.DbUtils;
-import org.erachain.utils.crypto.Base58;
-
-import java.sql.Timestamp;
-import java.util.Arrays;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -18,6 +11,7 @@ public class Account {
     private String publicKey;
     private String privateKey;
     private String recipient;
+    private String publicKeyRecipient;
     private String user;
     private String identityName;
     private String password ;
@@ -30,8 +24,6 @@ public class Account {
     public void setRecipient(String recipient) {
         this.recipient = recipient;
     }
-
-
 
     public String getIdentityName() {
         return identityName;
@@ -86,5 +78,27 @@ public class Account {
         this.id = id;
     }
 
+    public String getPublicKey() {
+        return publicKey;
+    }
 
+    public void setPublicKey(String publicKey) {
+        this.publicKey = publicKey;
+    }
+
+    public String getPrivateKey() {
+        return privateKey;
+    }
+
+    public void setPrivateKey(String privateKey) {
+        this.privateKey = privateKey;
+    }
+
+    public String getPublicKeyRecipient() {
+        return publicKeyRecipient;
+    }
+
+    public void setPublicKeyRecipient(String publicKeyRecipient) {
+        this.publicKeyRecipient = publicKeyRecipient;
+    }
 }
