@@ -32,11 +32,14 @@ public class EraClient {
     private String EraService_creator;
 
 
-    @Value("${EraService_Url_Signature}")
-    private String EraService_Url_Signature;
+//    @Value("${EraService_Url_Signature}")
+    private String ERASERVICE_URL_SIGNATURE;
 
-    @Value("${ERASERVICE_URL_API}")
+//    @Value("${ERASERVICE_URL_API}")
     private String ERASERVICE_URL_API;
+
+    @Value("#{'${ERA_SERVICE_IPS}'.trim().replaceAll(\"\\s*(?=,)|(?<=,)\\s*\", \"\").split(',')}")
+    private List<String> ERA_SERVICE_IPS;
 
     @Value("${EraService_password}")
     private String EraService_password;
@@ -90,7 +93,7 @@ public class EraClient {
 
     public String getSignForData(Account account, String data) throws Exception {
         logger.info("Sending by API...");
-        String result;
+        String result = null;
         SendTX tx;
         try {
             String privateKeyCreator = account.getPrivateKey();
@@ -104,10 +107,26 @@ public class EraClient {
                     System.currentTimeMillis(), 0, (byte) 0, encrypt);
             tx.sign(new Pair<>(Base58.decode(privateKeyCreator), Base58.decode(publicKeyCreator)));
             String byteCode = Base58.encode(tx.toBytes(true));
-            result = restClient.getResult(ERASERVICE_URL_API + "/" + byteCode);
+            for (String ip : ERA_SERVICE_IPS) {
+                try {
+                    //todo Gleb поискать и посмотреть библиотеку для формирования url
+                    //todo Gleb реализовать механизм что ответ получается по любому другому доступному url
+                    // кроме того, по которому отправлятся
+                    ERASERVICE_URL_API = "http://" + ip + ":9067/api/broadcast";
+                    ERASERVICE_URL_SIGNATURE = "http://" + ip + ":9067/apirecords/get";
+                    result = restClient.getResult(ERASERVICE_URL_API + "/" + byteCode);
+                    break;
+                } catch (Exception e) {
+                    logger.error("Request by url: " + ERASERVICE_URL_API + " can't be processed", e);
+                }
+            }
         } catch (Exception e) {
             logger.error(e.getMessage(), e);
             throw new Exception(ERASERVICE_URL_API + " " + e.getMessage());
+        }
+        if (result == null) {
+            logger.info("All era services are not reachable");
+            throw new Exception("All era services are not reachable");
         }
         String status;
         try {
@@ -129,13 +148,12 @@ public class EraClient {
 
     public String checkChain(DataEra dataEra) throws Exception {
         String signature = dataEra.getSignature();
-        String result = null;
+        String result;
         try {
-            result = restClient.getResult(EraService_Url_Signature + "/" + signature);
+            result = restClient.getResult(ERASERVICE_URL_SIGNATURE + "/" + signature);
         } catch (Exception e) {
-            //   logger.error(e.getMessage());
-            throw new Exception(EraService_Url_Signature + " " + e.getMessage());
-
+            logger.error(e.getMessage(), e);
+            throw new Exception(ERASERVICE_URL_SIGNATURE + " " + e.getMessage());
         }
         return result;
     }
