@@ -7,11 +7,7 @@ import org.erachain.utils.crypto.AEScrypto;
 import org.erachain.utils.crypto.Base58;
 import org.erachain.utils.crypto.Crypto;
 import org.erachain.utils.crypto.Pair;
-import org.glassfish.jersey.message.internal.OutboundJaxrsResponse;
-import org.json.simple.JSONObject;
-import org.json.simple.parser.JSONParser;
 
-import javax.ws.rs.core.Response;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.nio.charset.Charset;
