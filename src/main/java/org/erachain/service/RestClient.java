@@ -32,25 +32,17 @@ public class RestClient {
     public String getJsonResult(String url) throws Exception {
         HttpEntity<String> request = new HttpEntity<>(headers);
 
-        //String response = new RestTemplate().postForObject(url, request, String.class);
-        //String response = new RestTemplate().getForObject(url, request, String.class);
-        //RestTemplate restTemplate = new RestTemplate();
-        ResponseEntity<String> response = new RestTemplate().exchange(url, HttpMethod.GET, request, String.class);
+        ResponseEntity<String> response = getTemplate().exchange(url, HttpMethod.GET, request, String.class);
         return response.getBody();
     }
     public String getJsonResult(String url, String jsonRequest) throws Exception {
         HttpEntity<String> request = new HttpEntity<>(jsonRequest, headers);
 
-        String response = new RestTemplate().postForObject(url, request, String.class);
+        String response = getTemplate().postForObject(url, request, String.class);
 
         return response;
     }
-
-    public String getResult(String url, String anyString) throws Exception  {
-
-//        HttpEntity<String> request = new HttpEntity<>(anyString, headers);
-        HttpEntity<String> request = new HttpEntity<>(anyString);
-
+    private RestTemplate getTemplate() {
         RestTemplate restTemplate = new RestTemplate();
         StringHttpMessageConverter stringHttpMessageConverter = new StringHttpMessageConverter(Charset.forName("UTF-8"));
         stringHttpMessageConverter.setWriteAcceptCharset(true);
@@ -61,13 +53,19 @@ public class RestClient {
                 break;
             }
         }
+        return restTemplate;
+    }
+    public String getResult(String url, String anyString) throws Exception  {
 
-        String response = restTemplate.postForObject(url, request, String.class);
+//        HttpEntity<String> request = new HttpEntity<>(anyString, headers);
+        HttpEntity<String> request = new HttpEntity<>(anyString);
+
+        String response = getTemplate().postForObject(url, request, String.class);
 
         return response;
     }
     public String getResult(String url) throws Exception {
-        String response = new RestTemplate().getForObject(url, String.class);
+        String response = getTemplate().getForObject(url, String.class);
 
         return response;
     }
