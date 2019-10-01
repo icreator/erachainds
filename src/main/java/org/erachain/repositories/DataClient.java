@@ -2,6 +2,8 @@ package org.erachain.repositories;
 
 import org.erachain.entities.account.Account;
 import org.erachain.entities.datainfo.DataInfo;
+import org.erachain.entities.request.ActParams;
+import org.erachain.entities.request.ActRequest;
 import org.erachain.entities.request.Request;
 import org.erachain.service.ServiceFactory;
 import org.erachain.service.ServiceInterface;
@@ -11,9 +13,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Repository;
 
-import java.sql.SQLException;
-import java.sql.Timestamp;
+import java.sql.*;
 import java.util.*;
+import java.util.Date;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 
 @Repository
 public class DataClient {
@@ -24,6 +28,14 @@ public class DataClient {
     @Value("${Service_Url}")
     private String Service_Url;
 
+    @Value("${FETCH_ACTREQ_ID_PARAM}")
+    private String FETCH_ACTREQ_ID_PARAM;
+
+    @Value("${GET_LAST_RECORD}")
+    private String GET_LAST_RECORD;
+
+    @Value("${Same_Data_Option_Send}")
+    private String Same_Data_Option_Send;
 
     @Autowired
     private ServiceFactory serviceFactory;
@@ -40,6 +52,40 @@ public class DataClient {
     @Autowired
     private AccountProc accountProc;
 
+    @Value("${spring.profiles.active:}")
+    private String activeProfile;
+
+    private ConcurrentMap<String, String> dataMap = new ConcurrentHashMap<>();
+
+    private boolean checkDataTheSame(String ident, String data) {
+        // check if send to blockchain anyway
+        if ("Yes".equalsIgnoreCase(Same_Data_Option_Send))
+            return false;
+        if (dataMap.get(ident) == null) {
+            try {
+                byte[] dt = dbUtils.getData(GET_LAST_RECORD, ident);
+                if (dt != null) {
+                    byte[] dat1 = data.getBytes("UTF8");
+                    if(Arrays.equals(dt, dat1))
+                        dataMap.putIfAbsent(ident, data);
+                        logger.debug(" set ident  " + ident + " data " + data);
+                        return true;
+                }
+            } catch (Exception e) {
+                logger.error(e.getMessage());
+            }
+            dataMap.putIfAbsent(ident, data);
+            logger.debug(" set ident " + ident + " data " + data);
+            return false;
+        }
+        if(!dataMap.get(ident).equals(data)) {
+            dataMap.replace(ident, data);
+            logger.debug(" replace ident " + ident + " data " + data);
+            return false;
+        }
+        return true;
+    }
+
     public Map<String, byte[]> getDataFromClient(int accountId, int requestId) throws Exception {
         Account account = accountProc.getAccountById(accountId);
         Request request = accountProc.getRequestById(requestId);
@@ -53,6 +99,13 @@ public class DataClient {
         logger.info(" params " + params.get(Service_Url));
         ServiceInterface service = serviceFactory.getService(params.get(Service_Url));
         logger.info(" account service " + service);
+
+        Map<String, String> map = request.getParams(dbUtils, dateUtl);
+        map.keySet().forEach(name -> {
+            logger.debug(" name " + name + " value " + map.get(name));
+        });
+        params.putAll(map);
+
         List<String> idents = null;
         try {
             idents = service.getIdentityList(params);
@@ -60,22 +113,27 @@ public class DataClient {
             logger.error(e.getMessage());
             throw e;
         }
+
+        int debugIdents = 0;
+
         for (String ident : idents) {
+            if (activeProfile.contains("dev") && debugIdents++ >= 10){
+                logger.debug(" limits idents in debug {}", debugIdents);
+                break;
+            }
             params.put(account.getIdentityName(), ident);
-            Map<String, String> map = request.getParams(dbUtils, dateUtl);
-            map.keySet().forEach(name -> {
-                logger.info(" name " + name + " value " + map.get(name));
-            });
-            params.putAll(map);
+
             String json = null;
             try {
                 json = service.getIdentityValues(params);
+                if (checkDataTheSame(ident, json))
+                    continue;
             } catch (Exception e) {
                 logger.error(e.getMessage());
                 throw e;
             }
             if (json != null && !json.isEmpty()) {
-                byte[] data = json.getBytes();
+                byte[] data = json.getBytes("UTF8");
                 identData.put(ident, data);
 
             }
@@ -89,10 +147,10 @@ public class DataClient {
 
     private void setClientData(Request request, Map<String, byte[]> data) throws Exception {
 //        try {
-        logger.info(" get act req id ");
+        logger.debug(" get act req id ");
         int actRequestId = 0;
         try {
-            actRequestId = request.getActRequestId(dbUtils, dateUtl);
+            actRequestId = request.getActRequestId(this, dbUtils, dateUtl);
             if (actRequestId == 0) {
                 actRequestId = request.setActRequestId(dbUtils, dateUtl);
                 logger.info(" new act req id " + actRequestId);
@@ -125,7 +183,7 @@ public class DataClient {
                 throw e;
             }
         }
-        accountProc.afterRun(request);
+//        accountProc.afterRun(request);
         return;
     }
 
@@ -145,8 +203,19 @@ public class DataClient {
                 throw e;
             }
         }
-        accountProc.afterRun(request);
+//        accountProc.afterRun(request);
         return;
 
+    }
+    public int getActRequestId(int requestId, String paramName, String paramValue) throws Exception {
+        logger.info(" paramName " + paramName + " paramValue " + paramValue);
+        List<ActParams> actParams = dbUtils.fetchDataValues(ActParams.class, FETCH_ACTREQ_ID_PARAM, paramName, paramValue);
+        for (ActParams actParam : actParams) {
+            ActRequest actRequest = dbUtils.fetchData(ActRequest.class, actParam.getActRequestId());
+            if (actRequest != null && actRequest.getRequestId() == requestId) {
+                return actRequest.getId();
+            }
+        }
+        return 0;
     }
 }

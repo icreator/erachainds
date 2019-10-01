@@ -5,15 +5,13 @@ import org.erachain.entities.datainfo.DataEra;
 import org.erachain.entities.datainfo.DataInfo;
 import org.erachain.repositories.DbUtils;
 import org.erachain.service.RestClient;
-import org.erachain.service.energetik.JsonService;
+import org.erachain.service.JsonService;
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.stereotype.Service;
 
-import java.sql.SQLException;
-import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -61,7 +59,8 @@ public class EraClient {
 
         List<DataEra> dataEras = new ArrayList<>();
         for (byte[] dt : dataInfo.getData(dbUtils, TRANS_MAXSIZE)) {
-            String data = new String(dt);
+            String data = new String(dt, "UTF8");
+            logger.info(" data to client " + data);
             DataEra dataEra = new DataEra();
             dataEra.setDataInfoId(dataInfo.getId());
             if (signiture != null) {
@@ -83,9 +82,10 @@ public class EraClient {
         String[] urlParams = {EraService_creator, account.getRecipient()};
         Map<String, String> params = new HashMap<>();
         params.put("password", EraService_password);
+        //params.put("title", "ErachainDS data for "+account.getId());//EraService_title);
         params.put("title", EraService_title);
         String url = restClient.addParams(EraService_Url, urlParams, params);
-        logger.info(" url " + url);
+        logger.debug(" url " + url);
         String result = null;
         try {
             result = restClient.getResult(url, data);
@@ -94,7 +94,7 @@ public class EraClient {
             throw new Exception(EraService_Url + " " + e.getMessage());
         }
         String signature = jsonService.getValue(result, "signature");
-        logger.info(" signature " + signature);
+        logger.info(" Acquire signature for "+ account.getId() + " : "+ signature);
         return signature;
     }
 

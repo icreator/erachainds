@@ -36,12 +36,12 @@ public class TransactionControllerTest {
 
     }
 
-//    @Test
-//    public void validateTransaction() throws Exception {
-//        var trans_token = "";
-//        mockMvc.perform(post(URL)
-//                .param("trans_token", trans_token))
-//                .andExpect(status().isOk());
-//    }
+    @Test
+    public void validateTransaction() throws Exception {
+        String trans_token = "";
+        mockMvc.perform(post(URL)
+                .param("trans_token", trans_token))
+                .andExpect(status().isOk());
+    }
 
 }

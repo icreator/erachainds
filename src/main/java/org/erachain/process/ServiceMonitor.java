@@ -10,7 +10,7 @@ import org.erachain.repositories.DbUtils;
 import org.erachain.repositories.InfoSave;
 import org.erachain.service.ServiceFactory;
 import org.erachain.service.ServiceInterface;
-import org.erachain.service.energetik.JsonService;
+import org.erachain.service.JsonService;
 import org.erachain.service.eraService.EraClient;
 import org.erachain.utils.DateUtl;
 import org.slf4j.Logger;
@@ -19,6 +19,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.stereotype.Service;
 
+import java.io.UnsupportedEncodingException;
 import java.sql.SQLException;
 
 import java.util.*;
@@ -57,6 +58,9 @@ public class ServiceMonitor {
     @Value("${TRANS_MINSIZE}")
     private int TRANS_MINSIZE;
 
+    @Value("${CONFIRMATION_TO_ACCEPT}")
+    private int CONFIRMATION_TO_ACCEPT;
+
 
 
     @Value("${FETCH_DATA_FOR_SUBMIT}")
@@ -85,6 +89,7 @@ public class ServiceMonitor {
         Account account = accountProc.getAccountById(accountId);
         if(getSize(dataInfos) < TRANS_MINSIZE) {
             String data = getData(dataInfos);
+            logger.info(" data to chain " + data);
             signature = eraClient.getSignForData(account, data);
         }
         int offset = 0;
@@ -119,7 +124,11 @@ public class ServiceMonitor {
         int size = 0;
         StringBuffer stringBuffer = new StringBuffer("");
         for (DataInfo dataInfo : dataInfos) {
-           stringBuffer.append(dataInfo.getData());
+            try {
+                stringBuffer.append(new String(dataInfo.getData(), "UTF8"));
+            } catch (UnsupportedEncodingException e) {
+                logger.error(e.getMessage());
+            }
         }
         return stringBuffer.toString();
     }
@@ -141,11 +150,11 @@ public class ServiceMonitor {
                     }
                     confirmations = jsonService.getValue(result, "confirmations");
 
-                    if (confirmations == 0) {
-                        logger.info(" unconfirmed " + dataEra.getSignature());
+                    if (confirmations < CONFIRMATION_TO_ACCEPT) {
+                        logger.debug(" unconfirmed " + confirmations);
                         unConfirmed ++;
                     } else {
-                        logger.info(" confirmed " + dataEra.getSignature());
+                        logger.info(" confirmed " + confirmations);
                         int height = jsonService.getValue(result, "height");
                         int sequence = jsonService.getValue(result, "sequence");
                         dataEra.setBlockTrId(height + "-" + sequence);
@@ -172,9 +181,9 @@ public class ServiceMonitor {
             if (dataInfo.getAccDate() != null && dataInfo.getSendToClientDate() == null) {
                 Account account = accountProc.getAccountById(dataInfo.getAccountId());
                 Map<String, String> params = account.getParams();
-                logger.info(" params " + params.get(Service_Url));
+                logger.debug(" params " + params.get(Service_Url));
                 ServiceInterface service = serviceFactory.getService(params.get(Service_Url));
-                logger.info(" account service " + service);
+                logger.debug(" account service " + service);
                 params.put(account.getIdentityName(), dataInfo.getIdentity());
                 DataEra dataEra = dbUtils.fetchData(DataEra.class, "DataEra", "dataInfoId = " + dataInfo.getId()).get(0);
                 params.put("transaction", dataEra.getBlockTrId());
@@ -204,7 +213,7 @@ public class ServiceMonitor {
             if (dataInfo.getSendToClientDate() != null && dataInfo.getAcceptClientDate() == null) {
                 Account account = accountProc.getAccountById(dataInfo.getAccountId());
                 Map<String, String> params = account.getParams();
-                logger.info(" params " + params.get(Service_Url));
+                logger.debug(" params " + params.get(Service_Url));
                 ServiceInterface service = serviceFactory.getService(params.get(Service_Url));
                 logger.info(" account service " + service);
                 params.put(account.getIdentityName(), dataInfo.getIdentity());

@@ -23,7 +23,7 @@ public class Logging {
 
     @AfterReturning(value = "@annotation(org.erachain.utils.loggers.LoggableController)", returning = "result")
     public void afterLogging(ResponseEntity result){
-        logger.info("Controller Response: {}", result);
+        logger.debug("Controller Response: {}", result);
     }
 
 //    @Before(value = "@annotation(org.erachain.utils.loggers.LoggableBlock)")

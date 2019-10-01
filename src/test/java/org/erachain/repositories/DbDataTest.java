@@ -4,6 +4,10 @@ import org.erachain.entities.account.Account;
 import org.erachain.entities.datainfo.DataEra;
 import org.erachain.entities.datainfo.DataInfo;
 import org.erachain.entities.request.ActRequest;
+import org.erachain.service.JsonService;
+import org.json.JSONArray;
+import org.json.JSONObject;
+import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.slf4j.Logger;
@@ -12,6 +16,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringRunner;
 
+import javax.validation.valueextraction.Unwrapping;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
@@ -33,6 +38,9 @@ public class DbDataTest {
 
     @Autowired
     private InfoSave infoSave;
+
+    @Autowired
+    private JsonService jsonService;
 
     @Value("${EraService_creator}")
     private String EraService_creator;
@@ -81,6 +89,40 @@ public class DbDataTest {
     @Value("${CHECK_DATA_AFTER_SEND_TO_CLIENT}")
     private String CHECK_DATA_AFTER_SEND_TO_CLIENT;
 
+    @Value("${GET_LAST_RECORD_BY_DATE}")
+    private String GET_LAST_RECORD_BY_DATE;
+
+    @Value("${GET_LAST_BLOCK_CHAIN_INFO_BY_DATE}")
+    private String GET_LAST_BLOCK_CHAIN_INFO_BY_DATE;
+
+    @Test
+    public void getDataMapList() {
+        try {
+            List<Map<String, Object>> list = dbUtils.getDataMapList(GET_LAST_BLOCK_CHAIN_INFO_BY_DATE, "4408", new Date().getTime(), 3);
+            logger.info(jsonService.getDataMapList(list).toString());
+
+        } catch (Exception e) {
+            logger.error(e.getMessage());
+        }
+
+    }
+
+    @Test
+    public void getData1() {
+        try {
+//            String sql = CHECK_DATA_FOR_SUBMIT;
+//            String sql = CHECK_DATA_FOR_SUBMIT.replace("?", Long.toString(new Date().getTime()));
+//            logger.info(" sql " + sql);
+            List<byte[]> result = dbUtils.getDataList(GET_LAST_RECORD_BY_DATE, "4403", new Date().getTime(), 3);
+            result.forEach(res -> {
+                logger.info(" result " + new String(res));
+            });
+
+
+        } catch (SQLException e) {
+            logger.error(e.getMessage());
+        }
+    }
     @Test
     public void checkData() {
         try {
@@ -177,6 +219,14 @@ public class DbDataTest {
     public void testTableDacr() {
         Arrays.stream(dbUtils.getColumnNameArray("DataInfo")).forEach(name -> {
             logger.info(" col " + name);
+        });
+    }
+    @Test
+    public void testSql1() {
+        String sql = "select  runDate, data from DataInfo";
+        List<DataInfo> dataInfos = dbUtils.fetchData(DataInfo.class, sql);
+        dataInfos.forEach(dataInfo -> {
+            logger.info(dataInfo.getRunDate() + " " + dataInfo.getData());
         });
     }
 

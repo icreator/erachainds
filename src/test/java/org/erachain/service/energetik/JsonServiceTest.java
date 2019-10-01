@@ -18,7 +18,7 @@ public class JsonServiceTest {
     private Logger logger;
 
     @Autowired
-    private JsonService jsonService;
+    private JsonServiceEnergy jsonServiceEnergy;
 
     Map<String, String> params = new HashMap<>();
 
@@ -38,7 +38,7 @@ public class JsonServiceTest {
         setParams();
         String type = params.get("type");
         String value = params.get("value");
-        String result = jsonService.setMeterResultJson(params, params.get("meter"), type, value, params.get("transaction")).toString();
+        String result = jsonServiceEnergy.setMeterResultJson(params, params.get("meter"), type, value, params.get("transaction")).toString();
         logger.info(result);
     }
     @Test
@@ -46,7 +46,7 @@ public class JsonServiceTest {
         setParams();
         String type = params.get("type");
         String value = params.get("value");
-        String result = jsonService.checkMeterResultJson(params, params.get("meter"), type, value).toString();
+        String result = jsonServiceEnergy.checkMeterResultJson(params, params.get("meter"), type, value).toString();
         logger.info(result);
     }
 }
