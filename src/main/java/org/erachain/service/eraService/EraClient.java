@@ -59,6 +59,8 @@ public class EraClient {
     private RestClient restClient;
 
     private String ERASERVICE_URL_IP_RESPONSE_EXCEPT;
+    private boolean FLAG_RECEIVING_IP = true;
+    private boolean FLAG_RECEIVING_IP_CHECK = true;
 
     @Autowired
     public EraClient(RestClient restClient) {
@@ -105,21 +107,38 @@ public class EraClient {
                     System.currentTimeMillis(), 0, (byte) 0, encrypt);
             tx.sign(new Pair<>(Base58.decode(privateKeyCreator), Base58.decode(publicKeyCreator)));
             String byteCode = Base58.encode(tx.toBytes(true));
-            for (int i = 0; i < ERA_SERVICE_IPS.size(); i++) {
-                String ip = ERA_SERVICE_IPS.get(i);
+            if (!FLAG_RECEIVING_IP) {
+                logger.info("Not receiving ip, already remembered");
                 try {
-                    URL url = new URL("http", ip, 9067, "api/broadcast");
-                    ERASERVICE_URL_API = url.toString();
                     result = restClient.getResult(ERASERVICE_URL_API + "/" + byteCode);
-                    logger.info("Send successful data to blockchain with ip = " + ip);
-                    ERASERVICE_URL_IP_RESPONSE_EXCEPT = ip;
-                    break;
+                    logger.info("Send successful data to blockchain with remembered ip = " + ERASERVICE_URL_API);
                 } catch (ResourceAccessException e) {
-                    logger.warn("Request by url: " + ERASERVICE_URL_API + " can't be processed");
-                    if (i == ERA_SERVICE_IPS.size() - 1) {
-                        throw new Exception("No one ip from list is reachable");
+                    logger.warn("Request by remembered url: " + ERASERVICE_URL_API + " can't be processed");
+                    logger.warn("Switch to search ip");
+                    FLAG_RECEIVING_IP = true;
+                }
+            }
+            if (FLAG_RECEIVING_IP) {
+                logger.info("Receiving ip");
+                for (int i = 0; i < ERA_SERVICE_IPS.size(); i++) {
+                    String ip = ERA_SERVICE_IPS.get(i);
+                    try {
+                        URL url = new URL("http", ip, 9067, "api/broadcast");
+                        ERASERVICE_URL_API = url.toString();
+                        result = restClient.getResult(ERASERVICE_URL_API + "/" + byteCode);
+                        logger.info("Send successful data to blockchain with ip = " + ip);
+                        ERASERVICE_URL_IP_RESPONSE_EXCEPT = ip;
+                        FLAG_RECEIVING_IP = false;
+                        FLAG_RECEIVING_IP_CHECK = true;
+                        break;
+                    } catch (ResourceAccessException e) {
+                        logger.warn("Request by url: " + ERASERVICE_URL_API + " can't be processed");
+                        if (i == ERA_SERVICE_IPS.size() - 1) {
+                            throw new Exception("No one ip from list is reachable");
+                        }
                     }
                 }
+
             }
         } catch (Exception e) {
             logger.error(e.getMessage(), e);
@@ -152,32 +171,45 @@ public class EraClient {
         String signature = dataEra.getSignature();
         String result = null;
         try {
-            for (int i = 0; i < ERA_SERVICE_IPS.size(); i++) {
-                String ip = ERA_SERVICE_IPS.get(i);
-                if (i == ERA_SERVICE_IPS.size() - 1 && ip.equals(ERASERVICE_URL_IP_RESPONSE_EXCEPT)) {
-                    throw new Exception("No one ip from list is reachable for checking by signature");
-                }
-                if (ip.equals(ERASERVICE_URL_IP_RESPONSE_EXCEPT)) {
-                    continue;
-                }
+            if (!FLAG_RECEIVING_IP_CHECK) {
+                logger.info("Not receiving ip, already remembered");
                 try {
-                    URL url = new URL("http", ip, 9067, "apirecords/get");
-                    ERASERVICE_URL_SIGNATURE = url.toString();
                     result = restClient.getResult(ERASERVICE_URL_SIGNATURE + "/" + signature);
-                    logger.info("successful checked data");
-                    break;
+                    logger.info("check successful data from blockchain with remembered ip = " + ERASERVICE_URL_SIGNATURE);
                 } catch (ResourceAccessException e) {
-                    logger.warn("Request signature by url: " + ERASERVICE_URL_SIGNATURE + " can't be processed");
-                    if (i == ERA_SERVICE_IPS.size() - 1) {
+                    logger.warn("Request by remembered url: " + ERASERVICE_URL_SIGNATURE + " can't be processed");
+                    logger.warn("Switch to search ip");
+                    FLAG_RECEIVING_IP_CHECK = true;
+                }
+            }
+            if (FLAG_RECEIVING_IP_CHECK) {
+                for (int i = 0; i < ERA_SERVICE_IPS.size(); i++) {
+                    String ip = ERA_SERVICE_IPS.get(i);
+                    if (i == ERA_SERVICE_IPS.size() - 1 && ip.equals(ERASERVICE_URL_IP_RESPONSE_EXCEPT)) {
                         throw new Exception("No one ip from list is reachable for checking by signature");
+                    }
+                    if (ip.equals(ERASERVICE_URL_IP_RESPONSE_EXCEPT)) {
+                        continue;
+                    }
+                    try {
+                        URL url = new URL("http", ip, 9067, "apirecords/get");
+                        ERASERVICE_URL_SIGNATURE = url.toString();
+                        result = restClient.getResult(ERASERVICE_URL_SIGNATURE + "/" + signature);
+                        logger.info("successful checked data");
+                        FLAG_RECEIVING_IP_CHECK = false;
+                        break;
+                    } catch (ResourceAccessException e) {
+                        logger.warn("Request signature by url: " + ERASERVICE_URL_SIGNATURE + " can't be processed");
+                        if (i == ERA_SERVICE_IPS.size() - 1) {
+                            throw new Exception("No one ip from list is reachable for checking by signature");
+                        }
                     }
                 }
             }
-
-        } catch (Exception e) {
-            logger.error(e.getMessage(), e);
-            throw new Exception(ERASERVICE_URL_SIGNATURE + " " + e.getMessage());
+            } catch(Exception e){
+                logger.error(e.getMessage(), e);
+                throw new Exception(ERASERVICE_URL_SIGNATURE + " " + e.getMessage());
+            }
+            return result;
         }
-        return result;
     }
-}
