@@ -5,3 +5,5 @@ SET privateKey         = '3tFgehzEnQFiamLXTZoqCHac4wgt1USSLgDyfwoTS7Cx1Fhg4deJ7q
     recipient          = '7Nv5UaDubU222yynbNQTsUCZUYr1qW6dx9',
     publicKeyRecipient = 'B9QCMXdDwyD98S2k1GSJMuxJPzvYBJ9Sr5fDPB1zYDV6'
 WHERE id = 1;
+DELETE FROM DataEra;
+DELETE FROM DataInfo;
