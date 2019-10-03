@@ -121,7 +121,7 @@ public class EraClient {
             tx.sign(new Pair<>(Base58.decode(privateKeyCreator), Base58.decode(publicKeyCreator)));
             String byteCode = Base58.encode(tx.toBytes(true));
             if (!FLAG_RECEIVING_IP) {
-                logger.info("Not receiving ip, already remembered");
+                logger.info("Not checking ip, already remembered");
                 try {
                     result = restClient.getResult(ERASERVICE_URL_API + "/" + byteCode);
                     logger.info("Send successful data to blockchain with remembered ip = " + ERASERVICE_URL_API);
@@ -132,7 +132,7 @@ public class EraClient {
                 }
             }
             if (FLAG_RECEIVING_IP) {
-                logger.info("Receiving ip");
+                logger.info("Checking ips...");
                 ERA_SERVICE_IPS_RANGE = ERA_SERVICE_IPS_RANGE.stream().sorted(
                         (tuple1, tuple2) -> new LongComparator(true).compare(tuple1.f1, tuple2.f1)).
                         collect(Collectors.toList());
@@ -189,7 +189,7 @@ public class EraClient {
         String result = null;
         try {
             if (!FLAG_RECEIVING_IP_CHECK) {
-                logger.info("Not receiving ip check signature, already remembered");
+                logger.info("Not checking ip check signature, already remembered");
                 try {
                     result = restClient.getResult(ERASERVICE_URL_SIGNATURE + "/" + signature);
                     logger.info("check successful data from blockchain with remembered ip = " + ERASERVICE_URL_SIGNATURE);
@@ -200,6 +200,7 @@ public class EraClient {
                 }
             }
             if (FLAG_RECEIVING_IP_CHECK) {
+                logger.info("Checking ips (signature)...");
                 ERA_SERVICE_IPS_RANGE = ERA_SERVICE_IPS_RANGE.stream().sorted(
                         (tuple1, tuple2) -> new LongComparator(true).compare(tuple1.f1, tuple2.f1)).
                         collect(Collectors.toList());
