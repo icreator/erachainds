@@ -113,6 +113,7 @@ dependencies {
     testCompile "org.springframework.boot:spring-boot-starter-test"
     testCompile "org.junit.jupiter:junit-jupiter-api:${junitVersion}"
     compile group: 'org.apache.flink', name: 'flink-core', version: '1.8.0'
+    compileOnly "org.springframework.boot:spring-boot-configuration-processor"
 }
 
 

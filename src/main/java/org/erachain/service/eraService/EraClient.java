@@ -14,6 +14,7 @@ import org.erachain.utils.crypto.Pair;
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.ResourceAccessException;
@@ -21,12 +22,14 @@ import org.springframework.web.client.ResourceAccessException;
 import javax.annotation.PostConstruct;
 import java.math.BigDecimal;
 import java.net.URL;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
 @Service
-@PropertySource("classpath:custom.properties")
+@ConfigurationProperties(prefix = "custom-dev.properties")
+//@PropertySource("classpath:custom.properties")
 public class EraClient {
     @Autowired
     private Logger logger;
@@ -82,7 +85,7 @@ public class EraClient {
 
         List<DataEra> dataEras = new ArrayList<>();
         for (byte[] dt : dataInfo.getData(dbUtils, TRANS_MAXSIZE)) {
-            String data = new String(dt, "UTF8");
+            String data = new String(dt, StandardCharsets.UTF_8);
             logger.info(" data to client " + data);
             DataEra dataEra = new DataEra();
             dataEra.setDataInfoId(dataInfo.getId());
