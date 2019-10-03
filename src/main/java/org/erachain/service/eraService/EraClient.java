@@ -28,8 +28,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @Service
-@ConfigurationProperties(prefix = "custom-dev.properties")
-//@PropertySource("classpath:custom.properties")
+@PropertySource("classpath:custom.properties")
 public class EraClient {
     @Autowired
     private Logger logger;
