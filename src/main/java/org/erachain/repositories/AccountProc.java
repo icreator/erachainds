@@ -1,7 +1,6 @@
 package org.erachain.repositories;
 
 import org.erachain.entities.account.Account;
-import org.erachain.entities.datainfo.DataInfo;
 import org.erachain.entities.request.Request;
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -10,15 +9,20 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
 
 import java.lang.reflect.Field;
-import java.sql.*;
-import java.util.*;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
+import java.sql.Timestamp;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
 @Repository
 public class AccountProc {
 
-//    @Autowired
+    //    @Autowired
     private JdbcTemplate jdbcTemplate;
 
     @Value("${FETCH_ACCOUNTS}")
@@ -37,7 +41,7 @@ public class AccountProc {
     private DbUtils dbUtils;
 
     @Autowired
-    public  AccountProc(JdbcTemplate jdbcTemplate) {
+    public AccountProc(JdbcTemplate jdbcTemplate) {
         this.jdbcTemplate = jdbcTemplate;
     }
 
@@ -46,27 +50,27 @@ public class AccountProc {
     private static ConcurrentMap<Integer, Account> cache = new ConcurrentHashMap<>();
     private static ConcurrentMap<Integer, Request> cacheReq = new ConcurrentHashMap<>();
     private static ConcurrentMap<Integer, List<Request>> cacheListReq = new ConcurrentHashMap<>();
-    private static List<Account> listAct ;
+    private static List<Account> listAct;
 
-    public   List<Account>  getAccounts() {
+    public List<Account> getAccounts() {
         if (listAct != null)
             return listAct;
         List<Map<String, Object>> rows = jdbcTemplate.queryForList(FETCH_ACCOUNTS);
         listAct = new ArrayList<>();
-        for (Map<String, Object> row: rows){
-            Account  account = new Account();
+        for (Map<String, Object> row : rows) {
+            Account account = new Account();
             dbUtils.setObj(account, fields, row);
             listAct.add(account);
             cache.put(account.getId(), account);
         }
-         return listAct;
+        return listAct;
     }
 
-    public   void  setAccounts() {
+    public void setAccounts() {
         List<Map<String, Object>> rows = jdbcTemplate.queryForList(FETCH_ACCOUNTS);
-    //    List<Account> list = new ArrayList<>();
-        for (Map<String, Object> row: rows){
-            Account  account = new Account();
+        //    List<Account> list = new ArrayList<>();
+        for (Map<String, Object> row : rows) {
+            Account account = new Account();
             dbUtils.setObj(account, fields, row);
 //            list.add(account);
             cache.put(account.getId(), account);
@@ -75,12 +79,12 @@ public class AccountProc {
     }
 
     public Request getRequestById(int requestId) {
- //       if (!inited)
- //           setRequests();
-          return dbUtils.fetchData(Request.class, "Request", requestId);
+        //       if (!inited)
+        //           setRequests();
+        return dbUtils.fetchData(Request.class, "Request", requestId);
     }
 
-//    public   void  setRequests() {
+    //    public   void  setRequests() {
 //        List<Map<String, Object>> rows = jdbcTemplate.queryForList(FETCH_REQUESTS);
 //        for (Map<String, Object> row: rows){
 //            Request  request = new Request();
@@ -96,12 +100,13 @@ public class AccountProc {
 //        inited = true;
 //        return;
 //    }
-    public   List<Request>  getRequests(int accountId) {
+    public List<Request> getRequests(int accountId) {
         //if (!inited)
- //           setRequests();
+        //           setRequests();
         return dbUtils.fetchData(Request.class, "Request", " accountId = " + accountId);
     }
-    public Account getAccountById(int id)  {
+
+    public Account getAccountById(int id) {
         if (cache.get(id) == null) {
             setAccounts();
         }

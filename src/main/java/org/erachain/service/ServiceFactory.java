@@ -11,18 +11,19 @@ import java.util.Map;
 @Service
 public class ServiceFactory {
 
+    @Autowired
+    private BeanLoader beanLoader;
+
     private  Map<String, ServiceInterface> services = new HashMap<>();
 
     @Autowired
     public ServiceFactory(EnergyService energyService, MyDomService myDomService) {
-        services.put("https://app.yaenergetik.ru/api?v2", energyService);
-        services.put("http://api-admin.testmoydom.ru", myDomService);
-    }
-
-//    @Autowired
-//    public ServiceFactory(MyDomService myDomService) {
+        beanLoader.getNamesObjectsServices().stream().forEach((tuple2)->{
+//            services.put(tuple2.f0,tuple2.f1);
+        });
+//        services.put("https://app.yaenergetik.ru/api?v2", energyService);
 //        services.put("http://api-admin.testmoydom.ru", myDomService);
-//    }
+    }
 
     public ServiceInterface getService(String serviceUrl) {
         return services.get(serviceUrl);

@@ -15,6 +15,7 @@ public class Account {
     private String user;
     private String identityName;
     private String password ;
+    private String className ;
     // end db
 
     public String getRecipient() {
@@ -100,5 +101,13 @@ public class Account {
 
     public void setPublicKeyRecipient(String publicKeyRecipient) {
         this.publicKeyRecipient = publicKeyRecipient;
+    }
+
+    public String getClassName() {
+        return className;
+    }
+
+    public void setClassName(String className) {
+        this.className = className;
     }
 }

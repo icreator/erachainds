@@ -7,3 +7,4 @@ SET privateKey         = '3tFgehzEnQFiamLXTZoqCHac4wgt1USSLgDyfwoTS7Cx1Fhg4deJ7q
 WHERE id = 1;
 DELETE FROM DataEra;
 DELETE FROM DataInfo;
+ALTER TABLE Account ADD COLUMN className varchar(255);
