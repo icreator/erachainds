@@ -126,8 +126,8 @@ public class EraClient {
                     result = restClient.getResult(ERASERVICE_URL_API + "/" + byteCode);
                     logger.debug("Send successful data to blockchain with remembered ip = " + ERASERVICE_URL_API);
                 } catch (ResourceAccessException e) {
-                    logger.warn("Request by remembered url: " + ERASERVICE_URL_API + " can't be processed");
-                    logger.warn("Switch to search ip");
+                    logger.debug("Request by remembered url: " + ERASERVICE_URL_API + " can't be processed");
+                    logger.debug("Switch to search ip");
                     FLAG_RECEIVING_IP = true;
                 }
             }
@@ -148,7 +148,7 @@ public class EraClient {
                         FLAG_RECEIVING_IP_CHECK = true;
                         break;
                     } catch (ResourceAccessException e) {
-                        logger.warn("Request by url: " + ERASERVICE_URL_API + " can't be processed");
+                        logger.debug("Request by url: " + ERASERVICE_URL_API + " can't be processed");
                         ERA_SERVICE_IPS_RANGE.get(i).f1++;
                         if (i == ERA_SERVICE_IPS_RANGE.size() - 1) {
                             throw new Exception("No one ip from list is reachable");
@@ -194,8 +194,8 @@ public class EraClient {
                     result = restClient.getResult(ERASERVICE_URL_SIGNATURE + "/" + signature);
                     logger.debug("check successful data from blockchain with remembered ip = " + ERASERVICE_URL_SIGNATURE);
                 } catch (ResourceAccessException e) {
-                    logger.warn("Request check by remembered url: " + ERASERVICE_URL_SIGNATURE + " can't be processed");
-                    logger.warn("Switch to search ip check");
+                    logger.debug("Request check by remembered url: " + ERASERVICE_URL_SIGNATURE + " can't be processed");
+                    logger.debug("Switch to search ip check");
                     FLAG_RECEIVING_IP_CHECK = true;
                 }
             }
@@ -220,7 +220,7 @@ public class EraClient {
                         FLAG_RECEIVING_IP_CHECK = false;
                         break;
                     } catch (ResourceAccessException e) {
-                        logger.warn("Request signature by url: " + ERASERVICE_URL_SIGNATURE + " can't be processed");
+                        logger.debug("Request signature by url: " + ERASERVICE_URL_SIGNATURE + " can't be processed");
                         ERA_SERVICE_IPS_RANGE.get(i).f1++;
                         if (i == ERA_SERVICE_IPS_RANGE.size() - 1) {
                             throw new Exception("No one ip from list is reachable for checking by signature");
