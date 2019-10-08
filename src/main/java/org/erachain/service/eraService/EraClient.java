@@ -85,7 +85,7 @@ public class EraClient {
         List<DataEra> dataEras = new ArrayList<>();
         for (byte[] dt : dataInfo.getData(dbUtils, TRANS_MAXSIZE)) {
             String data = new String(dt, StandardCharsets.UTF_8);
-            logger.info(" data to client " + data);
+            logger.debug(" data to client " + data);
             DataEra dataEra = new DataEra();
             dataEra.setDataInfoId(dataInfo.getId());
             if (signiture != null) {
@@ -105,7 +105,7 @@ public class EraClient {
     }
 
     public String getSignForData(Account account, String data) throws Exception {
-        logger.info("Sending by API...");
+        logger.debug("Sending by API...");
         String result = null;
         SendTX tx;
         try {
@@ -121,10 +121,10 @@ public class EraClient {
             tx.sign(new Pair<>(Base58.decode(privateKeyCreator), Base58.decode(publicKeyCreator)));
             String byteCode = Base58.encode(tx.toBytes(true));
             if (!FLAG_RECEIVING_IP) {
-                logger.info("Not checking ip, already remembered");
+                logger.debug("Not checking ip, already remembered");
                 try {
                     result = restClient.getResult(ERASERVICE_URL_API + "/" + byteCode);
-                    logger.info("Send successful data to blockchain with remembered ip = " + ERASERVICE_URL_API);
+                    logger.debug("Send successful data to blockchain with remembered ip = " + ERASERVICE_URL_API);
                 } catch (ResourceAccessException e) {
                     logger.warn("Request by remembered url: " + ERASERVICE_URL_API + " can't be processed");
                     logger.warn("Switch to search ip");
@@ -132,7 +132,7 @@ public class EraClient {
                 }
             }
             if (FLAG_RECEIVING_IP) {
-                logger.info("Checking ips...");
+                logger.debug("Checking ips...");
                 ERA_SERVICE_IPS_RANGE = ERA_SERVICE_IPS_RANGE.stream().sorted(
                         (tuple1, tuple2) -> new LongComparator(true).compare(tuple1.f1, tuple2.f1)).
                         collect(Collectors.toList());
@@ -142,7 +142,7 @@ public class EraClient {
                         URL url = new URL("http", ip, 9067, "api/broadcast");
                         ERASERVICE_URL_API = url.toString();
                         result = restClient.getResult(ERASERVICE_URL_API + "/" + byteCode);
-                        logger.info("Send successful data to blockchain with ip = " + ip);
+                        logger.debug("Send successful data to blockchain with ip = " + ip);
                         ERASERVICE_URL_IP_RESPONSE_EXCEPT = ip;
                         FLAG_RECEIVING_IP = false;
                         FLAG_RECEIVING_IP_CHECK = true;
@@ -162,7 +162,7 @@ public class EraClient {
             throw new Exception(ERASERVICE_URL_API + " " + e.getMessage());
         }
         if (result == null) {
-            logger.info("All era services are not reachable");
+            logger.debug("All era services are not reachable");
             throw new Exception("All era services are not reachable");
         }
         String status;
@@ -179,20 +179,20 @@ public class EraClient {
             throw new Exception(ERASERVICE_URL_API + " status = " + status);
         }
         String signature = Base58.encode(tx.getSignature());
-        logger.info(" Acquire signature for " + account.getId() + " : " + signature);
+        logger.debug(" Acquire signature for " + account.getId() + " : " + signature);
         return signature;
     }
 
     public String checkChain(DataEra dataEra) throws Exception {
-        logger.info("Checking chain...");
+        logger.debug("Checking chain...");
         String signature = dataEra.getSignature();
         String result = null;
         try {
             if (!FLAG_RECEIVING_IP_CHECK) {
-                logger.info("Not checking ip check signature, already remembered");
+                logger.debug("Not checking ip check signature, already remembered");
                 try {
                     result = restClient.getResult(ERASERVICE_URL_SIGNATURE + "/" + signature);
-                    logger.info("check successful data from blockchain with remembered ip = " + ERASERVICE_URL_SIGNATURE);
+                    logger.debug("check successful data from blockchain with remembered ip = " + ERASERVICE_URL_SIGNATURE);
                 } catch (ResourceAccessException e) {
                     logger.warn("Request check by remembered url: " + ERASERVICE_URL_SIGNATURE + " can't be processed");
                     logger.warn("Switch to search ip check");
@@ -200,7 +200,7 @@ public class EraClient {
                 }
             }
             if (FLAG_RECEIVING_IP_CHECK) {
-                logger.info("Checking ips (signature)...");
+                logger.debug("Checking ips (signature)...");
                 ERA_SERVICE_IPS_RANGE = ERA_SERVICE_IPS_RANGE.stream().sorted(
                         (tuple1, tuple2) -> new LongComparator(true).compare(tuple1.f1, tuple2.f1)).
                         collect(Collectors.toList());
@@ -216,7 +216,7 @@ public class EraClient {
                         URL url = new URL("http", ip, 9067, "apirecords/get");
                         ERASERVICE_URL_SIGNATURE = url.toString();
                         result = restClient.getResult(ERASERVICE_URL_SIGNATURE + "/" + signature);
-                        logger.info("successful checked data");
+                        logger.debug("successful checked data");
                         FLAG_RECEIVING_IP_CHECK = false;
                         break;
                     } catch (ResourceAccessException e) {
