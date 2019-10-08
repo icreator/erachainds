@@ -15,7 +15,7 @@ public class Account {
     private String user;
     private String identityName;
     private String password ;
-    private String className ;
+    private String objectName;
     // end db
 
     public String getRecipient() {
@@ -103,11 +103,11 @@ public class Account {
         this.publicKeyRecipient = publicKeyRecipient;
     }
 
-    public String getClassName() {
-        return className;
+    public String getObjectName() {
+        return objectName;
     }
 
-    public void setClassName(String className) {
-        this.className = className;
+    public void setObjectName(String objectName) {
+        this.objectName = objectName;
     }
 }

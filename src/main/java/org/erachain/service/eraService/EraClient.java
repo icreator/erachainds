@@ -139,7 +139,7 @@ public class EraClient {
                 for (int i = 0; i < ERA_SERVICE_IPS_RANGE.size(); i++) {
                     String ip = ERA_SERVICE_IPS_RANGE.get(i).f0;
                     try {
-                        URL url = new URL("http", ip, 9067, "api/broadcast");
+                        URL url = new URL("http", ip, 9067, "/api/broadcast");
                         ERASERVICE_URL_API = url.toString();
                         result = restClient.getResult(ERASERVICE_URL_API + "/" + byteCode);
                         logger.info("Send successful data to blockchain with ip = " + ip);
@@ -213,7 +213,7 @@ public class EraClient {
                         continue;
                     }
                     try {
-                        URL url = new URL("http", ip, 9067, "apirecords/get");
+                        URL url = new URL("http", ip, 9067, "/apirecords/get");
                         ERASERVICE_URL_SIGNATURE = url.toString();
                         result = restClient.getResult(ERASERVICE_URL_SIGNATURE + "/" + signature);
                         logger.info("successful checked data");
