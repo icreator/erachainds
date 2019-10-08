@@ -21,14 +21,12 @@ public class ServiceFactory {
     private ApplicationContext context;
 
     @PostConstruct
-    public void init(){
+    public void init() {
         accountProc.getAccounts().forEach((account) -> {
             ServiceInterface serviceInterface = (ServiceInterface) context.getBean(account.getObjectName());
             services.put(account.getAccountUrl(), serviceInterface);
         });
     }
-
-
 
     public ServiceInterface getService(String serviceUrl) {
         return services.get(serviceUrl);
