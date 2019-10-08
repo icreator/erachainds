@@ -1,5 +1,7 @@
 package org.erachain.service.eraService;
 
+import org.apache.flink.api.common.typeutils.base.LongComparator;
+import org.apache.flink.api.java.tuple.Tuple2;
 import org.erachain.api.chain.SendTX;
 import org.erachain.entities.account.Account;
 import org.erachain.entities.datainfo.DataEra;
@@ -12,12 +14,18 @@ import org.erachain.utils.crypto.Pair;
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.ResourceAccessException;
 
+import javax.annotation.PostConstruct;
 import java.math.BigDecimal;
+import java.net.URL;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @PropertySource("classpath:custom.properties")
@@ -25,18 +33,17 @@ public class EraClient {
     @Autowired
     private Logger logger;
 
-    @Value("${EraService_Url}")
-    private String EraService_Url;
-
     @Value("${EraService_creator}")
     private String EraService_creator;
 
+    private String ERASERVICE_URL_SIGNATURE;
 
-    @Value("${EraService_Url_Signature}")
-    private String EraService_Url_Signature;
-
-    @Value("${ERASERVICE_URL_API}")
     private String ERASERVICE_URL_API;
+
+    @Value("#{'${ERA_SERVICE_IPS}'.trim().replaceAll(\"\\s*(?=,)|(?<=,)\\s*\", \"\").split(',')}")
+    private List<String> ERA_SERVICE_IPS;
+
+    private List<Tuple2<String, Long>> ERA_SERVICE_IPS_RANGE;
 
     @Value("${EraService_password}")
     private String EraService_password;
@@ -59,17 +66,26 @@ public class EraClient {
 
     private RestClient restClient;
 
+    private String ERASERVICE_URL_IP_RESPONSE_EXCEPT;
+    private boolean FLAG_RECEIVING_IP = true;
+    private boolean FLAG_RECEIVING_IP_CHECK = true;
+
     @Autowired
     public EraClient(RestClient restClient) {
         this.restClient = restClient;
+    }
+
+    @PostConstruct
+    public void postConstructInit(){
+        ERA_SERVICE_IPS_RANGE = ERA_SERVICE_IPS.stream().map((ip) -> Tuple2.of(ip, 0L)).collect(Collectors.toList());
     }
 
     public void setSignature(DataInfo dataInfo, Account account, String signiture, int offset) throws Exception {
 
         List<DataEra> dataEras = new ArrayList<>();
         for (byte[] dt : dataInfo.getData(dbUtils, TRANS_MAXSIZE)) {
-            String data = new String(dt, "UTF8");
-            logger.info(" data to client " + data);
+            String data = new String(dt, StandardCharsets.UTF_8);
+            logger.debug(" data to client " + data);
             DataEra dataEra = new DataEra();
             dataEra.setDataInfoId(dataInfo.getId());
             if (signiture != null) {
@@ -89,8 +105,8 @@ public class EraClient {
     }
 
     public String getSignForData(Account account, String data) throws Exception {
-        logger.info("Sending by API...");
-        String result;
+        logger.debug("Sending by API...");
+        String result = null;
         SendTX tx;
         try {
             String privateKeyCreator = account.getPrivateKey();
@@ -104,10 +120,50 @@ public class EraClient {
                     System.currentTimeMillis(), 0, (byte) 0, encrypt);
             tx.sign(new Pair<>(Base58.decode(privateKeyCreator), Base58.decode(publicKeyCreator)));
             String byteCode = Base58.encode(tx.toBytes(true));
-            result = restClient.getResult(ERASERVICE_URL_API + "/" + byteCode);
+            if (!FLAG_RECEIVING_IP) {
+                logger.debug("Not checking ip, already remembered");
+                try {
+                    result = restClient.getResult(ERASERVICE_URL_API + "/" + byteCode);
+                    logger.debug("Send successful data to blockchain with remembered ip = " + ERASERVICE_URL_API);
+                } catch (ResourceAccessException e) {
+                    logger.debug("Request by remembered url: " + ERASERVICE_URL_API + " can't be processed");
+                    logger.debug("Switch to search ip");
+                    FLAG_RECEIVING_IP = true;
+                }
+            }
+            if (FLAG_RECEIVING_IP) {
+                logger.debug("Checking ips...");
+                ERA_SERVICE_IPS_RANGE = ERA_SERVICE_IPS_RANGE.stream().sorted(
+                        (tuple1, tuple2) -> new LongComparator(true).compare(tuple1.f1, tuple2.f1)).
+                        collect(Collectors.toList());
+                for (int i = 0; i < ERA_SERVICE_IPS_RANGE.size(); i++) {
+                    String ip = ERA_SERVICE_IPS_RANGE.get(i).f0;
+                    try {
+                        URL url = new URL("http", ip, 9067, "/api/broadcast");
+                        ERASERVICE_URL_API = url.toString();
+                        result = restClient.getResult(ERASERVICE_URL_API + "/" + byteCode);
+                        logger.debug("Send successful data to blockchain with ip = " + ip);
+                        ERASERVICE_URL_IP_RESPONSE_EXCEPT = ip;
+                        FLAG_RECEIVING_IP = false;
+                        FLAG_RECEIVING_IP_CHECK = true;
+                        break;
+                    } catch (ResourceAccessException e) {
+                        logger.debug("Request by url: " + ERASERVICE_URL_API + " can't be processed");
+                        ERA_SERVICE_IPS_RANGE.get(i).f1++;
+                        if (i == ERA_SERVICE_IPS_RANGE.size() - 1) {
+                            throw new Exception("No one ip from list is reachable");
+                        }
+                    }
+                }
+
+            }
         } catch (Exception e) {
             logger.error(e.getMessage(), e);
             throw new Exception(ERASERVICE_URL_API + " " + e.getMessage());
+        }
+        if (result == null) {
+            logger.debug("All era services are not reachable");
+            throw new Exception("All era services are not reachable");
         }
         String status;
         try {
@@ -123,19 +179,58 @@ public class EraClient {
             throw new Exception(ERASERVICE_URL_API + " status = " + status);
         }
         String signature = Base58.encode(tx.getSignature());
-        logger.info(" Acquire signature for " + account.getId() + " : " + signature);
+        logger.debug(" Acquire signature for " + account.getId() + " : " + signature);
         return signature;
     }
 
     public String checkChain(DataEra dataEra) throws Exception {
+        logger.debug("Checking chain...");
         String signature = dataEra.getSignature();
         String result = null;
         try {
-            result = restClient.getResult(EraService_Url_Signature + "/" + signature);
+            if (!FLAG_RECEIVING_IP_CHECK) {
+                logger.debug("Not checking ip check signature, already remembered");
+                try {
+                    result = restClient.getResult(ERASERVICE_URL_SIGNATURE + "/" + signature);
+                    logger.debug("check successful data from blockchain with remembered ip = " + ERASERVICE_URL_SIGNATURE);
+                } catch (ResourceAccessException e) {
+                    logger.debug("Request check by remembered url: " + ERASERVICE_URL_SIGNATURE + " can't be processed");
+                    logger.debug("Switch to search ip check");
+                    FLAG_RECEIVING_IP_CHECK = true;
+                }
+            }
+            if (FLAG_RECEIVING_IP_CHECK) {
+                logger.debug("Checking ips (signature)...");
+                ERA_SERVICE_IPS_RANGE = ERA_SERVICE_IPS_RANGE.stream().sorted(
+                        (tuple1, tuple2) -> new LongComparator(true).compare(tuple1.f1, tuple2.f1)).
+                        collect(Collectors.toList());
+                for (int i = 0; i < ERA_SERVICE_IPS_RANGE.size(); i++) {
+                    String ip = ERA_SERVICE_IPS_RANGE.get(i).f0;
+                    if (i == ERA_SERVICE_IPS_RANGE.size() - 1 && ip.equals(ERASERVICE_URL_IP_RESPONSE_EXCEPT)) {
+                        throw new Exception("No one ip from list is reachable for checking by signature");
+                    }
+                    if (ip.equals(ERASERVICE_URL_IP_RESPONSE_EXCEPT)) {
+                        continue;
+                    }
+                    try {
+                        URL url = new URL("http", ip, 9067, "/apirecords/get");
+                        ERASERVICE_URL_SIGNATURE = url.toString();
+                        result = restClient.getResult(ERASERVICE_URL_SIGNATURE + "/" + signature);
+                        logger.debug("successful checked data");
+                        FLAG_RECEIVING_IP_CHECK = false;
+                        break;
+                    } catch (ResourceAccessException e) {
+                        logger.debug("Request signature by url: " + ERASERVICE_URL_SIGNATURE + " can't be processed");
+                        ERA_SERVICE_IPS_RANGE.get(i).f1++;
+                        if (i == ERA_SERVICE_IPS_RANGE.size() - 1) {
+                            throw new Exception("No one ip from list is reachable for checking by signature");
+                        }
+                    }
+                }
+            }
         } catch (Exception e) {
-            //   logger.error(e.getMessage());
-            throw new Exception(EraService_Url_Signature + " " + e.getMessage());
-
+            logger.error(e.getMessage(), e);
+            throw new Exception(ERASERVICE_URL_SIGNATURE + " " + e.getMessage());
         }
         return result;
     }
