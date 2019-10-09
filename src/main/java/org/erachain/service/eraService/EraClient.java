@@ -4,8 +4,10 @@ import org.apache.flink.api.common.typeutils.base.LongComparator;
 import org.apache.flink.api.java.tuple.Tuple2;
 import org.erachain.api.chain.SendTX;
 import org.erachain.entities.account.Account;
+import org.erachain.entities.account.AccountSender;
 import org.erachain.entities.datainfo.DataEra;
 import org.erachain.entities.datainfo.DataInfo;
+import org.erachain.repositories.AccountSendersDAO;
 import org.erachain.repositories.DbUtils;
 import org.erachain.service.JsonService;
 import org.erachain.service.RestClient;
@@ -14,7 +16,6 @@ import org.erachain.utils.crypto.Pair;
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.ResourceAccessException;
@@ -32,6 +33,9 @@ import java.util.stream.Collectors;
 public class EraClient {
     @Autowired
     private Logger logger;
+
+    @Autowired
+    private AccountSendersDAO accountSenders;
 
     @Value("${EraService_creator}")
     private String EraService_creator;
@@ -76,7 +80,7 @@ public class EraClient {
     }
 
     @PostConstruct
-    public void postConstructInit(){
+    public void postConstructInit() {
         ERA_SERVICE_IPS_RANGE = ERA_SERVICE_IPS.stream().map((ip) -> Tuple2.of(ip, 0L)).collect(Collectors.toList());
     }
 
@@ -109,10 +113,11 @@ public class EraClient {
         String result = null;
         SendTX tx;
         try {
-            String privateKeyCreator = account.getPrivateKey();
-            String publicKeyCreator = account.getPublicKey();
-            String recipient = account.getRecipient();
-            String publicKeyRecipient = account.getPublicKeyRecipient();
+            AccountSender accountSender = accountSenders.getAccountSenderById(account.getIdSender());
+            String privateKeyCreator = accountSender.getSenderPrivateKey();
+            String publicKeyCreator = accountSender.getSenderPublicKey();
+            String recipient = account.getAccountRecipient();
+            String publicKeyRecipient = account.getRecipientPublicKey();
             byte encrypt = ENCRYPT ? (byte) 1 : (byte) 0;
             tx = new SendTX(publicKeyCreator, privateKeyCreator, recipient, publicKeyRecipient,
                     EraService_title, data,
@@ -223,7 +228,15 @@ public class EraClient {
                         logger.debug("Request signature by url: " + ERASERVICE_URL_SIGNATURE + " can't be processed");
                         ERA_SERVICE_IPS_RANGE.get(i).f1++;
                         if (i == ERA_SERVICE_IPS_RANGE.size() - 1) {
-                            throw new Exception("No one ip from list is reachable for checking by signature");
+                            try {
+                                URL url = new URL("http", ERASERVICE_URL_IP_RESPONSE_EXCEPT, 9067, "/apirecords/get");
+                                ERASERVICE_URL_SIGNATURE = url.toString();
+                                result = restClient.getResult(ERASERVICE_URL_SIGNATURE + "/" + signature);
+                                logger.debug("Checked by same ip than send");
+                                FLAG_RECEIVING_IP_CHECK = false;
+                            } catch (ResourceAccessException exception){
+                                throw new Exception("No one ip from list is reachable for checking by signature");
+                            }
                         }
                     }
                 }

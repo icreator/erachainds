@@ -1,17 +1,25 @@
 
-create table IF NOT EXISTS Account
+CREATE TABLE IF NOT EXISTS AccountSenders
 (
-  id integer not null
-    primary key autoincrement,
-  accountUrl VarChar(255),
-  publicKey   VarChar(255),
-  privateKey  VarChar(255),
-  recipient VarChar(255),
-  user    varchar(50),
-  password varchar(50),
-  identityName varchar(20)
+    idSender         varchar(255) not null
+        primary key,
+    senderPrivateKey varchar(255),
+    senderPublicKey  varchar(255)
 );
-
+CREATE TABLE IF NOT EXISTS Account
+(
+    id                 INTEGER NOT NULL
+        PRIMARY KEY AUTOINCREMENT,
+    accountUrl         VARCHAR(255),
+    accountRecipient   VARCHAR(255),
+    recipientPublicKey VARCHAR(255),
+    user               VARCHAR(50),
+    password           VARCHAR(50),
+    identityName       VARCHAR(20),
+    objectName         VARCHAR(255),
+    idSender           VARCHAR(255),
+    FOREIGN KEY (idSender) REFERENCES AccountSenders (idSender)
+);
 
 create table IF NOT EXISTS DataInfo
 (
