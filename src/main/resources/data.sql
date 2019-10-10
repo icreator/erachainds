@@ -31,7 +31,7 @@ VALUES (2,
         'GA8XX9cm4W5ctsQLBcW6hu2LSYBSAT7mxSrsVWBDnJhw',
         's.klokov@erachain.org',
         'erachain',
-        'problem',
+        'meter',
         'energyService',
         'ErachainDS');
 
