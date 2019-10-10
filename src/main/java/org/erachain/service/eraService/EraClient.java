@@ -212,28 +212,21 @@ public class EraClient {
                 for (int i = 0; i < ERA_SERVICE_IPS_RANGE.size(); i++) {
                     String ip = ERA_SERVICE_IPS_RANGE.get(i).f0;
                     if (i == ERA_SERVICE_IPS_RANGE.size() - 1 && ip.equals(ERASERVICE_URL_IP_RESPONSE_EXCEPT)) {
-                        throw new Exception("No one ip from list is reachable for checking by signature");
+                        result = checkIp(signature, ERASERVICE_URL_IP_RESPONSE_EXCEPT, "Checked by same ip than send");
+                        break;
                     }
                     if (ip.equals(ERASERVICE_URL_IP_RESPONSE_EXCEPT)) {
                         continue;
                     }
                     try {
-                        URL url = new URL("http", ip, 9067, "/apirecords/get");
-                        ERASERVICE_URL_SIGNATURE = url.toString();
-                        result = restClient.getResult(ERASERVICE_URL_SIGNATURE + "/" + signature);
-                        logger.debug("successful checked data");
-                        FLAG_RECEIVING_IP_CHECK = false;
+                        result = checkIp(signature, ip, "successful checked data");
                         break;
                     } catch (ResourceAccessException e) {
                         logger.debug("Request signature by url: " + ERASERVICE_URL_SIGNATURE + " can't be processed");
                         ERA_SERVICE_IPS_RANGE.get(i).f1++;
                         if (i == ERA_SERVICE_IPS_RANGE.size() - 1) {
                             try {
-                                URL url = new URL("http", ERASERVICE_URL_IP_RESPONSE_EXCEPT, 9067, "/apirecords/get");
-                                ERASERVICE_URL_SIGNATURE = url.toString();
-                                result = restClient.getResult(ERASERVICE_URL_SIGNATURE + "/" + signature);
-                                logger.debug("Checked by same ip than send");
-                                FLAG_RECEIVING_IP_CHECK = false;
+                                result = checkIp(signature, ERASERVICE_URL_IP_RESPONSE_EXCEPT, "Checked by same ip than send");
                             } catch (ResourceAccessException exception){
                                 throw new Exception("No one ip from list is reachable for checking by signature");
                             }
@@ -245,6 +238,16 @@ public class EraClient {
             logger.error(e.getMessage(), e);
             throw new Exception(ERASERVICE_URL_SIGNATURE + " " + e.getMessage());
         }
+        return result;
+    }
+
+    private String checkIp(String signature, String eraservice_url_ip_response_except, String s) throws Exception {
+        String result;
+        URL url = new URL("http", eraservice_url_ip_response_except, 9067, "/apirecords/get");
+        ERASERVICE_URL_SIGNATURE = url.toString();
+        result = restClient.getResult(ERASERVICE_URL_SIGNATURE + "/" + signature);
+        logger.debug(s);
+        FLAG_RECEIVING_IP_CHECK = false;
         return result;
     }
 }
