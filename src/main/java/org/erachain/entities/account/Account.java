@@ -8,22 +8,21 @@ public class Account {
     // db
     private int    id;
     private String accountUrl;
-    private String publicKey;
-    private String privateKey;
-    private String recipient;
-    private String publicKeyRecipient;
+    private String accountRecipient;
+    private String recipientPublicKey;
     private String user;
     private String identityName;
     private String password ;
     private String objectName;
+    private String idSender;
     // end db
 
-    public String getRecipient() {
-        return recipient;
+    public String getAccountRecipient() {
+        return accountRecipient;
     }
 
-    public void setRecipient(String recipient) {
-        this.recipient = recipient;
+    public void setAccountRecipient(String accountRecipient) {
+        this.accountRecipient = accountRecipient;
     }
 
     public String getIdentityName() {
@@ -79,28 +78,12 @@ public class Account {
         this.id = id;
     }
 
-    public String getPublicKey() {
-        return publicKey;
+    public String getRecipientPublicKey() {
+        return recipientPublicKey;
     }
 
-    public void setPublicKey(String publicKey) {
-        this.publicKey = publicKey;
-    }
-
-    public String getPrivateKey() {
-        return privateKey;
-    }
-
-    public void setPrivateKey(String privateKey) {
-        this.privateKey = privateKey;
-    }
-
-    public String getPublicKeyRecipient() {
-        return publicKeyRecipient;
-    }
-
-    public void setPublicKeyRecipient(String publicKeyRecipient) {
-        this.publicKeyRecipient = publicKeyRecipient;
+    public void setRecipientPublicKey(String recipientPublicKey) {
+        this.recipientPublicKey = recipientPublicKey;
     }
 
     public String getObjectName() {
@@ -109,5 +92,13 @@ public class Account {
 
     public void setObjectName(String objectName) {
         this.objectName = objectName;
+    }
+
+    public String getIdSender() {
+        return idSender;
+    }
+
+    public void setIdSender(String idSender) {
+        this.idSender = idSender;
     }
 }
