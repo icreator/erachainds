@@ -3,7 +3,6 @@ package org.erachain.repositories;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 
@@ -19,7 +18,7 @@ public class DbUtils {
     @Autowired
     private Logger logger;
 
-     private JdbcTemplate jdbcTemplate;
+    private JdbcTemplate jdbcTemplate;
 
     @Autowired
     public DbUtils(JdbcTemplate jdbcTemplate) {
@@ -27,13 +26,14 @@ public class DbUtils {
     }
 
     private String getSql(String sql, Object... values) {
-        for(Object value : values) {
+        for (Object value : values) {
             String strValue = value.getClass().getSimpleName().endsWith("String") ? "'" + value.toString() + "'" : value.toString();
             sql = StringUtils.replaceOnce(sql, "?", strValue);
         }
         logger.debug(" sql " + sql);
         return sql;
     }
+
     public List<Map<String, Object>> getDataMapList(String sql, Object... values) throws Exception {
         sql = getSql(sql, values);
         List<Map<String, Object>> list = new ArrayList<>();
@@ -44,7 +44,7 @@ public class DbUtils {
 
             if (resultset != null && !resultset.isClosed()) {
                 ResultSetMetaData rm = resultset.getMetaData();
-                while(resultset.next()) {
+                while (resultset.next()) {
                     Map<String, Object> map = new HashMap<>();
                     for (int i = 1; i <= rm.getColumnCount(); i++) {
                         String name = rm.getColumnName(i);
@@ -57,6 +57,7 @@ public class DbUtils {
         }
         return list;
     }
+
     public Map<String, Object> getDataMap(String sql, Object... values) throws Exception {
         sql = getSql(sql, values);
         Map<String, Object> map = new HashMap<>();
@@ -66,7 +67,7 @@ public class DbUtils {
 
             if (resultset != null && !resultset.isClosed() && resultset.next()) {
                 ResultSetMetaData rm = resultset.getMetaData();
-                for (int i = 1; i <= rm.getColumnCount(); i ++) {
+                for (int i = 1; i <= rm.getColumnCount(); i++) {
                     String name = rm.getColumnName(i);
                     map.put(name, resultset.getObject(name));
                 }
@@ -75,6 +76,7 @@ public class DbUtils {
         }
         return map;
     }
+
     public <T> T checkData(String sql) throws SQLException {
         logger.debug(" sql " + sql);
         try (Connection connection = jdbcTemplate.getDataSource().getConnection()) {
@@ -83,12 +85,13 @@ public class DbUtils {
 
             if (resultset != null && !resultset.isClosed() && resultset.next()) {
 //                 // exactly one result so allowed
-                    return (T) resultset.getObject(1);
+                return (T) resultset.getObject(1);
             }
             statement.close();
         }
         return (T) null;
     }
+
     public <T> List<T> getDataList(String sql, Object... values) throws SQLException {
         sql = getSql(sql, values);
         logger.debug(" sql " + sql);
@@ -98,12 +101,13 @@ public class DbUtils {
             ResultSet resultset = statement.executeQuery();
 
             if (resultset != null && !resultset.isClosed()) {
-                while(resultset.next())
-                    list.add ((T) resultset.getObject(1));
+                while (resultset.next())
+                    list.add((T) resultset.getObject(1));
             }
         }
-        return  list;
+        return list;
     }
+
     public <T> T getData(String sql, Object... values) throws SQLException {
         sql = getSql(sql, values);
 //        logger.debug(" sql " + sql);
@@ -112,32 +116,37 @@ public class DbUtils {
             ResultSet resultset = statement.executeQuery();
 
             if (resultset != null && !resultset.isClosed() && resultset.next()) {
- //                // exactly one result so allowed
-                    return (T) resultset.getObject(1);
+                //                // exactly one result so allowed
+                return (T) resultset.getObject(1);
             }
         }
         return (T) null;
     }
-    public  <T> List<T>  fetchDataValues(Class<T> clazz, String sql, Object... values) {
+
+    public <T> List<T> fetchDataValues(Class<T> clazz, String sql, Object... values) {
         sql = getSql(sql, values);
         return fetchData(clazz, sql);
     }
+
     public <T> T fetchData(Class<T> clazz, int id) {
         return fetchData(clazz, clazz.getSimpleName(), id);
     }
+
     public <T> T fetchData(Class<T> clazz, String table, int id) {
-        return  fetchData(clazz, table, " id = " + id).get(0);
+        return fetchData(clazz, table, " id = " + id).get(0);
     }
+
     public <T> List<T> fetchData(Class<T> clazz, String table, String where) {
         return (List<T>) fetchData(clazz, fetch + table + (where = where == null ? "" : " where " + where));
     }
-    public   <T> List<T> fetchData(Class<T> clazz, String sql) {
+
+    public <T> List<T> fetchData(Class<T> clazz, String sql) {
 //        logger.debug(" sql " + sql);
         List<Map<String, Object>> rows = jdbcTemplate.queryForList(sql);
- //       logger.debug("rows " + rows.size());
+        //       logger.debug("rows " + rows.size());
         List<T> list = new ArrayList<>();
-        for (Map<String, Object> row: rows){
-            Object  dataInfo = null;
+        for (Map<String, Object> row : rows) {
+            Object dataInfo = null;
             try {
                 dataInfo = clazz.getConstructor().newInstance();
             } catch (Exception e) {
@@ -154,11 +163,12 @@ public class DbUtils {
     public void setObj(Object data, Map<String, Object> row) {
         setObj(data, data.getClass().getDeclaredFields(), row);
     }
+
     public void setObj(Object data, Field[] fields, Map<String, Object> row) {
         Arrays.stream(fields).forEach(f -> {
             if (row.get(f.getName()) != null) {
                 try {
- //                   logger.debug("set field " + f.getName() + " " + row.get(f.getName()));
+                    //                   logger.debug("set field " + f.getName() + " " + row.get(f.getName()));
                     f.setAccessible(true);
                     if (f.getType().getCanonicalName().equals("java.sql.Timestamp")) {
                         f.set(data, new Timestamp((long) row.get(f.getName())));
@@ -171,9 +181,11 @@ public class DbUtils {
         });
         return;
     }
+
     public String setObjToDb(Object data) {
         return setObjToDb(data, null, true);
     }
+
     public String setObjToDb(Object data, String table, boolean noId) {
         final StringBuffer campos = new StringBuffer("");
         final StringBuffer valores = new StringBuffer("");
@@ -196,9 +208,8 @@ public class DbUtils {
                 }
                 if (f.get(data) instanceof String) {
                     valores.append("'" + value + "'");
-                }
-                else if (f.get(data) instanceof Timestamp) {
-                        Long val =  ((Timestamp) f.get(data)).getTime();
+                } else if (f.get(data) instanceof Timestamp) {
+                    Long val = ((Timestamp) f.get(data)).getTime();
                     valores.append(val.toString());
                 } else {
                     valores.append(value);
@@ -210,12 +221,14 @@ public class DbUtils {
         });
         table = table == null ? data.getClass().getSimpleName().toLowerCase() : table;
         String sql = "insert into " + table + " (" + campos.toString() + ") values(" + valores.toString() + ");";
-     //   logger.debug("sql = " + sql);
+        //   logger.debug("sql = " + sql);
         return sql;
     }
+
     public int exSqlStatement(String sql) {
         return exSqlStatement(sql, false);
     }
+
     public int exSqlStatement(String sql, boolean upd) {
 
         try (Connection connection = jdbcTemplate.getDataSource().getConnection()) {
@@ -227,17 +240,19 @@ public class DbUtils {
                 return rc;
             }
             ResultSet rs = stm.getGeneratedKeys();
-            if(rs.next())
+            if (rs.next())
                 return rs.getInt(1);
         } catch (SQLException e) {
-             logger.error(e.getMessage());
+            logger.error(e.getMessage());
         }
 
         return 0;
     }
+
     public int setDbObj(Object data, String table) throws SQLException {
         return setDbObj(data, table, true);
     }
+
     public int setDbObj(Object data, String table, boolean noId) throws SQLException {
         String sql = setObjToDb(data, table, noId);
         logger.debug(" sql " + sql);
@@ -252,6 +267,7 @@ public class DbUtils {
         });
         return names;
     }
+
     public String[] getColumnNameArray(String table) {
         DatabaseMetaData databaseMetaData = null;
         ResultSet rs = null;

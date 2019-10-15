@@ -43,24 +43,19 @@ public class TransactionController {
     @Value("${GET_LAST_BLOCK_CHAIN_INFO_BY_DATE}")
     private String GET_LAST_BLOCK_CHAIN_INFO_BY_DATE;
 
-    //    @LoggableController
     @RequestMapping(value = "/{id}/proc", method = RequestMethod.GET, produces = {"text/plain"})
-    //         produces = {"text/json", "text/xml"})
     @PreAuthorize("permitAll()")
     public String getClientData(@PathVariable("id") String ident,
                                 @RequestParam List<String> names,
                                 @RequestParam List<String> values,
                                 @RequestParam(value = "xml", required = false) String xml
-    ) throws InterruptedException {
-
-//        byte[] data = Base58.decode(rawDataBase58);
-
+    ) {
         Map<String, String> params = new HashMap<>();
         int i = 0;
         for (String name : names) {
             params.put(name, values.get(i++));
         }
-        String result = "";
+        String result;
         try {
             result = infoSave.fetchDataForClient(ident, params);
             if ("yes".equalsIgnoreCase(xml)) {
@@ -75,26 +70,22 @@ public class TransactionController {
     }
 
 
-    //    @LoggableController
     @RequestMapping(value = "/{id}", method = RequestMethod.GET, produces = "application/json")
-//    @PreAuthorize("hasAuthority('ADMIN_USER')")
     @PreAuthorize("permitAll()")
     public String getIdentByDate(@PathVariable("id") String ident,
-                                 @RequestParam(value = "date", required = false) String date) throws InterruptedException {
-
-        JSONObject jsonObject = null;
-        Map<String, Object> map = null;
+                                 @RequestParam(value = "date", required = false) String date) {
+        JSONObject jsonObject;
         try {
             Date runDate = (date == null ? new Date() : dateUtl.stringToDate(date));
-            map = dbUtils.getDataMap(GET_LAST_BLOCK_CHAIN_INFO_BY_DATE, ident, runDate.getTime(), 1);
-            if (map == null || map.isEmpty())
+            Map<String, Object> map = dbUtils.getDataMap(GET_LAST_BLOCK_CHAIN_INFO_BY_DATE, ident, runDate.getTime(), 1);
+            if (map == null || map.isEmpty()) {
                 return "{\"error\":\"Not found\"}";
+            }
             jsonObject = jsonService.getDataMap(map);
         } catch (Exception e) {
             String message = "check parameters - " + e.getMessage();
             return "{\"error\"=\"" + message + "\"}";
         }
-
         return jsonObject.toString();
     }
 
@@ -112,14 +103,29 @@ public class TransactionController {
         }
 */
 
-    //        @LoggableController
+    @RequestMapping(value = "/{id}", method = RequestMethod.POST, produces = "application/json")
+    @PreAuthorize("permitAll()")
+    public String postIdentifierByDate(@PathVariable("id") String ident,
+                                       @RequestParam(value = "date", required = false) String date,
+                                       @RequestBody Map<String, String> params) {
+        String result;
+        try {
+            Date runDate = (date == null ? new Date() : dateUtl.stringToDate(date));
+            int limit = 1;
+            result = infoSave.fetchDataLastBlockDataParams(ident, params, runDate.getTime(),limit);
+        } catch (Exception e) {
+            return "{\"error\"=\"" + ("check parameters - " + e.getMessage()) + "\"}";
+        }
+        return result;
+    }
+
+
     @RequestMapping(value = "/{id}/data", method = RequestMethod.GET, produces = {"text/plain"})
-    //         produces = {"text/json", "text/xml"})
     @PreAuthorize("permitAll()")
     public String getDataByDate(@PathVariable("id") String ident,
-                                @RequestParam(value = "date", required = false) String date) throws InterruptedException {
+                                @RequestParam(value = "date", required = false) String date) {
 
-        byte[] result = null;
+        byte[] result;
         try {
             Date runDate = (date == null ? new Date() : dateUtl.stringToDate(date));
             result = dbUtils.getData(GET_LAST_RECORD_BY_DATE, ident, runDate.getTime(), 1);
@@ -135,14 +141,12 @@ public class TransactionController {
     @PreAuthorize("permitAll()")
     public String getIdentHistoryByDate(@PathVariable("id") String ident,
                                         @RequestParam(value = "date", required = false) String date,
-                                        @RequestParam(value = "limit", required = false) String limit) throws InterruptedException {
-
-        List<Map<String, Object>> list = null;
-        JSONObject result = null;
+                                        @RequestParam(value = "limit", required = false) String limit) {
+        JSONObject result;
         try {
             Date runDate = (date == null ? new Date() : dateUtl.stringToDate(date));
             int lim = (limit == null ? 50 : Integer.parseInt(limit));
-            list = dbUtils.getDataMapList(GET_LAST_BLOCK_CHAIN_INFO_BY_DATE, ident, runDate.getTime(), lim);
+            List<Map<String, Object>> list = dbUtils.getDataMapList(GET_LAST_BLOCK_CHAIN_INFO_BY_DATE, ident, runDate.getTime(), lim);
             if (list == null || list.isEmpty())
                 return "{\"error\":\"Not found\"}";
             result = jsonService.getDataMapList(list);
@@ -152,7 +156,6 @@ public class TransactionController {
         }
         return result.toString();
     }
-//
 }
 
 
