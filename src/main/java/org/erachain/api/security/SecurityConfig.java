@@ -29,9 +29,9 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 //        auth.inMemoryAuthentication().withUser("s.klokov@erachain.org").password(passwordEncoder().encode("erachain")).authorities("ADMIN_ROLE");
         auth.jdbcAuthentication().dataSource(dataSource)
                 .usersByUsernameQuery(
-                        "SELECT Account.user as username, Account.password as paaword,'1' as enabled FROM Account WHERE user=?")
+                        "SELECT Account.user, Account.password,'1' as enabled FROM Account WHERE user=?")
                 .authoritiesByUsernameQuery(
-                        "SELECT Account.user as username, 'admin_role' as role FROM Account WHERE user=?"
+                        "SELECT Account.user, 'admin_role' as role FROM Account WHERE user=?"
                 );
     }
 
