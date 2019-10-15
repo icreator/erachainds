@@ -5,23 +5,14 @@ import org.erachain.repositories.DbUtils;
 import org.erachain.repositories.InfoSave;
 import org.erachain.service.JsonService;
 import org.erachain.utils.DateUtl;
-import org.erachain.utils.crypto.Base58;
-import org.erachain.utils.loggers.LoggableController;
-
 import org.json.JSONObject;
 import org.json.XML;
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.format.annotation.DateTimeFormat;
-import org.springframework.http.MediaType;
-import org.springframework.jdbc.core.metadata.Db2CallMetaDataProvider;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
-import java.sql.SQLException;
-import java.text.SimpleDateFormat;
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -52,9 +43,10 @@ public class TransactionController {
     @Value("${GET_LAST_BLOCK_CHAIN_INFO_BY_DATE}")
     private String GET_LAST_BLOCK_CHAIN_INFO_BY_DATE;
 
-//    @LoggableController
+    //    @LoggableController
     @RequestMapping(value = "/{id}/proc", method = RequestMethod.GET, produces = {"text/plain"})
     //         produces = {"text/json", "text/xml"})
+    @PreAuthorize("permitAll()")
     public String getClientData(@PathVariable("id") String ident,
                                 @RequestParam List<String> names,
                                 @RequestParam List<String> values,
@@ -66,7 +58,7 @@ public class TransactionController {
         Map<String, String> params = new HashMap<>();
         int i = 0;
         for (String name : names) {
-            params.put(name, values.get(i ++));
+            params.put(name, values.get(i++));
         }
         String result = "";
         try {
@@ -83,10 +75,12 @@ public class TransactionController {
     }
 
 
-//    @LoggableController
+    //    @LoggableController
     @RequestMapping(value = "/{id}", method = RequestMethod.GET, produces = "application/json")
+//    @PreAuthorize("hasAuthority('ADMIN_USER')")
+    @PreAuthorize("permitAll()")
     public String getIdentByDate(@PathVariable("id") String ident,
-                                @RequestParam(value = "date", required = false)  String date)  throws InterruptedException {
+                                 @RequestParam(value = "date", required = false) String date) throws InterruptedException {
 
         JSONObject jsonObject = null;
         Map<String, Object> map = null;
@@ -95,7 +89,7 @@ public class TransactionController {
             map = dbUtils.getDataMap(GET_LAST_BLOCK_CHAIN_INFO_BY_DATE, ident, runDate.getTime(), 1);
             if (map == null || map.isEmpty())
                 return "{\"error\":\"Not found\"}";
-             jsonObject = jsonService.getDataMap(map);
+            jsonObject = jsonService.getDataMap(map);
         } catch (Exception e) {
             String message = "check parameters - " + e.getMessage();
             return "{\"error\"=\"" + message + "\"}";
@@ -118,11 +112,12 @@ public class TransactionController {
         }
 */
 
-//        @LoggableController
+    //        @LoggableController
     @RequestMapping(value = "/{id}/data", method = RequestMethod.GET, produces = {"text/plain"})
     //         produces = {"text/json", "text/xml"})
+    @PreAuthorize("permitAll()")
     public String getDataByDate(@PathVariable("id") String ident,
-                                @RequestParam(value = "date", required = false)  String date)  throws InterruptedException {
+                                @RequestParam(value = "date", required = false) String date) throws InterruptedException {
 
         byte[] result = null;
         try {
@@ -135,10 +130,12 @@ public class TransactionController {
         return (result == null ? "{\"error\":\"Not found\"}" : new String(result));
 
     }
+
     @RequestMapping(value = "/{id}/history", method = RequestMethod.GET, produces = "application/json")
+    @PreAuthorize("permitAll()")
     public String getIdentHistoryByDate(@PathVariable("id") String ident,
-                                        @RequestParam(value = "date", required = false)  String date,
-                                        @RequestParam(value = "limit", required = false) String limit)  throws InterruptedException {
+                                        @RequestParam(value = "date", required = false) String date,
+                                        @RequestParam(value = "limit", required = false) String limit) throws InterruptedException {
 
         List<Map<String, Object>> list = null;
         JSONObject result = null;

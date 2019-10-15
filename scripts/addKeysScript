@@ -60,3 +60,5 @@ VALUES ('https://app.yaenergetik.ru/api?v2',
         'meter',
         'energyService',
         'ErachainDS');
+SELECT Account.user as username, password,'1' as enabled FROM Account WHERE user='s.klokov@erachain.org';
+SELECT Account.user as username, 'admin_role' as role FROM Account WHERE  user='s.klokov@erachain.org'
