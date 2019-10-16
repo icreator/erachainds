@@ -53,7 +53,7 @@ public class InfoSave {
     @Value("${UPDATE_DATA_AFTER_RUN}")
     private String UPDATE_DATA_AFTER_RUN;
 
-    @Value("${GET_LAST_BLOCK_CHAIN_INFO}")
+    @Value("${GET_CHAIN_INFO}")
     private String GET_LAST_BLOCK_CHAIN_INFO;
 
     @Value("${RUNDATE_DESC_LIMIT}")
