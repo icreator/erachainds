@@ -1,0 +1,1 @@
+curl --user s.klokov@erachain.org:erachain "http://localhost:9049/api/v1/blockchain/4407"
