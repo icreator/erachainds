@@ -1,6 +1,9 @@
 package org.erachain.controllers;
 
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import org.erachain.jsons.ResponseOnRequestJsonOnlyId;
 import org.erachain.repositories.DbUtils;
 import org.erachain.repositories.InfoSave;
 import org.erachain.service.JsonService;
@@ -9,6 +12,7 @@ import org.json.JSONObject;
 import org.json.XML;
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Required;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
@@ -70,53 +74,59 @@ public class TransactionController {
     }
 
 
-    @RequestMapping(value = "/{id}", method = RequestMethod.GET, produces = "application/json")
-    @PreAuthorize("permitAll()")
-    public String getIdentByDate(@PathVariable("id") String ident,
-                                 @RequestParam(value = "date", required = false) String date) {
-        JSONObject jsonObject;
-        try {
-            Date runDate = (date == null ? new Date() : dateUtl.stringToDate(date));
-            Map<String, Object> map = dbUtils.getDataMap(GET_LAST_BLOCK_CHAIN_INFO_BY_DATE, ident, runDate.getTime(), 1);
-            if (map == null || map.isEmpty()) {
-                return "{\"error\":\"Not found\"}";
-            }
-            jsonObject = jsonService.getDataMap(map);
-        } catch (Exception e) {
-            String message = "check parameters - " + e.getMessage();
-            return "{\"error\"=\"" + message + "\"}";
-        }
-        return jsonObject.toString();
-    }
+//    @RequestMapping(value = "/{id}", method = RequestMethod.GET, produces = "application/json")
+//    @PreAuthorize("permitAll()")
+//    public String getIdentByDate(@PathVariable("id") String ident,
+//                                 @RequestParam(value = "date", required = false) String date) {
+//        JSONObject jsonObject;
+//        try {
+//            Date runDate = (date == null ? new Date() : dateUtl.stringToDate(date));
+//            Map<String, Object> map = dbUtils.getDataMap(GET_LAST_BLOCK_CHAIN_INFO_BY_DATE, ident, runDate.getTime(), 1);
+//            if (map == null || map.isEmpty()) {
+//                return "{\"error\":\"Not found\"}";
+//            }
+//            jsonObject = jsonService.getDataMap(map);
+//        } catch (Exception e) {
+//            String message = "check parameters - " + e.getMessage();
+//            return "{\"error\"=\"" + message + "\"}";
+//        }
+//        return jsonObject.toString();
+//    }
 
 /* Формта возвращаемого значения
         {
-
             "error" : "Not found"
-
 
             date: "timestamp" - дата запроса данных у внешнего сервиса
             tx: "BLOCKNO-TXNO" - номер блока и транзакции в блоке
             pos: 0 - позиция данных в транзакции, необязательный если вся транзакция для одного идентификатора
             size: 122 - длинна данных в байтах, необязательный если вся транзакция для одного идентификатора
-
         }
 */
 
-    @RequestMapping(value = "/{id}", method = RequestMethod.POST, produces = "application/json")
+    @RequestMapping(value = "/{id}", method = RequestMethod.GET, produces = "application/json")
     @PreAuthorize("permitAll()")
     public String postIdentifierByDate(@PathVariable("id") String ident,
-                                       @RequestParam(value = "date", required = false) String date,
-                                       @RequestBody Map<String, String> params) {
-        String result;
+                                       @RequestParam(required = false) List<String> names,
+                                       @RequestParam(required = false) List<String> values,
+                                       @RequestParam(value = "date", required = false) String date) throws JsonProcessingException {
+        ResponseOnRequestJsonOnlyId result;
+        Map<String, String> params = new HashMap<>();
+        int i = 0;
+        if (names != null) {
+            for (String name : names) {
+                params.put(name, values.get(i++));
+            }
+        }
         try {
             Date runDate = (date == null ? new Date() : dateUtl.stringToDate(date));
             int limit = 1;
-            result = infoSave.fetchDataLastBlockDataParams(ident, params, runDate.getTime(),limit);
+            result = infoSave.fetchDataLastBlockDataParams(ident, params, runDate.getTime(), limit);
         } catch (Exception e) {
             return "{\"error\"=\"" + ("check parameters - " + e.getMessage()) + "\"}";
         }
-        return result;
+        ObjectMapper mapper = new ObjectMapper();
+        return mapper.writeValueAsString(result);
     }
 
 

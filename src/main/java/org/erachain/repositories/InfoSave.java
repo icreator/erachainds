@@ -2,6 +2,7 @@ package org.erachain.repositories;
 
 import org.erachain.entities.datainfo.DataEra;
 import org.erachain.entities.datainfo.DataInfo;
+import org.erachain.jsons.ResponseOnRequestJsonOnlyId;
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -214,7 +215,7 @@ public class InfoSave {
         this.jdbcTemplate = jdbcTemplate;
     }
 
-    public String fetchDataLastBlockDataParams(String ident, Map<String, String> params, long time, int limit) throws SQLException {
+    public ResponseOnRequestJsonOnlyId fetchDataLastBlockDataParams(String ident, Map<String, String> params, long time, int limit) throws SQLException {
         try (Connection connection = jdbcTemplate.getDataSource().getConnection()) {
             StringBuilder sqlbuf = new StringBuilder(GET_LAST_BLOCK_CHAIN_INFO);
             params.keySet().forEach(name -> {
@@ -222,23 +223,26 @@ public class InfoSave {
                 sqlbuf.append(FETCH_DATA_FOR_CLIENT_WHERE);
             });
             sqlbuf.append(RUNDATE_DESC_LIMIT);
-            PreparedStatement stm = connection.prepareStatement(sqlbuf.toString());
-            int i = 0;
-            stm.setString(++i, ident);
-            stm.setString(++i, time + "");
-            for (String name : params.keySet()) {
-                logger.debug(name + " " + params.get(name));
-                stm.setString(++i, params.get(name));
-                stm.setString(++i, name);
+            ResponseOnRequestJsonOnlyId json;
+            try (PreparedStatement stm = connection.prepareStatement(sqlbuf.toString())) {
+                int i = 0;
+                stm.setString(++i, ident);
+                stm.setString(++i, time + "");
+                for (String name : params.keySet()) {
+                    logger.debug(name + " " + params.get(name));
+                    stm.setString(++i, params.get(name));
+                    stm.setString(++i, name);
+                }
+                stm.setString(++i, limit + "");
+                try (ResultSet rs = stm.executeQuery()) {
+                    rs.next();
+                    json = new ResponseOnRequestJsonOnlyId(new String(rs.getBytes(2)),
+                            new Long(new String(rs.getBytes(1))),
+                            Integer.parseInt(new String(rs.getBytes(4))),
+                            Integer.parseInt(new String(rs.getBytes(5))));
+                }
             }
-            stm.setString(++i, limit + "");
-            String data;
-            try (ResultSet rs = stm.executeQuery()) {
-                rs.next();
-                data = new String(rs.getBytes(1));
-                stm.close();
-            }
-            return data;
+            return json;
         }
     }
 }
