@@ -2,6 +2,7 @@ package org.erachain.repositories;
 
 import org.erachain.entities.datainfo.DataEra;
 import org.erachain.entities.datainfo.DataInfo;
+import org.erachain.jsons.ListResponseOnRequestJsonOnlyId;
 import org.erachain.jsons.ResponseOnRequestJsonOnlyId;
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,8 +17,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-
-import static java.util.Optional.of;
 
 @Repository
 @PropertySource("classpath:queries.properties")
@@ -52,13 +51,16 @@ public class InfoSave {
     private String FETCH_DATA_FOR_CLIENT;
 
     @Value("${ADD_PARAM_RESTRICTION_ACTUAL_REQUEST_ID}")
-    private String FETCH_DATA_FOR_CLIENT_WHERE;
+    private String ADD_PARAM_RESTRICTION_ACTUAL_REQUEST_ID;
 
     @Value("${UPDATE_DATA_AFTER_RUN}")
     private String UPDATE_DATA_AFTER_RUN;
 
     @Value("${GET_CHAIN_INFO}")
-    private String GET_LAST_BLOCK_CHAIN_INFO;
+    private String GET_CHAIN_INFO;
+
+    @Value("${GET_RECORD_DATA}")
+    private String GET_RECORD_DATA;
 
     @Value("${ORDER_BY_RUNDATE_DESC_LIMIT}")
     private String RUNDATE_DESC_LIMIT;
@@ -70,6 +72,11 @@ public class InfoSave {
 
     @Autowired
     private DbUtils dbUtils;
+
+    @Autowired
+    public InfoSave(JdbcTemplate jdbcTemplate) {
+        this.jdbcTemplate = jdbcTemplate;
+    }
 
     private static final Field[] fields = DataInfo.class.getDeclaredFields();
 
@@ -117,7 +124,7 @@ public class InfoSave {
             StringBuffer sqlbuf = new StringBuffer(FETCH_DATA_FOR_CLIENT);
             params.keySet().forEach(name -> {
                 sqlbuf.append(" ");
-                sqlbuf.append(FETCH_DATA_FOR_CLIENT_WHERE);
+                sqlbuf.append(ADD_PARAM_RESTRICTION_ACTUAL_REQUEST_ID);
 
             });
             PreparedStatement stm = connection.prepareStatement(sqlbuf.toString());
@@ -213,17 +220,12 @@ public class InfoSave {
         }
     }
 
-    @Autowired
-    public InfoSave(JdbcTemplate jdbcTemplate) {
-        this.jdbcTemplate = jdbcTemplate;
-    }
-
-    public Optional<ResponseOnRequestJsonOnlyId> fetchDataLastBlockDataParams(String ident, Map<String, String> params, long time, int limit) throws SQLException {
+    public Optional<ResponseOnRequestJsonOnlyId> fetchDataByIdLastBlockDataParams(String ident, Map<String, String> params, long time) throws SQLException {
         try (Connection connection = jdbcTemplate.getDataSource().getConnection()) {
-            StringBuilder sqlbuf = new StringBuilder(GET_LAST_BLOCK_CHAIN_INFO);
+            StringBuilder sqlbuf = new StringBuilder(GET_CHAIN_INFO);
             params.keySet().forEach(name -> {
                 sqlbuf.append(" ");
-                sqlbuf.append(FETCH_DATA_FOR_CLIENT_WHERE);
+                sqlbuf.append(ADD_PARAM_RESTRICTION_ACTUAL_REQUEST_ID);
             });
             sqlbuf.append(" ").append(RUNDATE_DESC_LIMIT);
             ResponseOnRequestJsonOnlyId json = null;
@@ -236,7 +238,7 @@ public class InfoSave {
                     stm.setString(++i, name);
                     stm.setString(++i, params.get(name));
                 }
-                stm.setString(++i, limit + "");
+                stm.setString(++i, "1");
                 try (ResultSet rs = stm.executeQuery()) {
                     if (rs.next()){
                         json = new ResponseOnRequestJsonOnlyId(new String(rs.getBytes(2)),
@@ -249,4 +251,67 @@ public class InfoSave {
             return Optional.of(json);
         }
     }
+    public Optional<String> fetchDataByIdDataLastBlockDataParams(String ident, Map<String, String> params, long time) throws SQLException {
+        try (Connection connection = jdbcTemplate.getDataSource().getConnection()) {
+            StringBuilder sqlbuf = new StringBuilder(GET_RECORD_DATA);
+            params.keySet().forEach(name -> {
+                sqlbuf.append(" ");
+                sqlbuf.append(ADD_PARAM_RESTRICTION_ACTUAL_REQUEST_ID);
+            });
+            sqlbuf.append(" ").append(RUNDATE_DESC_LIMIT);
+            String result = null;
+            try (PreparedStatement stm = connection.prepareStatement(sqlbuf.toString())) {
+                int i = 0;
+                stm.setString(++i, ident);
+                stm.setString(++i, time + "");
+                for (String name : params.keySet()) {
+                    logger.debug(name + " " + params.get(name));
+                    stm.setString(++i, name);
+                    stm.setString(++i, params.get(name));
+                }
+                stm.setString(++i,  "1");
+                try (ResultSet rs = stm.executeQuery()) {
+                    if (rs.next()){
+                        result = rs.getString(1);
+                    }
+                }
+            }
+            return Optional.of(result);
+        }
+    }
+    public Optional<ListResponseOnRequestJsonOnlyId> fetchDataByIdHistoryBlockDataParams(String ident, Map<String, String> params, long time, int limit) throws SQLException {
+        ListResponseOnRequestJsonOnlyId result = new ListResponseOnRequestJsonOnlyId();
+        try (Connection connection = jdbcTemplate.getDataSource().getConnection()) {
+            StringBuilder sqlbuf = new StringBuilder(GET_CHAIN_INFO);
+            params.keySet().forEach(name -> {
+                sqlbuf.append(" ");
+                sqlbuf.append(ADD_PARAM_RESTRICTION_ACTUAL_REQUEST_ID);
+            });
+            sqlbuf.append(" ").append(RUNDATE_DESC_LIMIT);
+            ResponseOnRequestJsonOnlyId json;
+            try (PreparedStatement stm = connection.prepareStatement(sqlbuf.toString())) {
+                int i = 0;
+                stm.setString(++i, ident);
+                stm.setString(++i, time + "");
+                for (String name : params.keySet()) {
+                    logger.debug(name + " " + params.get(name));
+                    stm.setString(++i, name);
+                    stm.setString(++i, params.get(name));
+                }
+                stm.setString(++i, limit + "");
+                List<ResponseOnRequestJsonOnlyId> responseOnRequestJsonOnlyIds = result.getResponseOnRequestJsonOnlyIds();
+                try (ResultSet rs = stm.executeQuery()) {
+                    while (rs.next()){
+                        json = new ResponseOnRequestJsonOnlyId(new String(rs.getBytes(2)),
+                                new Long(new String(rs.getBytes(1))),
+                                Integer.parseInt(new String(rs.getBytes(4))),
+                                Integer.parseInt(new String(rs.getBytes(5))));
+                        responseOnRequestJsonOnlyIds.add(json);
+                    }
+                }
+            }
+            return Optional.of(result);
+        }
+    }
+
 }

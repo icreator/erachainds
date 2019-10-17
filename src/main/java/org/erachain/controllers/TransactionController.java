@@ -3,16 +3,15 @@ package org.erachain.controllers;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.erachain.jsons.ListResponseOnRequestJsonOnlyId;
 import org.erachain.jsons.ResponseOnRequestJsonOnlyId;
 import org.erachain.repositories.DbUtils;
 import org.erachain.repositories.InfoSave;
 import org.erachain.service.JsonService;
 import org.erachain.utils.DateUtl;
 import org.json.JSONObject;
-import org.json.XML;
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Required;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
@@ -38,11 +37,8 @@ public class TransactionController {
     @Autowired
     private Logger logger;
 
-    @Value("${GET_LAST_RECORD_BY_DATE}")
+    @Value("${GET_RECORD_DATA}")
     private String GET_LAST_RECORD_BY_DATE;
-
-    @Value("${GET_LAST_BLOCK_CHAIN_INFO_BY_DATE}")
-    private String GET_LAST_BLOCK_CHAIN_INFO_BY_DATE;
 
 //    @RequestMapping(value = "/{id}/proc", method = RequestMethod.GET, produces = {"text/plain"})
 //    @PreAuthorize("permitAll()")
@@ -98,10 +94,9 @@ public class TransactionController {
         }
         try {
             Date runDate = (date == null ? new Date() : dateUtl.stringToDate(date));
-            int limit = 1;
-            result = infoSave.fetchDataLastBlockDataParams(ident, params, runDate.getTime(), limit);
+            result = infoSave.fetchDataByIdLastBlockDataParams(ident, params, runDate.getTime());
         } catch (Exception e) {
-            return "{\"error\"=\"" + ("check parameters - " + e.getMessage()) + "\"}";
+            return "{\"error\"=\""  + e.getMessage() + "\"}";
         }
         ObjectMapper mapper = new ObjectMapper();
         return mapper.writeValueAsString(result.orElseThrow(IllegalArgumentException::new));
@@ -111,38 +106,52 @@ public class TransactionController {
     @RequestMapping(value = "/{id}/data", method = RequestMethod.GET, produces = {"text/plain"})
     @PreAuthorize("permitAll()")
     public String getDataByDate(@PathVariable("id") String ident,
-                                @RequestParam(value = "date", required = false) String date) {
+                                @RequestParam(required = false) List<String> names,
+                                @RequestParam(required = false) List<String> values,
+                                @RequestParam(value = "date", required = false) String date) throws JsonProcessingException {
 
-        byte[] result;
+        Optional<String> result;
+        Map<String, String> params = new HashMap<>();
+        int i = 0;
+        if (names != null) {
+            for (String name : names) {
+                params.put(name, values.get(i++));
+            }
+        }
         try {
             Date runDate = (date == null ? new Date() : dateUtl.stringToDate(date));
-            result = dbUtils.getData(GET_LAST_RECORD_BY_DATE, ident, runDate.getTime(), 1);
+            result = infoSave.fetchDataByIdDataLastBlockDataParams(ident, params, runDate.getTime());
         } catch (Exception e) {
-            String message = "check parameters - " + e.getMessage();
-            return "{\"error\":\"" + message + "\"}";
+            return "{\"error\"=\"" + e.getMessage() + "\"}";
         }
-        return (result == null ? "{\"error\":\"Not found\"}" : new String(result));
-
+        return result.orElseThrow(IllegalArgumentException::new);
     }
 
     @RequestMapping(value = "/{id}/history", method = RequestMethod.GET, produces = "application/json")
     @PreAuthorize("permitAll()")
     public String getIdentHistoryByDate(@PathVariable("id") String ident,
+                                        @RequestParam(required = false) List<String> names,
+                                        @RequestParam(required = false) List<String> values,
                                         @RequestParam(value = "date", required = false) String date,
-                                        @RequestParam(value = "limit", required = false) String limit) {
-        JSONObject result;
+                                        @RequestParam(value = "limit", required = false) String limit) throws JsonProcessingException {
+        Optional<ListResponseOnRequestJsonOnlyId> result;
+        Map<String, String> params = new HashMap<>();
+        int i = 0;
+        if (names != null) {
+            for (String name : names) {
+                params.put(name, values.get(i++));
+            }
+        }
         try {
             Date runDate = (date == null ? new Date() : dateUtl.stringToDate(date));
             int lim = (limit == null ? 50 : Integer.parseInt(limit));
-            List<Map<String, Object>> list = dbUtils.getDataMapList(GET_LAST_BLOCK_CHAIN_INFO_BY_DATE, ident, runDate.getTime(), lim);
-            if (list == null || list.isEmpty())
-                return "{\"error\":\"Not found\"}";
-            result = jsonService.getDataMapList(list);
+            result = infoSave.fetchDataByIdHistoryBlockDataParams(ident, params, runDate.getTime(), lim);
         } catch (Exception e) {
-            String message = "check parameters - " + e.getMessage();
-            return "{\"error\"=\"" + message + "\"}";
+            return "{\"error\"=\"" + e.getMessage() + "\"}";
         }
-        return result.toString();
+        ObjectMapper mapper = new ObjectMapper();
+        return mapper.writeValueAsString(result.orElseThrow(IllegalArgumentException::new));
+
     }
 }
 

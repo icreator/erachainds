@@ -1,13 +1,9 @@
 package org.erachain.repositories;
 
 import org.erachain.entities.account.Account;
-import org.erachain.entities.datainfo.DataEra;
 import org.erachain.entities.datainfo.DataInfo;
 import org.erachain.entities.request.ActRequest;
 import org.erachain.service.JsonService;
-import org.json.JSONArray;
-import org.json.JSONObject;
-import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.slf4j.Logger;
@@ -16,9 +12,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringRunner;
 
-import javax.validation.valueextraction.Unwrapping;
-import java.sql.ResultSet;
-import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.util.*;
@@ -89,7 +82,7 @@ public class DbDataTest {
     @Value("${CHECK_DATA_AFTER_SEND_TO_CLIENT}")
     private String CHECK_DATA_AFTER_SEND_TO_CLIENT;
 
-    @Value("${GET_LAST_RECORD_BY_DATE}")
+    @Value("${GET_RECORD_DATA}")
     private String GET_LAST_RECORD_BY_DATE;
 
     @Value("${GET_LAST_BLOCK_CHAIN_INFO_BY_DATE}")
