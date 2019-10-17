@@ -15,6 +15,9 @@ import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
+
+import static java.util.Optional.of;
 
 @Repository
 @PropertySource("classpath:queries.properties")
@@ -48,7 +51,7 @@ public class InfoSave {
     @Value("${FETCH_DATA_FOR_CLIENT}")
     private String FETCH_DATA_FOR_CLIENT;
 
-    @Value("${FETCH_DATA_FOR_CLIENT_WHERE}")
+    @Value("${ADD_PARAM_RESTRICTION_ACTUAL_REQUEST_ID}")
     private String FETCH_DATA_FOR_CLIENT_WHERE;
 
     @Value("${UPDATE_DATA_AFTER_RUN}")
@@ -57,7 +60,7 @@ public class InfoSave {
     @Value("${GET_CHAIN_INFO}")
     private String GET_LAST_BLOCK_CHAIN_INFO;
 
-    @Value("${RUNDATE_DESC_LIMIT}")
+    @Value("${ORDER_BY_RUNDATE_DESC_LIMIT}")
     private String RUNDATE_DESC_LIMIT;
 
     private JdbcTemplate jdbcTemplate;
@@ -215,34 +218,35 @@ public class InfoSave {
         this.jdbcTemplate = jdbcTemplate;
     }
 
-    public ResponseOnRequestJsonOnlyId fetchDataLastBlockDataParams(String ident, Map<String, String> params, long time, int limit) throws SQLException {
+    public Optional<ResponseOnRequestJsonOnlyId> fetchDataLastBlockDataParams(String ident, Map<String, String> params, long time, int limit) throws SQLException {
         try (Connection connection = jdbcTemplate.getDataSource().getConnection()) {
             StringBuilder sqlbuf = new StringBuilder(GET_LAST_BLOCK_CHAIN_INFO);
             params.keySet().forEach(name -> {
                 sqlbuf.append(" ");
                 sqlbuf.append(FETCH_DATA_FOR_CLIENT_WHERE);
             });
-            sqlbuf.append(RUNDATE_DESC_LIMIT);
-            ResponseOnRequestJsonOnlyId json;
+            sqlbuf.append(" ").append(RUNDATE_DESC_LIMIT);
+            ResponseOnRequestJsonOnlyId json = null;
             try (PreparedStatement stm = connection.prepareStatement(sqlbuf.toString())) {
                 int i = 0;
                 stm.setString(++i, ident);
                 stm.setString(++i, time + "");
                 for (String name : params.keySet()) {
                     logger.debug(name + " " + params.get(name));
-                    stm.setString(++i, params.get(name));
                     stm.setString(++i, name);
+                    stm.setString(++i, params.get(name));
                 }
                 stm.setString(++i, limit + "");
                 try (ResultSet rs = stm.executeQuery()) {
-                    rs.next();
-                    json = new ResponseOnRequestJsonOnlyId(new String(rs.getBytes(2)),
-                            new Long(new String(rs.getBytes(1))),
-                            Integer.parseInt(new String(rs.getBytes(4))),
-                            Integer.parseInt(new String(rs.getBytes(5))));
+                    if (rs.next()){
+                        json = new ResponseOnRequestJsonOnlyId(new String(rs.getBytes(2)),
+                                new Long(new String(rs.getBytes(1))),
+                                Integer.parseInt(new String(rs.getBytes(4))),
+                                Integer.parseInt(new String(rs.getBytes(5))));
+                    }
                 }
             }
-            return json;
+            return Optional.of(json);
         }
     }
 }

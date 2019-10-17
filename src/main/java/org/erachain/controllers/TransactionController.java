@@ -17,10 +17,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @RestController
 @RequestMapping("/api/v1/blockchain")
@@ -47,51 +44,32 @@ public class TransactionController {
     @Value("${GET_LAST_BLOCK_CHAIN_INFO_BY_DATE}")
     private String GET_LAST_BLOCK_CHAIN_INFO_BY_DATE;
 
-    @RequestMapping(value = "/{id}/proc", method = RequestMethod.GET, produces = {"text/plain"})
-    @PreAuthorize("permitAll()")
-    public String getClientData(@PathVariable("id") String ident,
-                                @RequestParam List<String> names,
-                                @RequestParam List<String> values,
-                                @RequestParam(value = "xml", required = false) String xml
-    ) {
-        Map<String, String> params = new HashMap<>();
-        int i = 0;
-        for (String name : names) {
-            params.put(name, values.get(i++));
-        }
-        String result;
-        try {
-            result = infoSave.fetchDataForClient(ident, params);
-            if ("yes".equalsIgnoreCase(xml)) {
-                JSONObject json = new JSONObject(result);
-                result = XML.toString(json, ident);
-            }
-        } catch (Exception e) {
-            String message = "check parameters - " + e.getMessage();
-            return "{\"error\"=\"" + message + "\"}";
-        }
-        return result;
-    }
-
-
-//    @RequestMapping(value = "/{id}", method = RequestMethod.GET, produces = "application/json")
+//    @RequestMapping(value = "/{id}/proc", method = RequestMethod.GET, produces = {"text/plain"})
 //    @PreAuthorize("permitAll()")
-//    public String getIdentByDate(@PathVariable("id") String ident,
-//                                 @RequestParam(value = "date", required = false) String date) {
-//        JSONObject jsonObject;
+//    public String getClientData(@PathVariable("id") String ident,
+//                                @RequestParam List<String> names,
+//                                @RequestParam List<String> values,
+//                                @RequestParam(value = "xml", required = false) String xml
+//    ) {
+//        Map<String, String> params = new HashMap<>();
+//        int i = 0;
+//        for (String name : names) {
+//            params.put(name, values.get(i++));
+//        }
+//        String result;
 //        try {
-//            Date runDate = (date == null ? new Date() : dateUtl.stringToDate(date));
-//            Map<String, Object> map = dbUtils.getDataMap(GET_LAST_BLOCK_CHAIN_INFO_BY_DATE, ident, runDate.getTime(), 1);
-//            if (map == null || map.isEmpty()) {
-//                return "{\"error\":\"Not found\"}";
+//            result = infoSave.fetchDataForClient(ident, params);
+//            if ("yes".equalsIgnoreCase(xml)) {
+//                JSONObject json = new JSONObject(result);
+//                result = XML.toString(json, ident);
 //            }
-//            jsonObject = jsonService.getDataMap(map);
 //        } catch (Exception e) {
 //            String message = "check parameters - " + e.getMessage();
 //            return "{\"error\"=\"" + message + "\"}";
 //        }
-//        return jsonObject.toString();
+//        return result;
 //    }
+
 
 /* Формта возвращаемого значения
         {
@@ -106,11 +84,11 @@ public class TransactionController {
 
     @RequestMapping(value = "/{id}", method = RequestMethod.GET, produces = "application/json")
     @PreAuthorize("permitAll()")
-    public String postIdentifierByDate(@PathVariable("id") String ident,
-                                       @RequestParam(required = false) List<String> names,
-                                       @RequestParam(required = false) List<String> values,
-                                       @RequestParam(value = "date", required = false) String date) throws JsonProcessingException {
-        ResponseOnRequestJsonOnlyId result;
+    public String getIdentifierByDate(@PathVariable("id") String ident,
+                                      @RequestParam(required = false) List<String> names,
+                                      @RequestParam(required = false) List<String> values,
+                                      @RequestParam(value = "date", required = false) String date) throws JsonProcessingException {
+        Optional<ResponseOnRequestJsonOnlyId> result;
         Map<String, String> params = new HashMap<>();
         int i = 0;
         if (names != null) {
@@ -126,7 +104,7 @@ public class TransactionController {
             return "{\"error\"=\"" + ("check parameters - " + e.getMessage()) + "\"}";
         }
         ObjectMapper mapper = new ObjectMapper();
-        return mapper.writeValueAsString(result);
+        return mapper.writeValueAsString(result.orElseThrow(IllegalArgumentException::new));
     }
 
 
