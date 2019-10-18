@@ -59,11 +59,14 @@ public class InfoSave {
     @Value("${GET_CHAIN_INFO}")
     private String GET_CHAIN_INFO;
 
-    @Value("${GET_RECORD_DATA}")
-    private String GET_RECORD_DATA;
+    @Value("${GET_RECORD_RAW_DATA}")
+    private String GET_RECORD_RAW_DATA;
 
     @Value("${ORDER_BY_RUNDATE_DESC_LIMIT}")
     private String RUNDATE_DESC_LIMIT;
+
+    @Value("${ADD_USER_ID_RESTRICTION}")
+    private String ADD_USER_ID_RESTRICTION;
 
     private JdbcTemplate jdbcTemplate;
 
@@ -220,9 +223,10 @@ public class InfoSave {
         }
     }
 
-    public Optional<ResponseOnRequestJsonOnlyId> fetchDataByIdLastBlockDataParams(String ident, Map<String, String> params, long time) throws SQLException {
+    public Optional<ResponseOnRequestJsonOnlyId> fetchDataByIdLastBlockDataParams(String ident, Map<String, String> params, long time, String userName) throws SQLException {
         try (Connection connection = jdbcTemplate.getDataSource().getConnection()) {
             StringBuilder sqlbuf = new StringBuilder(GET_CHAIN_INFO);
+            sqlbuf.append(" ").append(ADD_USER_ID_RESTRICTION);
             params.keySet().forEach(name -> {
                 sqlbuf.append(" ");
                 sqlbuf.append(ADD_PARAM_RESTRICTION_ACTUAL_REQUEST_ID);
@@ -233,6 +237,7 @@ public class InfoSave {
                 int i = 0;
                 stm.setString(++i, ident);
                 stm.setString(++i, time + "");
+                stm.setString(++i, userName);
                 for (String name : params.keySet()) {
                     logger.debug(name + " " + params.get(name));
                     stm.setString(++i, name);
@@ -240,7 +245,7 @@ public class InfoSave {
                 }
                 stm.setString(++i, "1");
                 try (ResultSet rs = stm.executeQuery()) {
-                    if (rs.next()){
+                    if (rs.next()) {
                         json = new ResponseOnRequestJsonOnlyId(new String(rs.getBytes(2)),
                                 new Long(new String(rs.getBytes(1))),
                                 Integer.parseInt(new String(rs.getBytes(4))),
@@ -248,12 +253,14 @@ public class InfoSave {
                     }
                 }
             }
-            return Optional.of(json);
+            return Optional.ofNullable(json);
         }
     }
-    public Optional<String> fetchDataByIdDataLastBlockDataParams(String ident, Map<String, String> params, long time) throws SQLException {
+
+    public Optional<String> fetchDataByIdDataLastBlockDataParams(String ident, Map<String, String> params, long time, String userName) throws SQLException {
         try (Connection connection = jdbcTemplate.getDataSource().getConnection()) {
-            StringBuilder sqlbuf = new StringBuilder(GET_RECORD_DATA);
+            StringBuilder sqlbuf = new StringBuilder(GET_RECORD_RAW_DATA);
+            sqlbuf.append(" ").append(ADD_USER_ID_RESTRICTION);
             params.keySet().forEach(name -> {
                 sqlbuf.append(" ");
                 sqlbuf.append(ADD_PARAM_RESTRICTION_ACTUAL_REQUEST_ID);
@@ -264,25 +271,28 @@ public class InfoSave {
                 int i = 0;
                 stm.setString(++i, ident);
                 stm.setString(++i, time + "");
+                stm.setString(++i, userName);
                 for (String name : params.keySet()) {
                     logger.debug(name + " " + params.get(name));
                     stm.setString(++i, name);
                     stm.setString(++i, params.get(name));
                 }
-                stm.setString(++i,  "1");
+                stm.setString(++i, "1");
                 try (ResultSet rs = stm.executeQuery()) {
-                    if (rs.next()){
+                    if (rs.next()) {
                         result = rs.getString(1);
                     }
                 }
             }
-            return Optional.of(result);
+            return Optional.ofNullable(result);
         }
     }
-    public Optional<ListResponseOnRequestJsonOnlyId> fetchDataByIdHistoryBlockDataParams(String ident, Map<String, String> params, long time, int limit) throws SQLException {
+
+    public Optional<ListResponseOnRequestJsonOnlyId> fetchDataByIdHistoryBlockDataParams(String ident, Map<String, String> params, long time, int limit, String userName) throws SQLException {
         ListResponseOnRequestJsonOnlyId result = new ListResponseOnRequestJsonOnlyId();
         try (Connection connection = jdbcTemplate.getDataSource().getConnection()) {
             StringBuilder sqlbuf = new StringBuilder(GET_CHAIN_INFO);
+            sqlbuf.append(" ").append(ADD_USER_ID_RESTRICTION);
             params.keySet().forEach(name -> {
                 sqlbuf.append(" ");
                 sqlbuf.append(ADD_PARAM_RESTRICTION_ACTUAL_REQUEST_ID);
@@ -293,6 +303,7 @@ public class InfoSave {
                 int i = 0;
                 stm.setString(++i, ident);
                 stm.setString(++i, time + "");
+                stm.setString(++i, userName);
                 for (String name : params.keySet()) {
                     logger.debug(name + " " + params.get(name));
                     stm.setString(++i, name);
@@ -301,7 +312,7 @@ public class InfoSave {
                 stm.setString(++i, limit + "");
                 List<ResponseOnRequestJsonOnlyId> responseOnRequestJsonOnlyIds = result.getResponseOnRequestJsonOnlyIds();
                 try (ResultSet rs = stm.executeQuery()) {
-                    while (rs.next()){
+                    while (rs.next()) {
                         json = new ResponseOnRequestJsonOnlyId(new String(rs.getBytes(2)),
                                 new Long(new String(rs.getBytes(1))),
                                 Integer.parseInt(new String(rs.getBytes(4))),

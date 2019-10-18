@@ -82,7 +82,7 @@ public class DbDataTest {
     @Value("${CHECK_DATA_AFTER_SEND_TO_CLIENT}")
     private String CHECK_DATA_AFTER_SEND_TO_CLIENT;
 
-    @Value("${GET_RECORD_DATA}")
+    @Value("${GET_RECORD_RAW_DATA}")
     private String GET_LAST_RECORD_BY_DATE;
 
     @Value("${GET_LAST_BLOCK_CHAIN_INFO_BY_DATE}")

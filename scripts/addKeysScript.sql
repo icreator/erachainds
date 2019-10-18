@@ -65,6 +65,7 @@ SELECT Account.user as username, 'admin_role' as role FROM Account WHERE  user='
 SELECT  runDate AS date, blockTrId AS tx, partNo, offset AS pos, lengh AS size
 FROM DataInfo a, DataEra b
 WHERE identity = ? AND runDate < ? AND dataInfoId = a.id
+  AND accountId IN (SELECT id FROM Account WHERE user = ?)
   AND actRequestId IN (SELECT actRequestId FROM ActParams WHERE paramValue = ? AND paramName = ?)
   AND actRequestId IN (SELECT actRequestId FROM ActParams WHERE paramValue = ? AND paramName = ?)
 ORDER BY runDate DESC LIMIT ?;
