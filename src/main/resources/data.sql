@@ -23,10 +23,11 @@ VALUES ('ErachainDS',
 --         'myDomService',
 --         'ErachainDS');
 
-INSERT OR IGNORE INTO Account (accountUrl, accountRecipient, recipientPublicKey, user, password, identityName,
+INSERT OR IGNORE INTO Account (id, accountUrl, accountRecipient, recipientPublicKey, user, password, identityName,
                                objectName,
                                idSender)
-VALUES ('https://app.yaenergetik.ru/api?v2',
+VALUES (1,
+        'https://app.yaenergetik.ru/api?v2',
         '7AjWLhrtBxxsw7zsoqT79FMU6VSY81NCr3',
         'GA8XX9cm4W5ctsQLBcW6hu2LSYBSAT7mxSrsVWBDnJhw',
         's.klokov@erachain.org',
@@ -35,32 +36,36 @@ VALUES ('https://app.yaenergetik.ru/api?v2',
         'energyService',
         'ErachainDS');
 
-INSERT OR IGNORE INTO Params (requestId, paramName, dataType, format, defValue, curValue)
+INSERT OR IGNORE INTO Params (id, requestId, paramName, dataType, format, defValue, curValue)
 VALUES (1,
+        1,
         'type',
         'char',
         '',
         'hour',
         0);
 
-INSERT OR IGNORE INTO Params (requestId, paramName, dataType, format, defValue, curValue)
-VALUES (1,
+INSERT OR IGNORE INTO Params (id, requestId, paramName, dataType, format, defValue, curValue)
+VALUES (2,
+        1,
         'value',
         'date',
         'yyyy-MM-dd''T''HH:mm:ssZ',
         '',
         1);
 
-INSERT OR IGNORE INTO Params (requestId, paramName, dataType, format, defValue, curValue)
-VALUES (1,
+INSERT OR IGNORE INTO Params (id, requestId, paramName, dataType, format, defValue, curValue)
+VALUES (3,
+        1,
         'mode',
         '',
         null,
         'all',
         null);
 
-INSERT OR IGNORE INTO Request(accountId, runPeriod, submitPeriod, offUnit, offValue)
+INSERT OR IGNORE INTO Request(id, accountId, runPeriod, submitPeriod, offUnit, offValue)
 VALUES (1,
+        1,
         'minute',
         'minute',
         'minute',

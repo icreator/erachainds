@@ -66,7 +66,7 @@ public class TransactionController {
             Date runDate = (date == null ? new Date() : dateUtl.stringToDate(date));
             result = infoSave.fetchDataByIdLastBlockDataParams(ident, params, runDate.getTime(), principal.getName());
         } catch (Exception e) {
-            return "{\"error\"=\"" + e.getMessage() + "\"}";
+            return "{\"error\" : \"" + "Not found" + "\"}";
         }
         ObjectMapper mapper = new ObjectMapper();
         if (result.isPresent()) {
@@ -95,7 +95,7 @@ public class TransactionController {
             Date runDate = (date == null ? new Date() : dateUtl.stringToDate(date));
             result = infoSave.fetchDataByIdDataLastBlockDataParams(ident, params, runDate.getTime(), principal.getName());
         } catch (Exception e) {
-            return "{\"error\"=\"" + e.getMessage() + "\"}";
+            return "{\"error\" : \"" + "Not found" + "\"}";
         }
         return result.orElse("{\"error\" : \"" + "Not found" + "\"}");
 
@@ -122,7 +122,7 @@ public class TransactionController {
             int lim = (limit == null ? 50 : Integer.parseInt(limit));
             result = infoSave.fetchDataByIdHistoryBlockDataParams(ident, params, runDate.getTime(), lim, principal.getName());
         } catch (Exception e) {
-            return "{\"error\"=\"" + e.getMessage() + "\"}";
+            return "{\"error\" : \"" + "Not found" + "\"}";
         }
         ObjectMapper mapper = new ObjectMapper();
         return mapper.writeValueAsString(result.orElseThrow(IllegalArgumentException::new));
