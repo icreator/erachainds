@@ -1,0 +1,236 @@
+{
+	"info": {
+		"_postman_id": "f02870f0-1e17-4ba5-9891-1f1d89215abb",
+		"name": "ERACHAIN_DS_API",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "BLOCKCHAIN_ID",
+			"request": {
+				"auth": {
+					"type": "basic",
+					"basic": [
+						{
+							"key": "password",
+							"value": "erachain",
+							"type": "string"
+						},
+						{
+							"key": "username",
+							"value": "s.klokov@erachain.org",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:9049/api/v1/blockchain/4407?names=authToken&values=9u5bjskxv4pb7uotfk&names=date&values=2019-10-09T16:07:00%2b0300",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "9049",
+					"path": [
+						"api",
+						"v1",
+						"blockchain",
+						"4407"
+					],
+					"query": [
+						{
+							"key": "names",
+							"value": "authToken"
+						},
+						{
+							"key": "values",
+							"value": "9u5bjskxv4pb7uotfk"
+						},
+						{
+							"key": "names",
+							"value": "date"
+						},
+						{
+							"key": "values",
+							"value": "2019-10-09T16:07:00%2b0300"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "BLOCKCHAIN_ID IEnergy",
+			"request": {
+				"auth": {
+					"type": "basic",
+					"basic": [
+						{
+							"key": "password",
+							"value": "erachain",
+							"type": "string"
+						},
+						{
+							"key": "username",
+							"value": "s.klokov@erachain.org",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:9049/api/v1/blockchain/13859?names=mode&values=all&names=type&values=hour",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "9049",
+					"path": [
+						"api",
+						"v1",
+						"blockchain",
+						"13859"
+					],
+					"query": [
+						{
+							"key": "names",
+							"value": "mode"
+						},
+						{
+							"key": "values",
+							"value": "all"
+						},
+						{
+							"key": "names",
+							"value": "type"
+						},
+						{
+							"key": "values",
+							"value": "hour"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "BLOCKCHAIN_ID_DATA IEnergy",
+			"request": {
+				"auth": {
+					"type": "basic",
+					"basic": [
+						{
+							"key": "password",
+							"value": "erachain",
+							"type": "string"
+						},
+						{
+							"key": "username",
+							"value": "s.klokov@erachain.org",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:9049/api/v1/blockchain/13859/data?names=mode&values=all&names=type&values=hour",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "9049",
+					"path": [
+						"api",
+						"v1",
+						"blockchain",
+						"13859",
+						"data"
+					],
+					"query": [
+						{
+							"key": "names",
+							"value": "mode"
+						},
+						{
+							"key": "values",
+							"value": "all"
+						},
+						{
+							"key": "names",
+							"value": "type"
+						},
+						{
+							"key": "values",
+							"value": "hour"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "BLOCKCHAIN_ID_HISTORY IEnergy Copy",
+			"request": {
+				"auth": {
+					"type": "basic",
+					"basic": [
+						{
+							"key": "password",
+							"value": "erachain",
+							"type": "string"
+						},
+						{
+							"key": "username",
+							"value": "s.klokov@erachain.org",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:9049/api/v1/blockchain/13859/history?",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "9049",
+					"path": [
+						"api",
+						"v1",
+						"blockchain",
+						"13859",
+						"history"
+					],
+					"query": [
+						{
+							"key": "names",
+							"value": "mode",
+							"disabled": true
+						},
+						{
+							"key": "values",
+							"value": "all",
+							"disabled": true
+						},
+						{
+							"key": "names",
+							"value": "type",
+							"disabled": true
+						},
+						{
+							"key": "values",
+							"value": "hour",
+							"disabled": true
+						}
+					]
+				}
+			},
+			"response": []
+		}
+	],
+	"protocolProfileBehavior": {}
+}
