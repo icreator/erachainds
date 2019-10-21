@@ -28,8 +28,7 @@ import java.util.*;
 @PropertySource("classpath:custom.properties")
 public class ServiceMonitor {
 
-    @Autowired
-    private Logger logger;
+    private final Logger logger;
 
     @Autowired
     private AccountProc accountProc;
@@ -77,6 +76,10 @@ public class ServiceMonitor {
 
     @Value("${FETCH_DATA_AFTER_SEND_TO_CLIENT}")
     private String FETCH_DATA_AFTER_SEND_TO_CLIENT;
+
+    public ServiceMonitor(Logger logger) {
+        this.logger = logger;
+    }
 
 
     public void checkDataSubmit()throws Exception {

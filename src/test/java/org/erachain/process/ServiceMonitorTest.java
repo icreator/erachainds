@@ -1,6 +1,5 @@
 package org.erachain.process;
 
-import org.erachain.utils.loggers.Log;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.slf4j.Logger;

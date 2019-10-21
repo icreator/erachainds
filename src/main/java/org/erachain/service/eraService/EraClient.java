@@ -31,8 +31,7 @@ import java.util.stream.Collectors;
 @Service
 @PropertySource("classpath:custom.properties")
 public class EraClient {
-    @Autowired
-    private Logger logger;
+    private final Logger logger;
 
     @Autowired
     private AccountSendersDAO accountSenders;
@@ -75,8 +74,9 @@ public class EraClient {
     private boolean FLAG_RECEIVING_IP_CHECK = true;
 
     @Autowired
-    public EraClient(RestClient restClient) {
+    public EraClient(RestClient restClient, Logger logger) {
         this.restClient = restClient;
+        this.logger = logger;
     }
 
     @PostConstruct

@@ -16,8 +16,11 @@ import java.util.*;
 @Service
 public class JsonService {
 
-    @Autowired
-    private Logger logger;
+    private final Logger logger;
+
+    public JsonService(Logger logger) {
+        this.logger = logger;
+    }
 
     public <T> T getValue(String jsonString, String key) throws JSONException {
         JSONObject jsonObject = new JSONObject(jsonString);

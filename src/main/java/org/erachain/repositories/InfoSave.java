@@ -70,15 +70,15 @@ public class InfoSave {
 
     private JdbcTemplate jdbcTemplate;
 
-    @Autowired
-    private Logger logger;
+    private final Logger logger;
 
     @Autowired
     private DbUtils dbUtils;
 
     @Autowired
-    public InfoSave(JdbcTemplate jdbcTemplate) {
+    public InfoSave(JdbcTemplate jdbcTemplate, Logger logger) {
         this.jdbcTemplate = jdbcTemplate;
+        this.logger = logger;
     }
 
     private static final Field[] fields = DataInfo.class.getDeclaredFields();

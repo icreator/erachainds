@@ -14,8 +14,7 @@ import java.util.Map;
 
 @Service
 public class ClientEnergy {
-    @Autowired
-    private Logger logger;
+    private final Logger logger;
 
     @Autowired
     private RestClient restClient;
@@ -29,6 +28,10 @@ public class ClientEnergy {
     private String Energy_Url;
 
     private String sessionId;
+
+    public ClientEnergy(Logger logger) {
+        this.logger = logger;
+    }
 
     public void clientLogin(Map<String, String> params) throws Exception {
         clientLogin(params.get("accountUrl"),

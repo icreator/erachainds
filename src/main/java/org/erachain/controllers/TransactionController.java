@@ -25,9 +25,6 @@ public class TransactionController {
     @Autowired
     private DateUtl dateUtl;
 
-    @Autowired
-    private Logger logger;
-
     /**
      * Формта возвращаемого значения
      * {

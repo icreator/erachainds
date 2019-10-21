@@ -44,8 +44,7 @@ public class JobMonitor implements InitializingBean {
     @Autowired
     private DbUtils dbUtils;
 
-    @Autowired
-    private Logger logger;
+    private final Logger logger;
 
     @Autowired
     private AccountProc accountProc;
@@ -72,6 +71,10 @@ public class JobMonitor implements InitializingBean {
 
 
     private final Lock mutex = new ReentrantLock(true);
+
+    public JobMonitor(Logger logger) {
+        this.logger = logger;
+    }
 
     @Override
     public void afterPropertiesSet() throws Exception {

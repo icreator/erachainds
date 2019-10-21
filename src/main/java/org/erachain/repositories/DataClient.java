@@ -22,8 +22,7 @@ import java.util.concurrent.ConcurrentMap;
 @Repository
 public class DataClient {
 
-    @Autowired
-    private Logger logger;
+    private final Logger logger;
 
     @Value("${Service_Url}")
     private String Service_Url;
@@ -56,6 +55,10 @@ public class DataClient {
     private String activeProfile;
 
     private ConcurrentMap<String, String> dataMap = new ConcurrentHashMap<>();
+
+    public DataClient(Logger logger) {
+        this.logger = logger;
+    }
 
     private boolean checkDataTheSame(String ident, String data) {
         // check if send to blockchain anyway

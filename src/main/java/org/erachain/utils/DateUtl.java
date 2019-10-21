@@ -14,8 +14,11 @@ import org.springframework.stereotype.Component;
 @Component
 public class DateUtl {
 
-    @Autowired
-    private Logger logger;
+    private final Logger logger;
+
+    public DateUtl(Logger logger) {
+        this.logger = logger;
+    }
 
     public  Date getFirst(Date date, String unit){
         Calendar cal = Calendar.getInstance();

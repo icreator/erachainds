@@ -15,14 +15,14 @@ public class DbUtils {
 
     static String fetch = "SELECT * FROM ";
 
-    @Autowired
-    private Logger logger;
+    private final Logger logger;
 
     private JdbcTemplate jdbcTemplate;
 
     @Autowired
-    public DbUtils(JdbcTemplate jdbcTemplate) {
+    public DbUtils(JdbcTemplate jdbcTemplate, Logger logger) {
         this.jdbcTemplate = jdbcTemplate;
+        this.logger = logger;
     }
 
     private String getSql(String sql, Object... values) {

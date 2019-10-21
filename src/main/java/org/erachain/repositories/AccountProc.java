@@ -37,9 +37,6 @@ public class AccountProc {
     private String UPDATE_REQUEST_AFTER_RUN;
 
     @Autowired
-    private Logger logger;
-
-    @Autowired
     private DbUtils dbUtils;
 
     @Autowired
