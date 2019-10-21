@@ -61,4 +61,16 @@ VALUES ('https://app.yaenergetik.ru/api?v2',
         'energyService',
         'ErachainDS');
 SELECT Account.user as username, password,'1' as enabled FROM Account WHERE user='s.klokov@erachain.org';
-SELECT Account.user as username, 'admin_role' as role FROM Account WHERE  user='s.klokov@erachain.org'
+SELECT Account.user as username, 'admin_role' as role FROM Account WHERE  user='s.klokov@erachain.org';
+SELECT  runDate AS date, blockTrId AS tx, partNo, offset AS pos, lengh AS size
+FROM DataInfo a, DataEra b
+WHERE identity = ? AND runDate < ? AND dataInfoId = a.id
+  AND accountId IN (SELECT id FROM Account WHERE user = ?)
+  AND actRequestId IN (SELECT actRequestId FROM ActParams WHERE paramValue = ? AND paramName = ?)
+  AND actRequestId IN (SELECT actRequestId FROM ActParams WHERE paramValue = ? AND paramName = ?)
+ORDER BY runDate DESC LIMIT ?;
+SELECT actRequestId FROM ActParams WHERE paramValue = ? AND paramName = ?;
+SELECT actRequestId FROM ActParams WHERE paramValue = ? AND paramName = ?;
+SELECT  runDate AS date, blockTrId AS tx, partNo, offset AS pos, lengh AS size
+FROM DataInfo a, DataEra b
+WHERE identity = ? AND runDate < ? AND dataInfoId = a.id

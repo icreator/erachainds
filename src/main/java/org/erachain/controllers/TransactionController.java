@@ -1,22 +1,20 @@
 package org.erachain.controllers;
 
 
-import org.erachain.repositories.DbUtils;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import org.erachain.jsons.ListResponseOnRequestJsonOnlyId;
+import org.erachain.jsons.ResponseOnRequestJsonOnlyId;
 import org.erachain.repositories.InfoSave;
-import org.erachain.service.JsonService;
 import org.erachain.utils.DateUtl;
-import org.json.JSONObject;
-import org.json.XML;
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.security.Principal;
+import java.util.*;
 
 @RestController
 @RequestMapping("/api/v1/blockchain")
@@ -26,133 +24,110 @@ public class TransactionController {
     private InfoSave infoSave;
 
     @Autowired
-    private DbUtils dbUtils;
-
-    @Autowired
     private DateUtl dateUtl;
-
-    @Autowired
-    private JsonService jsonService;
 
     @Autowired
     private Logger logger;
 
-    @Value("${GET_LAST_RECORD_BY_DATE}")
-    private String GET_LAST_RECORD_BY_DATE;
-
-    @Value("${GET_LAST_BLOCK_CHAIN_INFO_BY_DATE}")
-    private String GET_LAST_BLOCK_CHAIN_INFO_BY_DATE;
-
-    //    @LoggableController
-    @RequestMapping(value = "/{id}/proc", method = RequestMethod.GET, produces = {"text/plain"})
-    //         produces = {"text/json", "text/xml"})
+    /**
+     * Формта возвращаемого значения
+     * {
+     * "error" : "Not found"
+     * <p>
+     * date: "timestamp" - дата запроса данных у внешнего сервиса
+     * tx: "BLOCKNO-TXNO" - номер блока и транзакции в блоке
+     * pos: 0 - позиция данных в транзакции, необязательный если вся транзакция для одного идентификатора
+     * size: 122 - длинна данных в байтах, необязательный если вся транзакция для одного идентификатора
+     * }
+     *
+     * @param ident
+     * @param names
+     * @param values
+     * @param date
+     * @param principal
+     * @return
+     * @throws JsonProcessingException
+     */
+    @RequestMapping(value = "/{id}", method = RequestMethod.GET, produces = "application/json")
     @PreAuthorize("permitAll()")
-    public String getClientData(@PathVariable("id") String ident,
-                                @RequestParam List<String> names,
-                                @RequestParam List<String> values,
-                                @RequestParam(value = "xml", required = false) String xml
-    ) throws InterruptedException {
-
-//        byte[] data = Base58.decode(rawDataBase58);
-
+    public String getIdentifierByDate(@PathVariable("id") String ident,
+                                      @RequestParam(required = false) List<String> names,
+                                      @RequestParam(required = false) List<String> values,
+                                      @RequestParam(value = "date", required = false) String date,
+                                      Principal principal) throws JsonProcessingException {
+        Optional<ResponseOnRequestJsonOnlyId> result;
         Map<String, String> params = new HashMap<>();
         int i = 0;
-        for (String name : names) {
-            params.put(name, values.get(i++));
-        }
-        String result = "";
-        try {
-            result = infoSave.fetchDataForClient(ident, params);
-            if ("yes".equalsIgnoreCase(xml)) {
-                JSONObject json = new JSONObject(result);
-                result = XML.toString(json, ident);
+        if (names != null) {
+            for (String name : names) {
+                params.put(name, values.get(i++));
             }
-        } catch (Exception e) {
-            String message = "check parameters - " + e.getMessage();
-            return "{\"error\"=\"" + message + "\"}";
         }
-        return result;
-    }
-
-
-    //    @LoggableController
-    @RequestMapping(value = "/{id}", method = RequestMethod.GET, produces = "application/json")
-//    @PreAuthorize("hasAuthority('ADMIN_USER')")
-    @PreAuthorize("permitAll()")
-    public String getIdentByDate(@PathVariable("id") String ident,
-                                 @RequestParam(value = "date", required = false) String date) throws InterruptedException {
-
-        JSONObject jsonObject = null;
-        Map<String, Object> map = null;
         try {
             Date runDate = (date == null ? new Date() : dateUtl.stringToDate(date));
-            map = dbUtils.getDataMap(GET_LAST_BLOCK_CHAIN_INFO_BY_DATE, ident, runDate.getTime(), 1);
-            if (map == null || map.isEmpty())
-                return "{\"error\":\"Not found\"}";
-            jsonObject = jsonService.getDataMap(map);
+            result = infoSave.fetchDataByIdLastBlockDataParams(ident, params, runDate.getTime(), principal.getName());
         } catch (Exception e) {
-            String message = "check parameters - " + e.getMessage();
-            return "{\"error\"=\"" + message + "\"}";
+            return "{\"error\"=\"" + e.getMessage() + "\"}";
         }
-
-        return jsonObject.toString();
+        ObjectMapper mapper = new ObjectMapper();
+        if (result.isPresent()) {
+            return mapper.writeValueAsString(result.get());
+        }
+        return "{\"error\" : \"" + "Not found" + "\"}";
     }
 
-/* Формта возвращаемого значения
-        {
 
-            "error" : "Not found"
-
-
-            date: "timestamp" - дата запроса данных у внешнего сервиса
-            tx: "BLOCKNO-TXNO" - номер блока и транзакции в блоке
-            pos: 0 - позиция данных в транзакции, необязательный если вся транзакция для одного идентификатора
-            size: 122 - длинна данных в байтах, необязательный если вся транзакция для одного идентификатора
-
-        }
-*/
-
-    //        @LoggableController
     @RequestMapping(value = "/{id}/data", method = RequestMethod.GET, produces = {"text/plain"})
-    //         produces = {"text/json", "text/xml"})
     @PreAuthorize("permitAll()")
     public String getDataByDate(@PathVariable("id") String ident,
-                                @RequestParam(value = "date", required = false) String date) throws InterruptedException {
-
-        byte[] result = null;
+                                @RequestParam(required = false) List<String> names,
+                                @RequestParam(required = false) List<String> values,
+                                @RequestParam(value = "date", required = false) String date,
+                                Principal principal) throws JsonProcessingException {
+        Optional<String> result;
+        Map<String, String> params = new HashMap<>();
+        int i = 0;
+        if (names != null) {
+            for (String name : names) {
+                params.put(name, values.get(i++));
+            }
+        }
         try {
             Date runDate = (date == null ? new Date() : dateUtl.stringToDate(date));
-            result = dbUtils.getData(GET_LAST_RECORD_BY_DATE, ident, runDate.getTime(), 1);
+            result = infoSave.fetchDataByIdDataLastBlockDataParams(ident, params, runDate.getTime(), principal.getName());
         } catch (Exception e) {
-            String message = "check parameters - " + e.getMessage();
-            return "{\"error\":\"" + message + "\"}";
+            return "{\"error\"=\"" + e.getMessage() + "\"}";
         }
-        return (result == null ? "{\"error\":\"Not found\"}" : new String(result));
+        return result.orElse("{\"error\" : \"" + "Not found" + "\"}");
 
     }
 
     @RequestMapping(value = "/{id}/history", method = RequestMethod.GET, produces = "application/json")
     @PreAuthorize("permitAll()")
     public String getIdentHistoryByDate(@PathVariable("id") String ident,
+                                        @RequestParam(required = false) List<String> names,
+                                        @RequestParam(required = false) List<String> values,
                                         @RequestParam(value = "date", required = false) String date,
-                                        @RequestParam(value = "limit", required = false) String limit) throws InterruptedException {
-
-        List<Map<String, Object>> list = null;
-        JSONObject result = null;
+                                        @RequestParam(value = "limit", required = false) String limit,
+                                        Principal principal) throws JsonProcessingException {
+        Optional<ListResponseOnRequestJsonOnlyId> result;
+        Map<String, String> params = new HashMap<>();
+        int i = 0;
+        if (names != null) {
+            for (String name : names) {
+                params.put(name, values.get(i++));
+            }
+        }
         try {
             Date runDate = (date == null ? new Date() : dateUtl.stringToDate(date));
             int lim = (limit == null ? 50 : Integer.parseInt(limit));
-            list = dbUtils.getDataMapList(GET_LAST_BLOCK_CHAIN_INFO_BY_DATE, ident, runDate.getTime(), lim);
-            if (list == null || list.isEmpty())
-                return "{\"error\":\"Not found\"}";
-            result = jsonService.getDataMapList(list);
+            result = infoSave.fetchDataByIdHistoryBlockDataParams(ident, params, runDate.getTime(), lim, principal.getName());
         } catch (Exception e) {
-            String message = "check parameters - " + e.getMessage();
-            return "{\"error\"=\"" + message + "\"}";
+            return "{\"error\"=\"" + e.getMessage() + "\"}";
         }
-        return result.toString();
+        ObjectMapper mapper = new ObjectMapper();
+        return mapper.writeValueAsString(result.orElseThrow(IllegalArgumentException::new));
     }
-//
 }
 
 
