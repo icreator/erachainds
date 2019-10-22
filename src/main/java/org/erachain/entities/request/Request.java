@@ -3,7 +3,6 @@ package org.erachain.entities.request;
 import org.erachain.repositories.DataClient;
 import org.erachain.repositories.DbUtils;
 import org.erachain.utils.DateUtl;
-import org.slf4j.Logger;
 
 import java.sql.SQLException;
 import java.sql.Timestamp;
@@ -118,13 +117,12 @@ public class Request {
     }
 
     public boolean checkTime(DateUtl dateUtl) {
-
-        if (lastRun == null)
+        if (lastRun == null) {
             return true;
-
-        if (runPeriod == null)
+        }
+        if (runPeriod == null) {
             return false;
-
+        }
         Date date = new Date(lastRun.getTime());
         String[] period = runPeriod.split("_");
         int value = 1;
@@ -134,20 +132,19 @@ public class Request {
             periodRun = period[1];
         }
         date = dateUtl.addUnit(date, periodRun, value);
-        if (date.before(new Date()))
-            return true;
-
-        return false;
+        return date.before(new Date());
     }
+
     public Map<String, String> getParams(DbUtils dbUtils, DateUtl dateUtl) {
-        if (params != null)
+        if (params != null) {
             return params;
+        }
         List<Params> pars = dbUtils.fetchData(Params.class, "Params", " requestId = " + id);
         SimpleDateFormat format = null;
         params = new HashMap<>();
         for (Params param : pars) {
             String value = param.getDefValue();
-            boolean isCurrent = param.getCurValue() > 0 ? true : false;
+            boolean isCurrent = param.getCurValue() > 0;
             boolean isDate = "date".equalsIgnoreCase(param.getDataType());
             if (isDate) {
                 paramName = param.getParamName();
@@ -159,18 +156,18 @@ public class Request {
                 format = new SimpleDateFormat(param.getFormat());
                 submitDate = getSubmitDate(dateUtl, date, submitPeriod);
                 if (offUnit != null && offValue != 0) {
-                    date = dateUtl.addUnit(date, offUnit, - offValue);
-                    submitDate = dateUtl.addUnit(submitDate, offUnit,  offValue - 1);
+                    date = dateUtl.addUnit(date, offUnit, -offValue);
+                    submitDate = dateUtl.addUnit(submitDate, offUnit, offValue - 1);
                 }
                 date = dateUtl.getAlign(date, submitPeriod);
-                if (format != null)
-                    value = format.format(date);
+                value = format.format(date);
                 paramValue = value;
             }
             params.put(param.getParamName(), value);
         }
         return params;
     }
+
     private Date getSubmitDate(DateUtl dateUtl, Date date, String submitPeriod) {
         String[] period = submitPeriod.split("_");
         int value2 = 1;
@@ -182,16 +179,17 @@ public class Request {
         submitDate = dateUtl.addUnit(date, periodRun, value2);
         return submitDate;
     }
+
     public int getActRequestId(DataClient dataClient, DbUtils dbUtils, DateUtl dateUtl) throws Exception {
         if (params == null) {
             params = this.getParams(dbUtils, dateUtl);
-            if (params == null)
-                throw new Exception(" missing params for a request");
+            if (params == null){
+                throw new Exception("Missing params for a request");
+            }
         }
-
-        int actRequestId = dataClient.getActRequestId(id, paramName, paramValue);
-        return actRequestId;
+        return dataClient.getActRequestId(id, paramName, paramValue);
     }
+
     public int setActRequestId(DbUtils dbUtils, DateUtl dateUtl) throws Exception {
         int actRequestId = 0;
         ActRequest actRequest = new ActRequest();
@@ -203,7 +201,7 @@ public class Request {
         try {
             actRequestId = dbUtils.setDbObj(actRequest, "ActRequest", true);
         } catch (SQLException e) {
-            throw new SQLException(" create  ActRequest " + e.getMessage());
+            throw new SQLException("Create  ActRequest " + e.getMessage());
         }
         actRequest.setId(actRequestId);
 
@@ -216,13 +214,10 @@ public class Request {
             try {
                 actParamsId = dbUtils.setDbObj(actParams, "ActParams", true);
             } catch (SQLException e) {
-                throw  new SQLException(" create act params " + e.getMessage());
+                throw new SQLException(" create act params " + e.getMessage());
             }
             actParams.setId(actParamsId);
         }
         return actRequestId;
     }
-
-//
-
 }

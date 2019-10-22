@@ -18,9 +18,6 @@ import static org.junit.jupiter.api.Assertions.*;
 public class MyDomServiceTest {
 
     @Autowired
-    private Logger logger;
-
-    @Autowired
     private MyDomService myDomService;
 
     Map<String, String> params = new HashMap<>();

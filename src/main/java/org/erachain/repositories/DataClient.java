@@ -149,27 +149,24 @@ public class DataClient {
     }
 
     private void setClientData(Request request, Map<String, byte[]> data) throws Exception {
-//        try {
-        logger.debug(" get act req id ");
+        logger.debug("Get act req id ");
         int actRequestId = 0;
         try {
             actRequestId = request.getActRequestId(this, dbUtils, dateUtl);
             if (actRequestId == 0) {
                 actRequestId = request.setActRequestId(dbUtils, dateUtl);
-                logger.info(" new act req id " + actRequestId);
+                logger.info("New act req id " + actRequestId);
                 setData(request, actRequestId, data);
             } else {
                 if (infoSave.checkDataWhere(actRequestId) > 0) {
-                    logger.info(" found act req id " + actRequestId);
+                    logger.info("Found act req id " + actRequestId);
                     updateData(request, actRequestId, data);
                 }
             }
         } catch (SQLException e) {
-            logger.error(" error setting client for request " + request.getId() + " " + e.getMessage());
+            logger.error("Error setting client for request " + request.getId() + " " + e.getMessage());
             throw e;
         }
-
-        return;
     }
 
     private void updateData(Request request, int actRequestId, Map<String, byte[]> data) throws SQLException {
