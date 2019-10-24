@@ -70,7 +70,9 @@ public class EraClient {
     private RestClient restClient;
 
     private String ERASERVICE_URL_IP_RESPONSE_EXCEPT;
+
     private boolean FLAG_RECEIVING_IP = true;
+    
     private boolean FLAG_RECEIVING_IP_CHECK = true;
 
     @Autowired
@@ -85,11 +87,10 @@ public class EraClient {
     }
 
     public void setSignature(DataInfo dataInfo, Account account, String signiture, int offset) throws Exception {
-
         List<DataEra> dataEras = new ArrayList<>();
         for (byte[] dt : dataInfo.getData(dbUtils, TRANS_MAXSIZE)) {
             String data = new String(dt, StandardCharsets.UTF_8);
-            logger.debug(" data to client " + data);
+            logger.debug("Data to client " + data);
             DataEra dataEra = new DataEra();
             dataEra.setDataInfoId(dataInfo.getId());
             if (signiture != null) {

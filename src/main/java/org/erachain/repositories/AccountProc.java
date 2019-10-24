@@ -114,14 +114,12 @@ public class AccountProc {
 
     public void afterRun(Request request) throws SQLException {
         request.setLastRun(new Timestamp(System.currentTimeMillis()));
-//        dbUtils.getDataId(UPDATE_REQUEST_AFTER_RUN, request.getLastRun(), request.getId());
         try (Connection connection = jdbcTemplate.getDataSource().getConnection()) {
             PreparedStatement stm = connection.prepareStatement(UPDATE_REQUEST_AFTER_RUN);
             stm.setTimestamp(1, request.getLastRun());
             stm.setInt(2, request.getId());
             stm.executeUpdate();
             stm.close();
-            connection.close();
         }
     }
 }

@@ -39,21 +39,21 @@ public class ClientEnergy {
         params.put("sessionId", sessionId);
     }
     private void clientLogin(String url, String user, String pass) throws Exception {
-        logger.info(" login " + url + " " + user);
+        logger.info("Login " + url + " " + user);
         String json = restClient.getJsonResult(url, jsonServiceEnergy.getAuth(user, pass).toString());
         String error = jsonServiceEnergy.checkForError(json);
         if (error != null) {
-            logger.error(" login error " + error);
-            throw new Exception(" login error " + error);
+            logger.error("Login error " + error);
+            throw new Exception("Login error " + error);
         }
         sessionId = jsonService.getValue(json, "result");
         restClient.addHeader("X-Session-Id", sessionId);
         Energy_Url = url;
-        logger.info("end login " + sessionId);
+        logger.info("End login " + sessionId);
     }
 
     public  List<String> getNetWorkList(Map<String, String> params) throws Exception {
-        logger.info(" NetWorkList ");
+        logger.info("NetWorkList ");
         if (params.get("sessionId") == null) {
             this.clientLogin(params);
         }
@@ -62,7 +62,7 @@ public class ClientEnergy {
         return jsonServiceEnergy.getNetWorkList(response);
     }
     public  List<String> getMeterList(String netWork) throws Exception {
-        logger.info(" MeterList for " + netWork);
+        logger.info("MeterList for " + netWork);
         String response = restClient.getJsonResult(Energy_Url,
                 jsonServiceEnergy.getMeterJson(netWork).toString());
         return jsonServiceEnergy.getMeterList(response);

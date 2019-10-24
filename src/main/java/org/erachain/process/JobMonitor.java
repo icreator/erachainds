@@ -50,9 +50,6 @@ public class JobMonitor implements InitializingBean {
     private AccountProc accountProc;
 
     @Autowired
-    private InfoSave infoSave;
-
-    @Autowired
     private ServiceMonitor serviceMonitor;
 
     @Autowired
@@ -67,19 +64,13 @@ public class JobMonitor implements InitializingBean {
 
     private static final AtomicInteger sequenceNumber = new AtomicInteger(0);
 
-    private static boolean startIt = false;
-
-
-    private final Lock mutex = new ReentrantLock(true);
-
     public JobMonitor(Logger logger) {
         this.logger = logger;
     }
 
     @Override
-    public void afterPropertiesSet() throws Exception {
+    public void afterPropertiesSet() {
         checkAccounts();
-//        setData();
     }
 
     public void checkAccounts() {
@@ -177,8 +168,7 @@ public class JobMonitor implements InitializingBean {
 //                Date date = new Date(actRequest.getDateSubmit().getTime());
 //                request.setSubmitDate(date);
 //            }
-//             todo Gleb comment one line below
-//            request.getParams(dbUtils, dateUtl);
+            request.getParams(dbUtils, dateUtl);
 
             ActiveJob activeJob = new ActiveJob(sequenceNumber.incrementAndGet(), account.getId());
             activeJob.setRequestId(request.getId());

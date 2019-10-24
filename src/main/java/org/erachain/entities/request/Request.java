@@ -201,7 +201,7 @@ public class Request {
         try {
             actRequestId = dbUtils.setDbObj(actRequest, "ActRequest", true);
         } catch (SQLException e) {
-            throw new SQLException("Create  ActRequest " + e.getMessage());
+            throw new SQLException("Create ActRequest " + e.getMessage());
         }
         actRequest.setId(actRequestId);
 
@@ -214,7 +214,7 @@ public class Request {
             try {
                 actParamsId = dbUtils.setDbObj(actParams, "ActParams", true);
             } catch (SQLException e) {
-                throw new SQLException(" create act params " + e.getMessage());
+                throw new SQLException("Create act params " + e.getMessage());
             }
             actParams.setId(actParamsId);
         }
