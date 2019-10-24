@@ -31,6 +31,7 @@ import java.util.stream.Collectors;
 @Service
 @PropertySource("classpath:custom.properties")
 public class EraClient {
+
     private final Logger logger;
 
     @Autowired
@@ -62,7 +63,6 @@ public class EraClient {
 
     @Value("${TRANS_MAXSIZE}")
     private int TRANS_MAXSIZE;
-
 
     @Value("${ENCRYPT}")
     private boolean ENCRYPT;
@@ -185,7 +185,7 @@ public class EraClient {
             throw new Exception(ERASERVICE_URL_API + " status = " + status);
         }
         String signature = Base58.encode(tx.getSignature());
-        logger.debug(" Acquire signature for " + account.getId() + " : " + signature);
+        logger.debug("Acquire signature for " + account.getId() + " : " + signature);
         return signature;
     }
 
