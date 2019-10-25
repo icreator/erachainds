@@ -169,7 +169,6 @@ public class JobMonitor implements InitializingBean {
 //                request.setSubmitDate(date);
 //            }
             request.getParams(dbUtils, dateUtl);
-
             ActiveJob activeJob = new ActiveJob(sequenceNumber.incrementAndGet(), account.getId());
             activeJob.setRequestId(request.getId());
             activeJobs.add(activeJob);

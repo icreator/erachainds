@@ -78,7 +78,7 @@ public class DbUtils {
     }
 
     public <T> T checkData(String sql) throws SQLException {
-        logger.debug(" sql " + sql);
+        logger.debug("Sql " + sql);
         try (Connection connection = jdbcTemplate.getDataSource().getConnection()) {
             PreparedStatement statement = connection.prepareStatement(sql);
             ResultSet resultset = statement.executeQuery();
@@ -89,12 +89,12 @@ public class DbUtils {
             }
             statement.close();
         }
-        return (T) null;
+        return null;
     }
 
     public <T> List<T> getDataList(String sql, Object... values) throws SQLException {
         sql = getSql(sql, values);
-        logger.debug(" sql " + sql);
+        logger.debug("Sql " + sql);
         List<T> list = new ArrayList<>();
         try (Connection connection = jdbcTemplate.getDataSource().getConnection()) {
             PreparedStatement statement = connection.prepareStatement(sql);

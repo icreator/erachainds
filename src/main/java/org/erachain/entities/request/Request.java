@@ -170,13 +170,13 @@ public class Request {
 
     private Date getSubmitDate(DateUtl dateUtl, Date date, String submitPeriod) {
         String[] period = submitPeriod.split("_");
-        int value2 = 1;
+        int value = 1;
         String periodRun = submitPeriod;
         if (period.length > 1) {
-            value2 = Integer.parseInt(period[0]);
+            value = Integer.parseInt(period[0]);
             periodRun = period[1];
         }
-        submitDate = dateUtl.addUnit(date, periodRun, value2);
+        submitDate = dateUtl.addUnit(date, periodRun, value);
         return submitDate;
     }
 
