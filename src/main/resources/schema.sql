@@ -58,8 +58,8 @@ create table IF NOT EXISTS Request
     submitPeriod         varchar(10) default 'month' not null,
     offUnit              varchar(10),
     offValue             int         default 0,
-    timeDayRun           time        default '00:00',
-    timezone             varchar(10) default '000 hours',
+    timeDailyRun           time        default '00:00',
+    timezone             varchar(6)  default '+02:00',
     enableTimeShiftingng bit         default false
 );
 

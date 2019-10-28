@@ -5,8 +5,13 @@ import org.erachain.repositories.DbUtils;
 import org.erachain.utils.DateUtl;
 
 import java.sql.SQLException;
+import java.sql.Time;
 import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
+import java.time.LocalTime;
+import java.time.OffsetTime;
+import java.time.ZoneId;
+import java.time.ZoneOffset;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -22,7 +27,7 @@ public class Request {
     private String submitPeriod;  // hour day minute second
     private String offUnit;   // unit offset - hour day minute second
     private int offValue;     // offset from the beginning of period
-    private String timeDayRun;
+    private String timeDailyRun;
     private String timezone;
     private boolean enableTimeShifting;
     // end of db values
@@ -120,6 +125,12 @@ public class Request {
     }
 
     public boolean checkTime(DateUtl dateUtl) {
+        Time time = Time.valueOf(timeDailyRun);
+        LocalTime localTime = time.toLocalTime();
+        OffsetTime offsetTime = localTime.atOffset(ZoneOffset.of(timezone));
+        if (enableTimeShifting && offsetTime.isBefore(OffsetTime.now())){
+            return true;
+        }
         if (lastRun == null) {
             return true;
         }
