@@ -1,4 +1,3 @@
-
 CREATE TABLE IF NOT EXISTS AccountSenders
 (
     idSender         varchar(255) not null
@@ -23,42 +22,45 @@ CREATE TABLE IF NOT EXISTS Account
 
 create table IF NOT EXISTS DataInfo
 (
-  id        integer     not null
-    primary key   autoincrement,
-  accountId int,
-  runDate   timestamp   not null,
-  data      blob        not null,
-  identity  varchar(50) not null,
-  subDate   timestamp,
-  accDate   timestamp,
-  actRequestId   int,
-  sendToClientDate timestamp,
-  acceptClientDate timestamp
+    id               integer     not null
+        primary key autoincrement,
+    accountId        int,
+    runDate          timestamp   not null,
+    data             blob        not null,
+    identity         varchar(50) not null,
+    subDate          timestamp,
+    accDate          timestamp,
+    actRequestId     int,
+    sendToClientDate timestamp,
+    acceptClientDate timestamp
 );
 
 create table IF NOT EXISTS DataEra
 (
-  id        integer     not null
-  primary key   autoincrement,
-  dataInfoId int,
-  signature varchar(64),
-  blockTrId   varchar(20),
-  partNo    int,
-  offset     int default 0,
-  lengh      int default 0
+    id         integer not null
+        primary key autoincrement,
+    dataInfoId int,
+    signature  varchar(64),
+    blockTrId  varchar(20),
+    partNo     int,
+    offset     int default 0,
+    lengh      int default 0
 );
 
 
 create table IF NOT EXISTS Request
 (
-   id           integer not null
+    id                   integer not null
         primary key autoincrement,
-    accountId    int,
-    runPeriod    varchar(10),
-    lastRun      timestamp,
-    submitPeriod varchar(10) default month not null,
-    offUnit      varchar(10),
-    offValue     int         default 0
+    accountId            int,
+    runPeriod            varchar(10),
+    lastRun              timestamp,
+    submitPeriod         varchar(10) default 'month' not null,
+    offUnit              varchar(10),
+    offValue             int         default 0,
+    timeDayRun           time        default '00:00',
+    timezone             varchar(10) default '000 hours',
+    enableTimeShiftingng bit         default false
 );
 
 
@@ -76,21 +78,21 @@ create table IF NOT EXISTS Params
 
 create table IF NOT EXISTS ActRequest
 (
-  id        integer     not null
-  primary key   autoincrement,
-  requestId int,
-  period  varchar(10),
-  DateRun   timestamp,
-  DateSubmit timestamp
+    id         integer not null
+        primary key autoincrement,
+    requestId  int,
+    period     varchar(10),
+    DateRun    timestamp,
+    DateSubmit timestamp
 );
 
 create table IF NOT EXISTS ActParams
 (
-  id        integer     not null
-  primary key   autoincrement,
-  actRequestId    int,
-  paramName    varchar(25),
-  paramValue    varchar(50)
+    id           integer not null
+        primary key autoincrement,
+    actRequestId int,
+    paramName    varchar(25),
+    paramValue   varchar(50)
 );
 
 

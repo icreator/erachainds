@@ -22,6 +22,9 @@ public class Request {
     private String submitPeriod;  // hour day minute second
     private String offUnit;   // unit offset - hour day minute second
     private int offValue;     // offset from the beginning of period
+    private String timeDayRun;
+    private String timezone;
+    private boolean enableTimeShifting;
     // end of db values
     private String paramValue;
 
@@ -183,7 +186,7 @@ public class Request {
     public int getActRequestId(DataClient dataClient, DbUtils dbUtils, DateUtl dateUtl) throws Exception {
         if (params == null) {
             params = this.getParams(dbUtils, dateUtl);
-            if (params == null){
+            if (params == null) {
                 throw new Exception("Missing params for a request");
             }
         }
