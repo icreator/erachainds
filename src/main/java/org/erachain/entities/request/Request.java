@@ -1,16 +1,14 @@
 package org.erachain.entities.request;
 
+import org.erachain.repositories.AccountProc;
 import org.erachain.repositories.DataClient;
 import org.erachain.repositories.DbUtils;
 import org.erachain.utils.DateUtl;
 
 import java.sql.SQLException;
-import java.sql.Time;
 import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
 import java.time.LocalTime;
-import java.time.OffsetTime;
-import java.time.ZoneId;
 import java.time.ZoneOffset;
 import java.util.Date;
 import java.util.HashMap;
@@ -29,7 +27,7 @@ public class Request {
     private int offValue;     // offset from the beginning of period
     private String timeDailyRun;
     private String timezone;
-    private boolean enableTimeShifting;
+    private int enableTimeShifting;
     // end of db values
     private String paramValue;
 
@@ -124,13 +122,21 @@ public class Request {
         this.lastRun = lastRun;
     }
 
-    public boolean checkTime(DateUtl dateUtl) {
-        Time time = Time.valueOf(timeDailyRun);
-        LocalTime localTime = time.toLocalTime();
-        OffsetTime offsetTime = localTime.atOffset(ZoneOffset.of(timezone));
-        if (enableTimeShifting && offsetTime.isBefore(OffsetTime.now())){
-            return true;
+    public boolean checkTime(DateUtl dateUtl, AccountProc accountProc) throws SQLException {
+        LocalTime localTime = LocalTime.parse(timeDailyRun);
+        ZoneOffset shift = ZoneOffset.of(timezone);
+        LocalTime shiftedLocalTime = localTime.atOffset(ZoneOffset.of("+00:00")).withOffsetSameInstant(shift).toLocalTime();
+        if (enableTimeShifting == 0) {
+            return calcNeedRun(dateUtl);
         }
+        if ((enableTimeShifting == 1) && shiftedLocalTime.isBefore(LocalTime.now())) {
+            accountProc.setEnableTimeShifting(this, 0);
+            return calcNeedRun(dateUtl);
+        }
+        return false;
+    }
+
+    private boolean calcNeedRun(DateUtl dateUtl) {
         if (lastRun == null) {
             return true;
         }

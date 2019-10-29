@@ -63,10 +63,12 @@ VALUES (3,
         'all',
         null);
 
-INSERT OR IGNORE INTO Request(id, accountId, runPeriod, submitPeriod, offUnit, offValue)
+INSERT OR IGNORE INTO Request(id, accountId, runPeriod, submitPeriod, offUnit, offValue,timeDailyRun,timezone)
 VALUES (1,
         1,
         'minute',
         'minute',
         'minute',
-        1)
+        1,
+        '11:10',
+        '+02:00')

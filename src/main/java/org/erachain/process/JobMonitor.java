@@ -146,7 +146,12 @@ public class JobMonitor implements InitializingBean {
     public void checkReadyAccounts(BlockingQueue<ActiveJob> queue) {
         List<Account> accounts = accountProc.getAccounts();
         accounts.forEach(account -> {
-            List<ActiveJob> activeJobs = checkReadyAccount(account);
+            List<ActiveJob> activeJobs = null;
+            try {
+                activeJobs = checkReadyAccount(account);
+            } catch (SQLException e) {
+                logger.error(e.getMessage(),e);
+            }
             for (ActiveJob activeJob : activeJobs) {
                 activeJob.setState(JobState.READY);
                 queue.add(activeJob);
@@ -156,11 +161,11 @@ public class JobMonitor implements InitializingBean {
         });
     }
 
-    public List<ActiveJob> checkReadyAccount(Account account) {
+    public List<ActiveJob> checkReadyAccount(Account account) throws SQLException {
         List<Request> requests = accountProc.getRequests(account.getId());
         List<ActiveJob> activeJobs = new ArrayList<>();
         for (Request request : requests) {
-            if (!request.checkTime(dateUtl)){
+            if (!request.checkTime(dateUtl,accountProc)){
                 continue;
             }
 //            ActRequest actRequest = dataClient.getCurrActReq(request);

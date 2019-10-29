@@ -50,17 +50,17 @@ create table IF NOT EXISTS DataEra
 
 create table IF NOT EXISTS Request
 (
-    id                   integer not null
+    id                 integer not null
         primary key autoincrement,
-    accountId            int,
-    runPeriod            varchar(10),
-    lastRun              timestamp,
-    submitPeriod         varchar(10) default 'month' not null,
-    offUnit              varchar(10),
-    offValue             int         default 0,
-    timeDailyRun           time        default '00:00',
-    timezone             varchar(6)  default '+02:00',
-    enableTimeShiftingng bit         default false
+    accountId          int,
+    runPeriod          varchar(10),
+    lastRun            timestamp,
+    submitPeriod       varchar(10) default 'month' not null,
+    offUnit            varchar(10),
+    offValue           int         default 0,
+    timeDailyRun       time        default '00:00',
+    timezone           varchar(6)  default '+00:00',
+    enableTimeShifting bit         default false
 );
 
 
