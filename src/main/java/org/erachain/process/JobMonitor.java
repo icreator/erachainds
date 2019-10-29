@@ -5,12 +5,10 @@ import org.erachain.entities.ActiveJob;
 import org.erachain.entities.JobState;
 import org.erachain.entities.account.Account;
 
-import org.erachain.entities.request.ActRequest;
 import org.erachain.entities.request.Request;
 import org.erachain.repositories.AccountProc;
 import org.erachain.repositories.DataClient;
 import org.erachain.repositories.DbUtils;
-import org.erachain.repositories.InfoSave;
 import org.erachain.utils.DateUtl;
 import org.slf4j.Logger;
 import org.springframework.beans.factory.InitializingBean;
@@ -23,8 +21,6 @@ import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReentrantLock;
 
 @Component
 public class JobMonitor implements InitializingBean {
@@ -165,7 +161,7 @@ public class JobMonitor implements InitializingBean {
         List<Request> requests = accountProc.getRequests(account.getId());
         List<ActiveJob> activeJobs = new ArrayList<>();
         for (Request request : requests) {
-            if (!request.checkTime(dateUtl,accountProc)){
+            if (!request.checkTime(dateUtl,accountProc,logger)){
                 continue;
             }
 //            ActRequest actRequest = dataClient.getCurrActReq(request);
@@ -173,6 +169,7 @@ public class JobMonitor implements InitializingBean {
 //                Date date = new Date(actRequest.getDateSubmit().getTime());
 //                request.setSubmitDate(date);
 //            }
+            request.recalcSubmitDate(dateUtl);
             request.getParams(dbUtils, dateUtl);
             ActiveJob activeJob = new ActiveJob(sequenceNumber.incrementAndGet(), account.getId());
             activeJob.setRequestId(request.getId());

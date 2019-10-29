@@ -4,6 +4,7 @@ import org.erachain.repositories.AccountProc;
 import org.erachain.repositories.DataClient;
 import org.erachain.repositories.DbUtils;
 import org.erachain.utils.DateUtl;
+import org.slf4j.Logger;
 
 import java.sql.SQLException;
 import java.sql.Timestamp;
@@ -122,13 +123,15 @@ public class Request {
         this.lastRun = lastRun;
     }
 
-    public boolean checkTime(DateUtl dateUtl, AccountProc accountProc) throws SQLException {
+    public boolean checkTime(DateUtl dateUtl, AccountProc accountProc, Logger logger) throws SQLException {
+        if (enableTimeShifting == 0) {
+            logger.debug("Enter normal mode");
+            return calcNeedRun(dateUtl);
+        }
+        logger.debug("Enter calc date mode");
         LocalTime localTime = LocalTime.parse(timeDailyRun);
         ZoneOffset shift = ZoneOffset.of(timezone);
         LocalTime shiftedLocalTime = localTime.atOffset(ZoneOffset.of("+00:00")).withOffsetSameInstant(shift).toLocalTime();
-        if (enableTimeShifting == 0) {
-            return calcNeedRun(dateUtl);
-        }
         if ((enableTimeShifting == 1) && shiftedLocalTime.isBefore(LocalTime.now())) {
             accountProc.setEnableTimeShifting(this, 0);
             return calcNeedRun(dateUtl);
@@ -155,6 +158,15 @@ public class Request {
         return date.before(new Date());
     }
 
+    public void recalcSubmitDate(DateUtl dateUtl){
+        Date date = new Date();
+        submitDate = getSubmitDate(dateUtl, date, submitPeriod);
+        if (offUnit != null && offValue != 0) {
+            submitDate = dateUtl.addUnit(submitDate, offUnit, offValue - 1);
+        }
+    }
+
+
     public Map<String, String> getParams(DbUtils dbUtils, DateUtl dateUtl) {
         if (params != null) {
             return params;
@@ -174,10 +186,10 @@ public class Request {
             if (isCurrent && isDate) {
                 Date date = new Date();
                 format = new SimpleDateFormat(param.getFormat());
-                submitDate = getSubmitDate(dateUtl, date, submitPeriod);
+//                submitDate = getSubmitDate(dateUtl, date, submitPeriod);
                 if (offUnit != null && offValue != 0) {
                     date = dateUtl.addUnit(date, offUnit, -offValue);
-                    submitDate = dateUtl.addUnit(submitDate, offUnit, offValue - 1);
+//                    submitDate = dateUtl.addUnit(submitDate, offUnit, offValue - 1);
                 }
                 date = dateUtl.getAlign(date, submitPeriod);
                 value = format.format(date);
