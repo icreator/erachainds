@@ -103,9 +103,9 @@ public class DataClient {
         ServiceInterface service = serviceFactory.getService(params.get(Service_Url));
         logger.info(" account service " + service);
 
-        Map<String, String> map = request.getParams(dbUtils, dateUtl);
+        Map<String, String> map = request.getParams(dbUtils,dateUtl);
         map.keySet().forEach(name -> {
-            logger.debug(" name " + name + " value " + map.get(name));
+            logger.debug("Name: " + name + " value: " + map.get(name));
         });
         params.putAll(map);
 
@@ -183,8 +183,6 @@ public class DataClient {
                 throw e;
             }
         }
-//        accountProc.afterRun(request);
-        return;
     }
 
     private void setData(Request request, int actRequestId, Map<String, byte[]> data) throws SQLException {
@@ -203,13 +201,11 @@ public class DataClient {
                 throw e;
             }
         }
-//        accountProc.afterRun(request);
-        return;
-
     }
     public int getActRequestId(int requestId, String paramName, String paramValue) throws Exception {
-        logger.info(" paramName " + paramName + " paramValue " + paramValue);
-        List<ActParams> actParams = dbUtils.fetchDataValues(ActParams.class, FETCH_ACTREQ_ID_PARAM, paramName, paramValue);
+        logger.info("ParamName: " + paramName + " ParamValue: " + paramValue);
+        List<ActParams> actParams = dbUtils.fetchDataValues(
+                ActParams.class, FETCH_ACTREQ_ID_PARAM, paramName, paramValue);
         for (ActParams actParam : actParams) {
             ActRequest actRequest = dbUtils.fetchData(ActRequest.class, actParam.getActRequestId());
             if (actRequest != null && actRequest.getRequestId() == requestId) {

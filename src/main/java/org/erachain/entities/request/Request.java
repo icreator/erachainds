@@ -125,7 +125,7 @@ public class Request {
 
     public boolean checkTime(DateUtl dateUtl, AccountProc accountProc, Logger logger) throws SQLException {
         if (enableTimeShifting == 0) {
-            logger.debug("Enter normal mode");
+            logger.debug("Enter normal mode without recalc time shifting");
             return calcNeedRun(dateUtl);
         }
         logger.debug("Enter calc date mode");
@@ -158,7 +158,7 @@ public class Request {
         return date.before(new Date());
     }
 
-    public void recalcSubmitDate(DateUtl dateUtl){
+    public void recalcSubmitDate(DateUtl dateUtl) {
         Date date = new Date();
         submitDate = getSubmitDate(dateUtl, date, submitPeriod);
         if (offUnit != null && offValue != 0) {
@@ -166,39 +166,43 @@ public class Request {
         }
     }
 
+    public void setupParameterDate(DateUtl dateUtl) {
+        paramName = "date";
+//        paramName = "forUniquePurposesDate";
+        Date date = new Date();
+        SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssZ");
+        if (offUnit != null && offValue != 0) {
+            date = dateUtl.addUnit(date, offUnit, -offValue);
+        }
+        date = dateUtl.getAlign(date, submitPeriod);
+        paramValue = format.format(date);
+    }
 
-    public Map<String, String> getParams(DbUtils dbUtils, DateUtl dateUtl) {
+    public void putArtificiallyParameterDate(){
+        params.put(paramName, paramValue);
+    }
+    public Map<String, String> getParams(DbUtils dbUtils,DateUtl dateUtl) {
         if (params != null) {
             return params;
         }
         List<Params> pars = dbUtils.fetchData(Params.class, "Params", " requestId = " + id);
-        SimpleDateFormat format = null;
         params = new HashMap<>();
         for (Params param : pars) {
             String value = param.getDefValue();
-            boolean isCurrent = param.getCurValue() > 0;
-            boolean isDate = "date".equalsIgnoreCase(param.getDataType());
-            if (isDate) {
-                paramName = param.getParamName();
-                paramValue = value;
-                isCurrentDate = isCurrent;
-            }
-            if (isCurrent && isDate) {
+            if (param.getDataType().equals("date")) {
                 Date date = new Date();
-                format = new SimpleDateFormat(param.getFormat());
-//                submitDate = getSubmitDate(dateUtl, date, submitPeriod);
+                SimpleDateFormat format = new SimpleDateFormat(param.getFormat());
                 if (offUnit != null && offValue != 0) {
                     date = dateUtl.addUnit(date, offUnit, -offValue);
-//                    submitDate = dateUtl.addUnit(submitDate, offUnit, offValue - 1);
                 }
                 date = dateUtl.getAlign(date, submitPeriod);
                 value = format.format(date);
-                paramValue = value;
             }
             params.put(param.getParamName(), value);
         }
         return params;
     }
+
 
     private Date getSubmitDate(DateUtl dateUtl, Date date, String submitPeriod) {
         String[] period = submitPeriod.split("_");
@@ -213,12 +217,10 @@ public class Request {
     }
 
     public int getActRequestId(DataClient dataClient, DbUtils dbUtils, DateUtl dateUtl) throws Exception {
-        if (params == null) {
-            params = this.getParams(dbUtils, dateUtl);
-            if (params == null) {
-                throw new Exception("Missing params for a request");
-            }
-        }
+        recalcSubmitDate(dateUtl);
+        setupParameterDate(dateUtl);
+        params = getParams(dbUtils,dateUtl);
+        putArtificiallyParameterDate();
         return dataClient.getActRequestId(id, paramName, paramValue);
     }
 

@@ -4,7 +4,6 @@ package org.erachain.process;
 import org.erachain.entities.ActiveJob;
 import org.erachain.entities.JobState;
 import org.erachain.entities.account.Account;
-
 import org.erachain.entities.request.Request;
 import org.erachain.repositories.AccountProc;
 import org.erachain.repositories.DataClient;
@@ -15,8 +14,12 @@ import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
+
 import java.sql.SQLException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.TimeUnit;
@@ -84,22 +87,22 @@ public class JobMonitor implements InitializingBean {
                 } catch (Exception e) {
                     logger.error(e.getMessage());
                 }
-                queue.stream().forEach(o -> {
-                    logger.debug("Service " + o.getState().toString());
-                    switch (o.getState()) {
+                queue.stream().forEach(activeJob -> {
+                    logger.debug("Service " + activeJob.getState().toString());
+                    switch (activeJob.getState()) {
                         case READY:
                             try {
                                 logger.info("=================Job 1. Receiving data from client================");
-                                Map<String, byte[]> data = dataClient.getDataFromClient(o.getAccountId(), o.getRequestId());
-                                accountProc.afterRun(accountProc.getRequestById(o.getRequestId()));
+                                Map<String, byte[]> data = dataClient.getDataFromClient(activeJob.getAccountId(), activeJob.getRequestId());
+                                accountProc.afterRun(accountProc.getRequestById(activeJob.getRequestId()));
                                 if (data != null && !data.isEmpty()) {
-                                    dataClient.setClientData(o.getRequestId(), data);
+                                    dataClient.setClientData(activeJob.getRequestId(), data);
                                 }
                             } catch (Exception e) {
                                 logger.error(e.getMessage());
                             }
                             break;
-                        case STARTED :
+                        case STARTED:
                             try {
                                 logger.info("=================Job 2. Sending Data to blockchain================");
                                 serviceMonitor.checkDataSubmit();
@@ -107,7 +110,7 @@ public class JobMonitor implements InitializingBean {
                                 logger.error(e.getMessage());
                             }
                             break;
-                        case DATA_SUB :
+                        case DATA_SUB:
                             try {
                                 logger.info("=================Job 3. Check saved data in blockchain================");
                                 serviceMonitor.checkDataAccept();
@@ -115,11 +118,11 @@ public class JobMonitor implements InitializingBean {
                                 logger.error(e.getMessage());
                             }
                             break;
-                        case DATA_ACC :
+                        case DATA_ACC:
                             logger.info("=================Job 4. Send tx link to client ================");
                             serviceMonitor.checkSendToClient();
                             break;
-                        case INFO_SEND :
+                        case INFO_SEND:
                             logger.info("=================Job 5. Check tx link to client ================");
                             serviceMonitor.checkAcceptedByClient();
                             break;
@@ -136,9 +139,11 @@ public class JobMonitor implements InitializingBean {
 
         new Thread(server).start();
     }
+
     public void checkReadyAccounts() {
         checkReadyAccounts(queue);
     }
+
     public void checkReadyAccounts(BlockingQueue<ActiveJob> queue) {
         List<Account> accounts = accountProc.getAccounts();
         accounts.forEach(account -> {
@@ -146,7 +151,7 @@ public class JobMonitor implements InitializingBean {
             try {
                 activeJobs = checkReadyAccount(account);
             } catch (SQLException e) {
-                logger.error(e.getMessage(),e);
+                logger.error(e.getMessage(), e);
             }
             for (ActiveJob activeJob : activeJobs) {
                 activeJob.setState(JobState.READY);
@@ -161,26 +166,23 @@ public class JobMonitor implements InitializingBean {
         List<Request> requests = accountProc.getRequests(account.getId());
         List<ActiveJob> activeJobs = new ArrayList<>();
         for (Request request : requests) {
-            if (!request.checkTime(dateUtl,accountProc,logger)){
+            if (!request.checkTime(dateUtl, accountProc, logger)) {
                 continue;
             }
-//            ActRequest actRequest = dataClient.getCurrActReq(request);
-//            if (actRequest != null) {
-//                Date date = new Date(actRequest.getDateSubmit().getTime());
-//                request.setSubmitDate(date);
-//            }
             request.recalcSubmitDate(dateUtl);
-            request.getParams(dbUtils, dateUtl);
+            request.setupParameterDate(dateUtl);
+            request.getParams(dbUtils,dateUtl);
             ActiveJob activeJob = new ActiveJob(sequenceNumber.incrementAndGet(), account.getId());
             activeJob.setRequestId(request.getId());
             activeJobs.add(activeJob);
         }
         return activeJobs;
     }
+
     public void checkData(BlockingQueue<ActiveJob> queue) {
         String[] sqls = {CHECK_DATA_FOR_SUBMIT.replace("?", Long.toString(new Date().getTime())),
                 CHECK_DATA_AFTER_SUBMIT, CHECK_DATA_AFTER_ACCEPT, CHECK_DATA_AFTER_SEND_TO_CLIENT};
-        for (int i = sqls.length; i > 0; i --) {
+        for (int i = sqls.length; i > 0; i--) {
             String sql = sqls[i - 1];
             int records = 0;
             try {
