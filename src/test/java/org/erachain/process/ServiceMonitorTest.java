@@ -27,7 +27,7 @@ public class ServiceMonitorTest {
         try {
             serviceMonitor.checkDataSubmit();
         } catch (Exception e) {
-            logger.error(e.getMessage());
+            logger.error(e.getMessage(),e);
         }
     }
 
@@ -36,7 +36,7 @@ public class ServiceMonitorTest {
         try {
             serviceMonitor.checkDataAccept();
         } catch (Exception e) {
-            logger.error(e.getMessage());
+            logger.error(e.getMessage(),e);
         }
     }
 

@@ -75,7 +75,7 @@ public class DataClient {
                         return true;
                 }
             } catch (Exception e) {
-                logger.error(e.getMessage());
+                logger.error(e.getMessage(),e);
             }
             dataMap.putIfAbsent(ident, data);
             logger.debug(" set ident " + ident + " data " + data);
@@ -113,7 +113,7 @@ public class DataClient {
         try {
             idents = service.getIdentityList(params);
         } catch (Exception e) {
-            logger.error(e.getMessage());
+            logger.error(e.getMessage(),e);
             throw e;
         }
 
@@ -132,7 +132,7 @@ public class DataClient {
                 if (checkDataTheSame(ident, json))
                     continue;
             } catch (Exception e) {
-                logger.error(e.getMessage());
+                logger.error(e.getMessage(),e);
                 throw e;
             }
             if (json != null && !json.isEmpty()) {

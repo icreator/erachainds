@@ -47,7 +47,7 @@ public class JsonService {
                     Files.readAllBytes(resource.toPath()));
             //    logger.info(payStr);
         } catch (IOException e) {
-            logger.error(e.getMessage());
+            logger.error(e.getMessage(),e);
         }
         return new JSONObject(payStr);
     }

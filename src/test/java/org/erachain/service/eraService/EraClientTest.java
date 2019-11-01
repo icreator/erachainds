@@ -26,10 +26,10 @@ public class EraClientTest {
     public void testClient() {
         Account account = accountProc.getAccountById(1);
         try {
-            String sign = eraClient.getSignForData(account, "test");
+            String sign = eraClient.sendingToBlockchain(account, "test");
             logger.info(" sign " + sign);
         } catch (Exception e) {
-            logger.error(e.getMessage());
+            logger.error(e.getMessage(),e);
         }
     }
 }

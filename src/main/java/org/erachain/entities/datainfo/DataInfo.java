@@ -83,7 +83,7 @@ public class DataInfo {
         return data;
     }
 
-    public List<byte[]> getData(DbUtils dbUtils, int size) {
+    public List<byte[]> getDataSplit(int size) {
         return split(data, size);
     }
 

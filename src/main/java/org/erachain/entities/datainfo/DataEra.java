@@ -10,7 +10,7 @@ public class DataEra {
     private int partNo;
 
     private int offset;
-    private int lengh;
+    private int length;
     // end db
 
 
@@ -22,12 +22,12 @@ public class DataEra {
         this.offset = offset;
     }
 
-    public int getLengh() {
-        return lengh;
+    public int getLength() {
+        return length;
     }
 
-    public void setLengh(int lengh) {
-        this.lengh = lengh;
+    public void setLength(int length) {
+        this.length = length;
     }
 
     public int getId() {

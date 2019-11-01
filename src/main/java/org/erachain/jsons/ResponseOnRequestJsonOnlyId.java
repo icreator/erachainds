@@ -19,12 +19,24 @@ public class ResponseOnRequestJsonOnlyId {
         this.size = size;
     }
 
+    public ResponseOnRequestJsonOnlyId(String tx, long date, int partNo, int pos, int size) {
+        this.tx = tx;
+        this.date = date;
+        this.partNo = partNo;
+        this.pos = pos;
+        this.size = size;
+    }
+
     public String getTx() {
         return tx;
     }
 
     public long getDate() {
         return date;
+    }
+
+    public int getPartNo() {
+        return partNo;
     }
 
     public int getPos() {

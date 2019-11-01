@@ -91,7 +91,7 @@ public class InfoSave {
         try {
             return dbUtils.checkData(CHECK_DATA_BY_ACTREQID.replace("?", Integer.toString(actRequestId)));
         } catch (SQLException e) {
-            logger.error(e.getMessage());
+            logger.error(e.getMessage(),e);
         }
         return 0;
     }
@@ -315,6 +315,7 @@ public class InfoSave {
                     while (rs.next()) {
                         json = new ResponseOnRequestJsonOnlyId(new String(rs.getBytes(2)),
                                 new Long(new String(rs.getBytes(1))),
+                                Integer.parseInt(new String(rs.getBytes(3))),
                                 Integer.parseInt(new String(rs.getBytes(4))),
                                 Integer.parseInt(new String(rs.getBytes(5))));
                         responseOnRequestJsonOnlyIds.add(json);

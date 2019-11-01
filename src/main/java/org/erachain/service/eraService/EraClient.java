@@ -61,8 +61,8 @@ public class EraClient {
     @Autowired
     private DbUtils dbUtils;
 
-    @Value("${TRANS_MAXSIZE}")
-    private int TRANS_MAXSIZE;
+    @Value("${TRANSACTION_MAXSIZE_BYTE}")
+    private int TRANSACTION_MAXSIZE_BYTE;
 
     @Value("${ENCRYPT}")
     private boolean ENCRYPT;
@@ -86,20 +86,20 @@ public class EraClient {
         ERA_SERVICE_IPS_RANGE = ERA_SERVICE_IPS.stream().map((ip) -> Tuple2.of(ip, 0L)).collect(Collectors.toList());
     }
 
-    public void setSignature(DataInfo dataInfo, Account account, String signiture, int offset) throws Exception {
+    public void saveToBlockchainAndWriteDataEraInDb(DataInfo dataInfo, Account account, String signature, int offset) throws Exception {
         List<DataEra> dataEras = new ArrayList<>();
-        for (byte[] dt : dataInfo.getData(dbUtils, TRANS_MAXSIZE)) {
+        for (byte[] dt : dataInfo.getDataSplit(TRANSACTION_MAXSIZE_BYTE)) {
             String data = new String(dt, StandardCharsets.UTF_8);
             logger.debug("Data to client " + data);
             DataEra dataEra = new DataEra();
             dataEra.setDataInfoId(dataInfo.getId());
-            if (signiture != null) {
-                dataEra.setSignature(signiture);
-                dataEra.setOffset(offset);
-                dataEra.setLengh(dataInfo.getData().length);
+            if (signature != null) {
+                dataEra.setSignature(signature);
             } else {
-                dataEra.setSignature(getSignForData(account, data));
+                dataEra.setSignature(sendingToBlockchain(account, data));
             }
+            dataEra.setOffset(offset);
+            dataEra.setLength(dataInfo.getData().length);
             dataEras.add(dataEra);
         }
         int partNo = 0;
@@ -109,8 +109,8 @@ public class EraClient {
         }
     }
 
-    public String getSignForData(Account account, String data) throws Exception {
-        logger.debug("Sending by API...");
+    public String sendingToBlockchain(Account account, String data) throws Exception {
+        logger.debug("Sending by API to blockchain...");
         String result = null;
         SendTX tx;
         try {

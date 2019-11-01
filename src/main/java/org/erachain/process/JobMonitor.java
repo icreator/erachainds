@@ -77,7 +77,7 @@ public class JobMonitor implements InitializingBean {
             try {
                 TimeUnit.SECONDS.sleep(1);
             } catch (InterruptedException e) {
-                logger.error(e.getMessage());
+                logger.error(e.getMessage(),e);
             }
             while (true) {
                 logger.debug("Started Job Monitor " + new Date().toString());
@@ -85,7 +85,7 @@ public class JobMonitor implements InitializingBean {
                     checkData(queue);
                     checkReadyAccounts(queue);
                 } catch (Exception e) {
-                    logger.error(e.getMessage());
+                    logger.error(e.getMessage(),e);
                 }
                 queue.stream().forEach(activeJob -> {
                     logger.debug("Service " + activeJob.getState().toString());
@@ -99,7 +99,7 @@ public class JobMonitor implements InitializingBean {
                                     dataClient.setClientData(activeJob.getRequestId(), data);
                                 }
                             } catch (Exception e) {
-                                logger.error(e.getMessage());
+                                logger.error(e.getMessage(),e);
                             }
                             break;
                         case STARTED:
@@ -107,7 +107,7 @@ public class JobMonitor implements InitializingBean {
                                 logger.info("=================Job 2. Sending Data to blockchain================");
                                 serviceMonitor.checkDataSubmit();
                             } catch (Exception e) {
-                                logger.error(e.getMessage());
+                                logger.error(e.getMessage(),e);
                             }
                             break;
                         case DATA_SUB:
@@ -115,7 +115,7 @@ public class JobMonitor implements InitializingBean {
                                 logger.info("=================Job 3. Check saved data in blockchain================");
                                 serviceMonitor.checkDataAccept();
                             } catch (Exception e) {
-                                logger.error(e.getMessage());
+                                logger.error(e.getMessage(),e);
                             }
                             break;
                         case DATA_ACC:
@@ -132,7 +132,7 @@ public class JobMonitor implements InitializingBean {
                 try {
                     TimeUnit.SECONDS.sleep(1);
                 } catch (InterruptedException e) {
-                    logger.error(e.getMessage());
+                    logger.error(e.getMessage(),e);
                 }
             }
         };
@@ -188,7 +188,7 @@ public class JobMonitor implements InitializingBean {
             try {
                 records = dbUtils.checkData(sql);
             } catch (SQLException e) {
-                logger.error(e.getMessage());
+                logger.error(e.getMessage(),e);
             }
             if (records > 0) {
                 ActiveJob activeJob = new ActiveJob(sequenceNumber.incrementAndGet(), records);

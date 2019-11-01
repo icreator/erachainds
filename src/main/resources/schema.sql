@@ -44,7 +44,7 @@ create table IF NOT EXISTS DataEra
     blockTrId  varchar(20),
     partNo     int,
     offset     int default 0,
-    lengh      int default 0
+    length      int default 0
 );
 
 

@@ -175,7 +175,7 @@ public class DbUtils {
                     } else
                         f.set(data, row.get(f.getName()));
                 } catch (IllegalAccessException e) {
-                    logger.error(e.getMessage());
+                    logger.error(e.getMessage(),e);
                 }
             }
         });
@@ -243,7 +243,7 @@ public class DbUtils {
             if (rs.next())
                 return rs.getInt(1);
         } catch (SQLException e) {
-            logger.error(e.getMessage());
+            logger.error(e.getMessage(),e);
         }
 
         return 0;
@@ -285,7 +285,7 @@ public class DbUtils {
             connection.close();
             return sArray;
         } catch (Exception e) {
-            logger.error(e.getMessage());
+            logger.error(e.getMessage(),e);
 
         }
         return null;
