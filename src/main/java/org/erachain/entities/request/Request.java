@@ -11,10 +11,7 @@ import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
 import java.time.LocalTime;
 import java.time.ZoneOffset;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class Request {
 
@@ -178,10 +175,11 @@ public class Request {
         paramValue = format.format(date);
     }
 
-    public void putArtificiallyParameterDate(){
+    public void putArtificiallyParameterDate() {
         params.put(paramName, paramValue);
     }
-    public Map<String, String> getParams(DbUtils dbUtils,DateUtl dateUtl) {
+
+    public Map<String, String> getParams(DbUtils dbUtils, DateUtl dateUtl) {
         if (params != null) {
             return params;
         }
@@ -196,6 +194,11 @@ public class Request {
                     date = dateUtl.addUnit(date, offUnit, -offValue);
                 }
                 date = dateUtl.getAlign(date, submitPeriod);
+//                int secondsDefault = TimeZone.getDefault().getRawOffset() / 1000;
+//                date = dateUtl.addUnit(date, "hour", (secondsDefault
+//                        - ZoneOffset.of(timezone).getTotalSeconds()) / 3600);
+                date = dateUtl.addUnit(date, "hour",
+                        - ZoneOffset.of(timezone).getTotalSeconds() / 3600);
                 value = format.format(date);
             }
             params.put(param.getParamName(), value);
@@ -219,7 +222,7 @@ public class Request {
     public int getActRequestId(DataClient dataClient, DbUtils dbUtils, DateUtl dateUtl) throws Exception {
         recalcSubmitDate(dateUtl);
         setupParameterDate(dateUtl);
-        params = getParams(dbUtils,dateUtl);
+        params = getParams(dbUtils, dateUtl);
         putArtificiallyParameterDate();
         return dataClient.getActRequestId(id, paramName, paramValue);
     }
