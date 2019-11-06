@@ -195,7 +195,8 @@ public class Request {
                 }
                 date = dateUtl.getAlign(date, submitPeriod);
 //                int secondsDefault = TimeZone.getDefault().getRawOffset() / 1000;
-//                date = dateUtl.addUnit(date, "hour", (secondsDefault
+//                date = dateUtl.addUnit(date, "hour", (
+//                        - secondsDefault
 //                        - ZoneOffset.of(timezone).getTotalSeconds()) / 3600);
                 date = dateUtl.addUnit(date, "hour",
                         - ZoneOffset.of(timezone).getTotalSeconds() / 3600);
