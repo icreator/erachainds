@@ -106,7 +106,7 @@ public class DateUtl {
         return date;
     }
 
-    private static Date reduceToLowerBound(Date date, String unit) {
+    public Date reduceToLowerBound(Date date, String unit) {
         LocalDateTime result = LocalDateTime.ofInstant(date.toInstant(), ZoneId.systemDefault());
         switch (unit) {
             case ("month"): {

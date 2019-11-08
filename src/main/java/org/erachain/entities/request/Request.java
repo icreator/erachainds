@@ -9,7 +9,9 @@ import org.slf4j.Logger;
 import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
+import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.time.ZoneId;
 import java.time.ZoneOffset;
 import java.util.*;
 
@@ -23,9 +25,8 @@ public class Request {
     private String submitPeriod;  // hour day minute second
     private String offUnit;   // unit offset - hour day minute second
     private int offValue;     // offset from the beginning of period
-    private String timeDailyRun;
     private String timezone;
-    private int enableTimeShifting;
+    private boolean rememberTime = true;
     // end of db values
     private String paramValue;
 
@@ -120,39 +121,45 @@ public class Request {
         this.lastRun = lastRun;
     }
 
-    public boolean checkTime(DateUtl dateUtl, AccountProc accountProc, Logger logger) throws SQLException {
-        if (enableTimeShifting == 0) {
-            logger.debug("Enter normal mode without recalc time shifting");
-            return calcNeedRun(dateUtl);
+    private LocalDateTime localDateTime = null;
+
+    public boolean checkTime(DateUtl dateUtl, Logger logger) throws SQLException {
+        if (rememberTime) {
+            logger.debug("Enter mode remember time of start calcing...");
+            Date now = new Date();
+            String unitRunPeriod = getUnitRunPeriod();
+            Date reduceToLowerBoundDate = dateUtl.reduceToLowerBound(now,
+                    Objects.requireNonNull(unitRunPeriod));
+            if (offUnit != null && offValue != 0) {
+                reduceToLowerBoundDate = dateUtl.addUnit(submitDate, offUnit, offValue - 1);
+            }
+            localDateTime = LocalDateTime.ofInstant(reduceToLowerBoundDate.toInstant(),
+                    ZoneId.systemDefault());
+            if (unitRunPeriod.equals("day") ||
+                    unitRunPeriod.equals("week") ||
+                    unitRunPeriod.equals("month")) {
+                ZoneOffset shift = ZoneOffset.of(timezone);
+                localDateTime = localDateTime.atOffset(ZoneOffset.of("+00:00"))
+                        .withOffsetSameInstant(shift).toLocalDateTime();
+            }
+            logger.debug("Calculated! localDateTime = "+localDateTime.toString());
+            rememberTime = false;
         }
-        logger.debug("Enter calc date mode");
-        LocalTime localTime = LocalTime.parse(timeDailyRun);
-        ZoneOffset shift = ZoneOffset.of(timezone);
-        LocalTime shiftedLocalTime = localTime.atOffset(ZoneOffset.of("+00:00")).withOffsetSameInstant(shift).toLocalTime();
-        if ((enableTimeShifting == 1) && shiftedLocalTime.isBefore(LocalTime.now())) {
-            accountProc.setEnableTimeShifting(this, 0);
-            return calcNeedRun(dateUtl);
+        if (Objects.requireNonNull(localDateTime).isBefore(LocalDateTime.now())) {
+            logger.debug("start!");
+            logger.debug("localDateTime now = "+LocalDateTime.now().toString());
+            rememberTime = true;
+            return true;
         }
         return false;
     }
 
-    private boolean calcNeedRun(DateUtl dateUtl) {
-        if (lastRun == null) {
-            return true;
-        }
+    private String getUnitRunPeriod() {
         if (runPeriod == null) {
-            return false;
+            return null;
         }
-        Date date = new Date(lastRun.getTime());
         String[] period = runPeriod.split("_");
-        int value = 1;
-        String periodRun = runPeriod;
-        if (period.length > 1) {
-            value = Integer.parseInt(period[0]);
-            periodRun = period[1];
-        }
-        date = dateUtl.addUnit(date, periodRun, value);
-        return date.before(new Date());
+        return period[1];
     }
 
     public void recalcSubmitDate(DateUtl dateUtl) {
@@ -199,7 +206,7 @@ public class Request {
 //                        - secondsDefault
 //                        - ZoneOffset.of(timezone).getTotalSeconds()) / 3600);
                 date = dateUtl.addUnit(date, "hour",
-                        - ZoneOffset.of(timezone).getTotalSeconds() / 3600);
+                        -ZoneOffset.of(timezone).getTotalSeconds() / 3600);
                 value = format.format(date);
             }
             params.put(param.getParamName(), value);
@@ -258,8 +265,6 @@ public class Request {
         }
         return actRequestId;
     }
-
-
 
 
 }
