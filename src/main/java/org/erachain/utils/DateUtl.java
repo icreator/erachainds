@@ -6,6 +6,10 @@ import org.springframework.stereotype.Component;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.ZoneOffset;
+import java.time.temporal.ChronoUnit;
 import java.util.Calendar;
 import java.util.Date;
 
@@ -22,24 +26,24 @@ public class DateUtl {
         this.logger = logger;
     }
 
-    public  Date getFirst(Date date, String unit){
+    public Date getFirst(Date date, String unit) {
         Calendar calendar = Calendar.getInstance();
         calendar.setTime(date);
         switch (unit) {
-            case ("month") :
+            case ("month"):
                 calendar.set(Calendar.DAY_OF_MONTH, calendar.getActualMinimum(Calendar.DAY_OF_MONTH));
                 break;
-            case ("week") :
+            case ("week"):
                 calendar.set(Calendar.DAY_OF_WEEK, calendar.getActualMinimum(Calendar.DAY_OF_WEEK));
                 break;
-            case ("day") :
+            case ("day"):
                 calendar.set(Calendar.HOUR_OF_DAY, calendar.getActualMinimum(Calendar.HOUR_OF_DAY));
                 break;
-            case ("hour") :
+            case ("hour"):
                 calendar.set(Calendar.MINUTE, calendar.getActualMinimum(Calendar.MINUTE));
                 calendar.set(Calendar.SECOND, calendar.getActualMinimum(Calendar.SECOND));
                 break;
-            case ("minute") :
+            case ("minute"):
                 calendar.set(Calendar.SECOND, calendar.getActualMinimum(Calendar.SECOND));
                 break;
         }
@@ -54,22 +58,23 @@ public class DateUtl {
         }
         return date;
     }
+
     public Date addUnit(Date date, String unit, int value) {
         Date result = null;
         switch (unit) {
-            case ("month") :
+            case ("month"):
                 result = DateUtils.addMonths(date, value);
                 break;
-            case ("week") :
+            case ("week"):
                 result = DateUtils.addWeeks(date, value);
                 break;
-            case ("day") :
+            case ("day"):
                 result = DateUtils.addDays(date, value);
                 break;
-            case ("hour") :
+            case ("hour"):
                 result = DateUtils.addHours(date, value);
                 break;
-            case ("minute") :
+            case ("minute"):
                 result = DateUtils.addMinutes(date, value);
                 break;
         }
@@ -80,14 +85,14 @@ public class DateUtl {
         Date date;
         try {
             if (strDate.length() == 10) {
-                if(strDate.contains("-"))
+                if (strDate.contains("-"))
                     date = simpleDateFormat.parse(strDate);
                 else {
                     long time = Long.parseLong(strDate);
                     date = new Date(time + 1000);
                 }
             } else {
-                if(strDate.contains("-"))
+                if (strDate.contains("-"))
                     date = simpleDateTimeFormat.parse(strDate);
                 else {
                     long time = Long.parseLong(strDate);
@@ -100,4 +105,41 @@ public class DateUtl {
         }
         return date;
     }
+
+    private static Date reduceToLowerBound(Date date, String unit) {
+        LocalDateTime result = LocalDateTime.ofInstant(date.toInstant(), ZoneId.systemDefault());
+        switch (unit) {
+            case ("month"): {
+                Calendar calendar = Calendar.getInstance();
+                calendar.setTime(date);
+                calendar.set(Calendar.HOUR_OF_DAY, 0);
+                calendar.clear(Calendar.MINUTE);
+                calendar.clear(Calendar.SECOND);
+                calendar.clear(Calendar.MILLISECOND);
+                calendar.set(Calendar.DAY_OF_MONTH, 1);
+                return calendar.getTime();
+            }
+            case ("week"): {
+                Calendar calendar = Calendar.getInstance();
+                calendar.setTime(date);
+                calendar.set(Calendar.HOUR_OF_DAY, 0);
+                calendar.clear(Calendar.MINUTE);
+                calendar.clear(Calendar.SECOND);
+                calendar.clear(Calendar.MILLISECOND);
+                calendar.set(Calendar.DAY_OF_WEEK, calendar.getFirstDayOfWeek());
+                return calendar.getTime();
+            }
+            case ("day"):
+                result = result.truncatedTo(ChronoUnit.DAYS);
+                break;
+            case ("hour"):
+                result = result.truncatedTo(ChronoUnit.HOURS);
+                break;
+            case ("minute"):
+                result = result.truncatedTo(ChronoUnit.MINUTES);
+                break;
+        }
+        return Date.from(result.toInstant(ZoneOffset.UTC));
+    }
+
 }

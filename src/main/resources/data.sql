@@ -82,10 +82,14 @@ VALUES (3,
         'all',
         null);
 
-INSERT OR IGNORE INTO Request(id, accountId,
-                              runPeriod, submitPeriod,
-                              offUnit, offValue,
-                              timeDailyRun,timezone,
+INSERT OR IGNORE INTO Request(id,
+                              accountId,
+                              runPeriod,
+                              submitPeriod,
+                              offUnit,
+                              offValue,
+                              timeDailyRun,
+                              timezone,
                               enableTimeShifting)
 VALUES (1,
         1,
