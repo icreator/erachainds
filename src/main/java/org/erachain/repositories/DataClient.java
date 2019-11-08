@@ -103,7 +103,7 @@ public class DataClient {
         ServiceInterface service = serviceFactory.getService(params.get(Service_Url));
         logger.info(" account service " + service);
 
-        Map<String, String> map = request.getParams(dbUtils, dateUtl);
+        Map<String, String> map = request.getParamsAndRecalcParams(dbUtils, dateUtl);
         map.keySet().forEach(name -> {
             logger.debug("Name: " + name + " value: " + map.get(name));
         });

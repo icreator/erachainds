@@ -1,6 +1,5 @@
 package org.erachain.entities.request;
 
-import org.erachain.repositories.AccountProc;
 import org.erachain.repositories.DataClient;
 import org.erachain.repositories.DbUtils;
 import org.erachain.utils.DateUtl;
@@ -10,7 +9,6 @@ import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
-import java.time.LocalTime;
 import java.time.ZoneId;
 import java.time.ZoneOffset;
 import java.util.*;
@@ -142,12 +140,12 @@ public class Request {
                 localDateTime = localDateTime.atOffset(ZoneOffset.of("+00:00"))
                         .withOffsetSameInstant(shift).toLocalDateTime();
             }
-            logger.debug("Calculated! localDateTime = "+localDateTime.toString());
+            logger.debug("Calculated! localDateTime = " + localDateTime.toString());
             rememberTime = false;
         }
         if (Objects.requireNonNull(localDateTime).isBefore(LocalDateTime.now())) {
             logger.debug("start!");
-            logger.debug("localDateTime now = "+LocalDateTime.now().toString());
+            logger.debug("localDateTime now = " + LocalDateTime.now().toString());
             rememberTime = true;
             return true;
         }
@@ -186,7 +184,7 @@ public class Request {
         params.put(paramName, paramValue);
     }
 
-    public Map<String, String> getParams(DbUtils dbUtils, DateUtl dateUtl) {
+    public Map<String, String> getParamsAndRecalcParams(DbUtils dbUtils, DateUtl dateUtl) {
         if (params != null) {
             return params;
         }
@@ -201,10 +199,6 @@ public class Request {
                     date = dateUtl.addUnit(date, offUnit, -offValue);
                 }
                 date = dateUtl.getAlign(date, submitPeriod);
-//                int secondsDefault = TimeZone.getDefault().getRawOffset() / 1000;
-//                date = dateUtl.addUnit(date, "hour", (
-//                        - secondsDefault
-//                        - ZoneOffset.of(timezone).getTotalSeconds()) / 3600);
                 date = dateUtl.addUnit(date, "hour",
                         -ZoneOffset.of(timezone).getTotalSeconds() / 3600);
                 value = format.format(date);
@@ -230,7 +224,7 @@ public class Request {
     public int getActRequestId(DataClient dataClient, DbUtils dbUtils, DateUtl dateUtl) throws Exception {
         recalcSubmitDate(dateUtl);
         setupParameterDate(dateUtl);
-        params = getParams(dbUtils, dateUtl);
+        params = getParamsAndRecalcParams(dbUtils, dateUtl);
         putArtificiallyParameterDate();
         return dataClient.getActRequestId(id, paramName, paramValue);
     }
