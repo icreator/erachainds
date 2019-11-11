@@ -1,5 +1,6 @@
 package org.erachain.entities.request;
 
+import org.erachain.repositories.AccountProc;
 import org.erachain.repositories.DataClient;
 import org.erachain.repositories.DbUtils;
 import org.erachain.utils.DateUtl;
@@ -25,24 +26,25 @@ public class Request {
     private String offUnit;   // unit offset - hour day minute second
     private int offValue;     // offset from the beginning of period
     private String timezone;
-    private boolean rememberTime = true;
+    private int enableTimeShifting;
+    private int addRunPeriod;
     // end of db values
+
     private String paramValue;
 
     private String paramName;
 
     private Date submitDate;
 
+
     public boolean isCurrentDate() {
         return isCurrentDate;
     }
-
 
     private boolean isCurrentDate;
 
     private Map<String, String> params;
 
-    private boolean addRunPeriod = false;
 
     public String getParamName() {
         return paramName;
@@ -124,15 +126,16 @@ public class Request {
 
     private LocalDateTime localDateTime = null;
 
-    public boolean checkTime(DateUtl dateUtl, Logger logger) throws SQLException {
-        if (rememberTime) {
+    public boolean checkTime(DateUtl dateUtl, AccountProc accountProc, Logger logger) throws SQLException {
+        if (enableTimeShifting == 1) {
             logger.debug("Enter mode remember time of start calcing...");
             Date now = new Date();
             String unitRunPeriod = getUnitRunPeriod();
             Date reduceToLowerBoundDate = dateUtl.reduceToLowerBound(now,
                     Objects.requireNonNull(unitRunPeriod));
             if (offUnit != null && offValue != 0) {
-                reduceToLowerBoundDate = dateUtl.addUnit(submitDate, offUnit, offValue - 1);
+                reduceToLowerBoundDate = dateUtl.addUnit(reduceToLowerBoundDate,
+                        offUnit, offValue);
             }
             localDateTime = LocalDateTime.ofInstant(reduceToLowerBoundDate.toInstant(),
                     ZoneId.systemDefault());
@@ -144,9 +147,9 @@ public class Request {
                         .withOffsetSameInstant(shift).toLocalDateTime();
             }
             logger.debug("Calculated! localDateTime = " + localDateTime.toString());
-            rememberTime = false;
+            accountProc.setEnableTimeShifting(this, false);
         }
-        if (addRunPeriod) {    
+        if (addRunPeriod == 1) {
             String[] period = runPeriod.split("_");
             int value = 1;
             String periodRun = runPeriod;
@@ -159,12 +162,12 @@ public class Request {
             Date date = dateUtl.addUnit(Date.from(zonedDateTime.toInstant()), periodRun, value);
             localDateTime = LocalDateTime.ofInstant(date.toInstant(),
                     ZoneId.systemDefault());
-            addRunPeriod = false;
+            accountProc.setEnableAddRunPeriod(this, false);
         }
-        if (Objects.requireNonNull(localDateTime).isBefore(LocalDateTime.now())) {
+        if (localDateTime != null && localDateTime.isBefore(LocalDateTime.now())) {
             logger.debug("start!");
             logger.debug("localDateTime now = " + LocalDateTime.now().toString());
-            addRunPeriod = true;
+            accountProc.setEnableAddRunPeriod(this, true);
             return true;
         }
         return false;
@@ -174,8 +177,12 @@ public class Request {
         if (runPeriod == null) {
             return null;
         }
+        String periodRun = runPeriod;
         String[] period = runPeriod.split("_");
-        return period[1];
+        if (period.length > 1) {
+            periodRun = period[1];
+        }
+        return periodRun;
     }
 
     public void recalcSubmitDate(DateUtl dateUtl) {

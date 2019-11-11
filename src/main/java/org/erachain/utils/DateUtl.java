@@ -8,7 +8,7 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
-import java.time.ZoneOffset;
+import java.time.ZonedDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.Calendar;
 import java.util.Date;
@@ -139,7 +139,8 @@ public class DateUtl {
                 result = result.truncatedTo(ChronoUnit.MINUTES);
                 break;
         }
-        return Date.from(result.toInstant(ZoneOffset.UTC));
+        ZonedDateTime zonedDateTime = result.atZone(ZoneId.systemDefault());
+        return Date.from(zonedDateTime.toInstant());
     }
 
 }

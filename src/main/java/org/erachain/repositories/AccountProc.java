@@ -36,6 +36,10 @@ public class AccountProc {
     @Value("${UPDATE_REQUEST_SET_ENABLE_TIME_DAILY_RUN}")
     private String UPDATE_REQUEST_SET_ENABLE_TIME_DAILY_RUN;
 
+    @Value("${UPDATE_REQUEST_SET_ENABLE_ADD_RUN_PERIOD}")
+    private String UPDATE_REQUEST_SET_ENABLE_ADD_RUN_PERIOD;
+
+
     @Autowired
     private DbUtils dbUtils;
 
@@ -122,9 +126,20 @@ public class AccountProc {
             stm.close();
         }
     }
-    public void setEnableTimeShiftingng(Request request, boolean value) throws SQLException {
+    public void setEnableTimeShifting(Request request, boolean value) throws SQLException {
         try (Connection connection = jdbcTemplate.getDataSource().getConnection()) {
-            try (PreparedStatement stm = connection.prepareStatement(UPDATE_REQUEST_SET_ENABLE_TIME_DAILY_RUN)) {
+            try (PreparedStatement stm = connection.prepareStatement(
+                    UPDATE_REQUEST_SET_ENABLE_TIME_DAILY_RUN)) {
+                stm.setBoolean(1, value);
+                stm.setInt(2, request.getId());
+                stm.executeUpdate();
+            }
+        }
+    }
+    public void setEnableAddRunPeriod(Request request, boolean value) throws SQLException {
+        try (Connection connection = jdbcTemplate.getDataSource().getConnection()) {
+            try (PreparedStatement stm = connection.prepareStatement(
+                    UPDATE_REQUEST_SET_ENABLE_ADD_RUN_PERIOD)) {
                 stm.setBoolean(1, value);
                 stm.setInt(2, request.getId());
                 stm.executeUpdate();

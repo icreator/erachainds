@@ -88,8 +88,7 @@ INSERT OR IGNORE INTO Request(id,
                               submitPeriod,
                               offUnit,
                               offValue,
-                              timezone
-                         )
+                              timezone)
 VALUES (1,
         1,
         'minute',
