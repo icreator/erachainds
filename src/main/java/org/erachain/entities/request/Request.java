@@ -147,6 +147,7 @@ public class Request {
                         .withOffsetSameInstant(shift).toLocalDateTime();
             }
             logger.debug("Calculated! localDateTime = " + localDateTime.toString());
+            accountProc.updateLastRun(this, Timestamp.valueOf(localDateTime));
             accountProc.setEnableTimeShifting(this, false);
         }
         if (addRunPeriod == 1) {
@@ -162,7 +163,9 @@ public class Request {
             Date date = dateUtl.addUnit(Date.from(zonedDateTime.toInstant()), periodRun, value);
             localDateTime = LocalDateTime.ofInstant(date.toInstant(),
                     ZoneId.systemDefault());
+            accountProc.updateLastRun(this, Timestamp.valueOf(localDateTime));
             accountProc.setEnableAddRunPeriod(this, false);
+
         }
         if (localDateTime != null && localDateTime.isBefore(LocalDateTime.now())) {
             logger.debug("start!");

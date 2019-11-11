@@ -126,6 +126,16 @@ public class AccountProc {
             stm.close();
         }
     }
+
+    public void updateLastRun(Request request, Timestamp timestamp) throws SQLException {
+        try (Connection connection = jdbcTemplate.getDataSource().getConnection()) {
+            PreparedStatement stm = connection.prepareStatement(UPDATE_REQUEST_AFTER_RUN);
+            stm.setTimestamp(1, timestamp);
+            stm.setInt(2, request.getId());
+            stm.executeUpdate();
+        }
+    }
+
     public void setEnableTimeShifting(Request request, boolean value) throws SQLException {
         try (Connection connection = jdbcTemplate.getDataSource().getConnection()) {
             try (PreparedStatement stm = connection.prepareStatement(
@@ -136,6 +146,7 @@ public class AccountProc {
             }
         }
     }
+
     public void setEnableAddRunPeriod(Request request, boolean value) throws SQLException {
         try (Connection connection = jdbcTemplate.getDataSource().getConnection()) {
             try (PreparedStatement stm = connection.prepareStatement(
@@ -146,4 +157,5 @@ public class AccountProc {
             }
         }
     }
+
 }
