@@ -166,7 +166,7 @@ public class JobMonitor implements InitializingBean {
         List<Request> requests = accountProc.getRequests(account.getId());
         List<ActiveJob> activeJobs = new ArrayList<>();
         for (Request request : requests) {
-            if (!request.checkTime(dateUtl,accountProc, logger)) {
+            if (!request.checkTime(dateUtl, logger)) {
                 continue;
             }
             request.recalcSubmitDate(dateUtl);
