@@ -11,6 +11,7 @@ import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.ZoneOffset;
+import java.time.ZonedDateTime;
 import java.util.*;
 
 public class Request {
@@ -40,6 +41,8 @@ public class Request {
     private boolean isCurrentDate;
 
     private Map<String, String> params;
+
+    private boolean addRunPeriod = false;
 
     public String getParamName() {
         return paramName;
@@ -143,10 +146,25 @@ public class Request {
             logger.debug("Calculated! localDateTime = " + localDateTime.toString());
             rememberTime = false;
         }
+        if (addRunPeriod) {
+            String[] period = runPeriod.split("_");
+            int value = 1;
+            String periodRun = runPeriod;
+            if (period.length > 1) {
+                value = Integer.parseInt(period[0]);
+                periodRun = period[1];
+            }
+            ZonedDateTime zonedDateTime = localDateTime.atZone(ZoneId.systemDefault());
+
+            Date date = dateUtl.addUnit(Date.from(zonedDateTime.toInstant()), periodRun, value);
+            localDateTime = LocalDateTime.ofInstant(date.toInstant(),
+                    ZoneId.systemDefault());
+            addRunPeriod = false;
+        }
         if (Objects.requireNonNull(localDateTime).isBefore(LocalDateTime.now())) {
             logger.debug("start!");
             logger.debug("localDateTime now = " + LocalDateTime.now().toString());
-            rememberTime = true;
+            addRunPeriod = true;
             return true;
         }
         return false;
