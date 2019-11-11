@@ -88,11 +88,13 @@ INSERT OR IGNORE INTO Request(id,
                               submitPeriod,
                               offUnit,
                               offValue,
-                              timezone)
+                              timezone,
+                              enableTimeShifting)
 VALUES (1,
         1,
         'minute',
         'minute',
         'minute',
         1,
-        '+05:00')
+        '+05:00',
+        0)

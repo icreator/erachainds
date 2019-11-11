@@ -1,5 +1,6 @@
 package org.erachain.entities.request;
 
+import org.erachain.repositories.AccountProc;
 import org.erachain.repositories.DataClient;
 import org.erachain.repositories.DbUtils;
 import org.erachain.utils.DateUtl;
@@ -32,6 +33,8 @@ public class Request {
     private String paramName;
 
     private Date submitDate;
+
+    private int enableTimeShifting;
 
     public boolean isCurrentDate() {
         return isCurrentDate;
@@ -124,8 +127,8 @@ public class Request {
 
     private LocalDateTime localDateTime = null;
 
-    public boolean checkTime(DateUtl dateUtl, Logger logger) throws SQLException {
-        if (rememberTime) {
+    public boolean checkTime(DateUtl dateUtl, AccountProc accountProc, Logger logger) throws SQLException {
+        if (enableTimeShifting == 0) {
             logger.debug("Enter mode remember time of start calcing...");
             Date now = new Date();
             String unitRunPeriod = getUnitRunPeriod();
@@ -144,9 +147,9 @@ public class Request {
                         .withOffsetSameInstant(shift).toLocalDateTime();
             }
             logger.debug("Calculated! localDateTime = " + localDateTime.toString());
-            rememberTime = false;
+            accountProc.setEnableTimeShiftingng(this,false);
         }
-        if (addRunPeriod) {
+        if (addRunPeriod) {    
             String[] period = runPeriod.split("_");
             int value = 1;
             String periodRun = runPeriod;

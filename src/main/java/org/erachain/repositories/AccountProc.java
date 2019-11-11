@@ -122,4 +122,13 @@ public class AccountProc {
             stm.close();
         }
     }
+    public void setEnableTimeShiftingng(Request request, boolean value) throws SQLException {
+        try (Connection connection = jdbcTemplate.getDataSource().getConnection()) {
+            try (PreparedStatement stm = connection.prepareStatement(UPDATE_REQUEST_SET_ENABLE_TIME_DAILY_RUN)) {
+                stm.setBoolean(1, value);
+                stm.setInt(2, request.getId());
+                stm.executeUpdate();
+            }
+        }
+    }
 }
