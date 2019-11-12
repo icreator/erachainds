@@ -91,8 +91,8 @@ INSERT OR IGNORE INTO Request(id,
                               timezone)
 VALUES (1,
         1,
-        '10_minute',
-        'minute',
+        'day',
+        '20_minute',
         'minute',
         5,
-        '+05:00')
+        '+01:00')

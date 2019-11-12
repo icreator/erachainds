@@ -149,7 +149,7 @@ public class Request {
                         .withOffsetSameInstant(shift).toLocalDateTime();
             }
             logger.debug("Calculated! localDateTime = " + localDateTime.toString());
-            lastRun = Timestamp.valueOf(localDateTime);
+            lastRun = Timestamp.valueOf(localDateTime.plusSeconds(TimeZone.getDefault().getRawOffset()/1000));
             accountProc.updateLastRun(this, lastRun);
             accountProc.setEnableTimeShifting(this, false);
         }
