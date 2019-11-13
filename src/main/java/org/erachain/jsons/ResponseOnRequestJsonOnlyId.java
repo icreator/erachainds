@@ -6,7 +6,7 @@ public class ResponseOnRequestJsonOnlyId {
 
     private long date;
 
-    private int partNo;
+//    private int partNo;
 
     private int pos;
 
@@ -22,7 +22,7 @@ public class ResponseOnRequestJsonOnlyId {
     public ResponseOnRequestJsonOnlyId(String tx, long date, int partNo, int pos, int size) {
         this.tx = tx;
         this.date = date;
-        this.partNo = partNo;
+//        this.partNo = partNo;
         this.pos = pos;
         this.size = size;
     }
@@ -35,9 +35,9 @@ public class ResponseOnRequestJsonOnlyId {
         return date;
     }
 
-    public int getPartNo() {
-        return partNo;
-    }
+//    public int getPartNo() {
+//        return partNo;
+//    }
 
     public int getPos() {
         return pos;

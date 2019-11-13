@@ -95,11 +95,11 @@ public class EraClient {
             dataEra.setDataInfoId(dataInfo.getId());
             if (signature != null) {
                 dataEra.setSignature(signature);
+                dataEra.setOffset(offset);
+                dataEra.setLength(dataInfo.getData().length);
             } else {
                 dataEra.setSignature(sendingToBlockchain(account, data));
             }
-            dataEra.setOffset(offset);
-            dataEra.setLength(dataInfo.getData().length);
             dataEras.add(dataEra);
         }
         int partNo = 0;

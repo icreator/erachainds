@@ -243,13 +243,17 @@ public class InfoSave {
                     stm.setString(++i, name);
                     stm.setString(++i, params.get(name));
                 }
-                stm.setString(++i, "1");
+                stm.setString(++i, "50");
                 try (ResultSet rs = stm.executeQuery()) {
-                    if (rs.next()) {
+                    while (rs.next()) {
+                        if (rs.getBytes(2) == null) {
+                            continue;
+                        }
                         json = new ResponseOnRequestJsonOnlyId(new String(rs.getBytes(2)),
                                 new Long(new String(rs.getBytes(1))),
                                 Integer.parseInt(new String(rs.getBytes(4))),
                                 Integer.parseInt(new String(rs.getBytes(5))));
+                        break;
                     }
                 }
             }
@@ -313,9 +317,12 @@ public class InfoSave {
                 List<ResponseOnRequestJsonOnlyId> responseOnRequestJsonOnlyIds = result.getResponseOnRequestJsonOnlyIds();
                 try (ResultSet rs = stm.executeQuery()) {
                     while (rs.next()) {
+                        if (rs.getBytes(2) == null) {
+                            continue;
+                        }
                         json = new ResponseOnRequestJsonOnlyId(new String(rs.getBytes(2)),
                                 new Long(new String(rs.getBytes(1))),
-                                Integer.parseInt(new String(rs.getBytes(3))),
+//                                Integer.parseInt(new String(rs.getBytes(3))),
                                 Integer.parseInt(new String(rs.getBytes(4))),
                                 Integer.parseInt(new String(rs.getBytes(5))));
                         responseOnRequestJsonOnlyIds.add(json);
