@@ -234,13 +234,8 @@ public class Request {
                     date = dateUtl.addUnit(date, offUnit, -offValue);
                 }
                 date = dateUtl.getAlign(date, submitPeriod);
-                String unitRunPeriod = getUnitRunPeriod();
-                if (unitRunPeriod.equals("day") ||
-                        unitRunPeriod.equals("week") ||
-                        unitRunPeriod.equals("month")) {
-                    date = dateUtl.addUnit(date, "hour",
-                            -ZoneOffset.of(timezone).getTotalSeconds() / 3600);
-                }
+                date = dateUtl.addUnit(date, "hour",
+                        -ZoneOffset.of(timezone).getTotalSeconds() / 3600);
                 value = format.format(date);
             }
             params.put(param.getParamName(), value);
