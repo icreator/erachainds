@@ -28,6 +28,7 @@ public class Request {
     private String timezone;
     private int enableTimeShifting;
     private int addRunPeriod;
+    private Timestamp plannedTimeRun;
     // end of db values
 
     private String paramValue;
@@ -125,13 +126,13 @@ public class Request {
     }
 
     public boolean checkTime(DateUtl dateUtl, AccountProc accountProc, Logger logger) throws SQLException {
-        if (lastRun == null) {
-            lastRun = Timestamp.valueOf(LocalDateTime.now());
-            accountProc.updateLastRun(this, lastRun);
+        if (plannedTimeRun == null) {
+            plannedTimeRun = Timestamp.valueOf(LocalDateTime.now());
+            accountProc.updatePlannedTimeRun(this, plannedTimeRun);
         }
         if (enableTimeShifting == 1) {
             logger.debug("Enter mode remember time of start calcing...");
-            Date lastRunTime = new Date(lastRun.getTime());
+            Date lastRunTime = new Date(plannedTimeRun.getTime());
             String unitRunPeriod = getUnitRunPeriod();
             Date reduceToLowerBoundDate = dateUtl.reduceToLowerBound(lastRunTime,
                     Objects.requireNonNull(unitRunPeriod));
@@ -149,8 +150,8 @@ public class Request {
                         .withOffsetSameInstant(shift).toLocalDateTime();
             }
             logger.debug("Calculated! localDateTime = " + localDateTime.toString());
-            lastRun = Timestamp.valueOf(localDateTime.plusSeconds(TimeZone.getDefault().getRawOffset()/1000));
-            accountProc.updateLastRun(this, lastRun);
+            plannedTimeRun = Timestamp.valueOf(localDateTime.plusSeconds(TimeZone.getDefault().getRawOffset()/1000));
+            accountProc.updatePlannedTimeRun(this, plannedTimeRun);
             accountProc.setEnableTimeShifting(this, false);
         }
         if (addRunPeriod == 1) {
@@ -161,18 +162,18 @@ public class Request {
                 value = Integer.parseInt(period[0]);
                 periodRun = period[1];
             }
-            LocalDateTime localDateTime = lastRun.toLocalDateTime();
+            LocalDateTime localDateTime = plannedTimeRun.toLocalDateTime();
             ZonedDateTime zonedDateTime = localDateTime.atZone(ZoneId.systemDefault());
 
             Date date = dateUtl.addUnit(Date.from(zonedDateTime.toInstant()), periodRun, value);
             localDateTime = LocalDateTime.ofInstant(date.toInstant(),
                     ZoneId.systemDefault());
-            lastRun = Timestamp.valueOf(localDateTime);
-            accountProc.updateLastRun(this, lastRun);
+            plannedTimeRun = Timestamp.valueOf(localDateTime);
+            accountProc.updatePlannedTimeRun(this, plannedTimeRun);
             accountProc.setEnableAddRunPeriod(this, false);
 
         }
-        if (lastRun != null && lastRun.toLocalDateTime().isBefore(LocalDateTime.now())) {
+        if (plannedTimeRun != null && plannedTimeRun.toLocalDateTime().isBefore(LocalDateTime.now())) {
             logger.debug("start!");
             logger.debug("localDateTime now = " + LocalDateTime.now().toString());
             accountProc.setEnableAddRunPeriod(this, true);

@@ -60,7 +60,9 @@ create table IF NOT EXISTS Request
     offValue           int         default 0,
     timezone           varchar(6)  default '+00:00',
     enableTimeShifting bit         default true,
-    addRunPeriod       bit         default false
+    addRunPeriod       bit         default false,
+    plannedTimeRun     timestamp
+
 );
 
 

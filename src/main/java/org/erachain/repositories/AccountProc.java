@@ -33,6 +33,9 @@ public class AccountProc {
     @Value("${UPDATE_REQUEST_AFTER_RUN}")
     private String UPDATE_REQUEST_AFTER_RUN;
 
+    @Value("${UPDATE_REQUEST_PLANNED_TIME_RUN}")
+    private String UPDATE_REQUEST_PLANNED_TIME_RUN;
+
     @Value("${UPDATE_REQUEST_SET_ENABLE_TIME_DAILY_RUN}")
     private String UPDATE_REQUEST_SET_ENABLE_TIME_DAILY_RUN;
 
@@ -158,4 +161,12 @@ public class AccountProc {
         }
     }
 
+    public void updatePlannedTimeRun(Request request, Timestamp timestamp) throws SQLException {
+        try (Connection connection = jdbcTemplate.getDataSource().getConnection()) {
+            PreparedStatement stm = connection.prepareStatement(UPDATE_REQUEST_PLANNED_TIME_RUN);
+            stm.setTimestamp(1, timestamp);
+            stm.setInt(2, request.getId());
+            stm.executeUpdate();
+        }
+    }
 }
