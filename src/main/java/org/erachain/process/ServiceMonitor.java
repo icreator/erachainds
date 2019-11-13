@@ -60,15 +60,11 @@ public class ServiceMonitor {
     @Value("${CONFIRMATION_TO_ACCEPT}")
     private int CONFIRMATION_TO_ACCEPT;
 
-
-
     @Value("${FETCH_DATA_FOR_SUBMIT}")
     private String FETCH_DATA_FOR_SUBMIT;
 
     @Value("${FETCH_DATA_AFTER_SUBMIT}")
     private String FETCH_DATA_AFTER_SUBMIT;
-
-
 
     @Value("${FETCH_DATA_AFTER_ACCEPT}")
     private String FETCH_DATA_AFTER_ACCEPT;
