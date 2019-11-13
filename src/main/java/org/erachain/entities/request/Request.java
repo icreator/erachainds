@@ -150,7 +150,8 @@ public class Request {
                         .withOffsetSameInstant(shift).toLocalDateTime();
             }
             logger.debug("Calculated! localDateTime = " + localDateTime.toString());
-            plannedTimeRun = Timestamp.valueOf(localDateTime.plusSeconds(TimeZone.getDefault().getRawOffset()/1000));
+//            plannedTimeRun = Timestamp.valueOf(localDateTime.plusSeconds(TimeZone.getDefault().getRawOffset()/1000));
+            plannedTimeRun = Timestamp.valueOf(localDateTime);
             accountProc.updatePlannedTimeRun(this, plannedTimeRun);
             accountProc.setEnableTimeShifting(this, false);
         }
