@@ -149,11 +149,9 @@ public class Request {
                 localDateTime = localDateTime.atOffset(ZoneOffset.of("+00:00"))
                         .withOffsetSameInstant(shift).toLocalDateTime();
             }
-            ZonedDateTime zonedDateTime = localDateTime.atZone(ZoneId.of("+00:00"));
-            Date date = Date.from(zonedDateTime.toInstant());
             logger.debug("Calculated! localDateTime = " + localDateTime.toString());
 //            plannedTimeRun = Timestamp.valueOf(localDateTime.plusSeconds(TimeZone.getDefault().getRawOffset()/1000));
-            plannedTimeRun = new Timestamp(date.getTime());
+            plannedTimeRun = Timestamp.valueOf(localDateTime);
             accountProc.updatePlannedTimeRun(this, plannedTimeRun);
             accountProc.setEnableTimeShifting(this, false);
         }

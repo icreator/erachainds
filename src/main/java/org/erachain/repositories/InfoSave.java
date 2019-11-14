@@ -249,10 +249,17 @@ public class InfoSave {
                         if (rs.getBytes(2) == null) {
                             continue;
                         }
-                        json = new ResponseOnRequestJsonOnlyId(new String(rs.getBytes(2)),
-                                new Long(new String(rs.getBytes(1))),
-                                Integer.parseInt(new String(rs.getBytes(4))),
-                                Integer.parseInt(new String(rs.getBytes(5))));
+
+                        if (rs.getInt(3) > 0) {
+                            json = new ResponseOnRequestJsonOnlyId(new String(rs.getBytes(2)),
+                                    new Long(new String(rs.getBytes(1))),
+                                    Integer.parseInt(new String(rs.getBytes(4))),
+                                    Integer.parseInt(new String(rs.getBytes(5))));
+                        } else {
+                            json = new ResponseOnRequestJsonOnlyId(new String(rs.getBytes(2)),
+                                    new Long(new String(rs.getBytes(1))));
+                        }
+
                         break;
                     }
                 }
@@ -320,11 +327,15 @@ public class InfoSave {
                         if (rs.getBytes(2) == null) {
                             continue;
                         }
-                        json = new ResponseOnRequestJsonOnlyId(new String(rs.getBytes(2)),
-                                new Long(new String(rs.getBytes(1))),
-//                                Integer.parseInt(new String(rs.getBytes(3))),
-                                Integer.parseInt(new String(rs.getBytes(4))),
-                                Integer.parseInt(new String(rs.getBytes(5))));
+                        if (rs.getInt(3) > 0) {
+                            json = new ResponseOnRequestJsonOnlyId(new String(rs.getBytes(2)),
+                                    new Long(new String(rs.getBytes(1))),
+                                    Integer.parseInt(new String(rs.getBytes(4))),
+                                    Integer.parseInt(new String(rs.getBytes(5))));
+                        } else {
+                            json = new ResponseOnRequestJsonOnlyId(new String(rs.getBytes(2)),
+                                    new Long(new String(rs.getBytes(1))));
+                        }
                         responseOnRequestJsonOnlyIds.add(json);
                     }
                 }
