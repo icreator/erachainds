@@ -149,9 +149,11 @@ public class Request {
                 localDateTime = localDateTime.atOffset(ZoneOffset.of("+00:00"))
                         .withOffsetSameInstant(shift).toLocalDateTime();
             }
+            ZonedDateTime zonedDateTime = localDateTime.atZone(ZoneId.of("+00:00"));
+            Date date = Date.from(zonedDateTime.toInstant());
             logger.debug("Calculated! localDateTime = " + localDateTime.toString());
 //            plannedTimeRun = Timestamp.valueOf(localDateTime.plusSeconds(TimeZone.getDefault().getRawOffset()/1000));
-            plannedTimeRun = Timestamp.valueOf(localDateTime);
+            plannedTimeRun = new Timestamp(date.getTime());
             accountProc.updatePlannedTimeRun(this, plannedTimeRun);
             accountProc.setEnableTimeShifting(this, false);
         }
@@ -234,8 +236,20 @@ public class Request {
                     date = dateUtl.addUnit(date, offUnit, -offValue);
                 }
                 date = dateUtl.getAlign(date, submitPeriod);
-                date = dateUtl.addUnit(date, "hour",
-                        -ZoneOffset.of(timezone).getTotalSeconds() / 3600);
+
+                LocalDateTime localDateTime = LocalDateTime.ofInstant(date.toInstant(),
+                        ZoneId.systemDefault());
+                ZoneOffset shift = ZoneOffset.of(timezone);
+                localDateTime = localDateTime.atOffset(ZoneOffset.of("+00:00"))
+                        .withOffsetSameInstant(shift).toLocalDateTime();
+                ZonedDateTime zonedDateTime = localDateTime.atZone(ZoneId.systemDefault());
+                date = Date.from(zonedDateTime.toInstant());
+
+
+//                date = dateUtl.addUnit(date, "hour",
+//                        -ZoneOffset.of(timezone).getTotalSeconds() / 3600);
+
+
                 value = format.format(date);
             }
             params.put(param.getParamName(), value);
