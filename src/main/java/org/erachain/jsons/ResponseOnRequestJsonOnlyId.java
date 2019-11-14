@@ -46,11 +46,11 @@ public class ResponseOnRequestJsonOnlyId {
 //        return partNo;
 //    }
 
-    public int getPos() {
+    public Integer getPos() {
         return pos;
     }
 
-    public int getSize() {
+    public Integer getSize() {
         return size;
     }
 }
