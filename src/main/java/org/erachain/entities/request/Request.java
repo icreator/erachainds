@@ -132,9 +132,9 @@ public class Request {
         }
         if (enableTimeShifting == 1) {
             logger.debug("Enter mode remember time of start calcing...");
-            Date lastRunTime = new Date(plannedTimeRun.getTime());
+            Date lastRunPlannedTime = new Date(plannedTimeRun.getTime());
             String unitRunPeriod = getUnitRunPeriod();
-            Date reduceToLowerBoundDate = dateUtl.reduceToLowerBound(lastRunTime,
+            Date reduceToLowerBoundDate = dateUtl.reduceToLowerBound(lastRunPlannedTime,
                     Objects.requireNonNull(unitRunPeriod));
             if (offUnit != null && offValue != 0) {
                 reduceToLowerBoundDate = dateUtl.addUnit(reduceToLowerBoundDate,
@@ -149,9 +149,11 @@ public class Request {
                 localDateTime = localDateTime.atOffset(ZoneOffset.of("+00:00"))
                         .withOffsetSameInstant(shift).toLocalDateTime();
             }
+            ZonedDateTime zonedDateTime = localDateTime.atZone(ZoneId.systemDefault());
+            Date date = Date.from(zonedDateTime.toInstant());
             logger.debug("Calculated! localDateTime = " + localDateTime.toString());
 //            plannedTimeRun = Timestamp.valueOf(localDateTime.plusSeconds(TimeZone.getDefault().getRawOffset()/1000));
-            plannedTimeRun = Timestamp.valueOf(localDateTime);
+            plannedTimeRun = new Timestamp(date.getTime());
             accountProc.updatePlannedTimeRun(this, plannedTimeRun);
             accountProc.setEnableTimeShifting(this, false);
         }
@@ -174,7 +176,7 @@ public class Request {
             accountProc.setEnableAddRunPeriod(this, false);
 
         }
-        if (plannedTimeRun != null && plannedTimeRun.toLocalDateTime().isBefore(LocalDateTime.now())) {
+        if (plannedTimeRun != null && plannedTimeRun.before(new Date())) {
             logger.debug("start!");
             logger.debug("localDateTime now = " + LocalDateTime.now().toString());
             accountProc.setEnableAddRunPeriod(this, true);
@@ -228,7 +230,7 @@ public class Request {
         for (Params param : pars) {
             String value = param.getDefValue();
             if (param.getDataType().equals("date")) {
-                Date date = new Date();
+                Date date = new Date(plannedTimeRun.getTime());
                 SimpleDateFormat format = new SimpleDateFormat(param.getFormat());
                 if (offUnit != null && offValue != 0) {
                     date = dateUtl.addUnit(date, offUnit, -offValue);
@@ -237,17 +239,18 @@ public class Request {
 
                 LocalDateTime localDateTime = LocalDateTime.ofInstant(date.toInstant(),
                         ZoneId.systemDefault());
+                if (timezone.charAt(0) == '+') {
+                    timezone = "-" + timezone.substring(1);
+                } else if (timezone.charAt(0) == '-') {
+                    timezone = "+" + timezone.substring(1);
+                } else {
+                    throw new IllegalArgumentException("Invalid setup timezone");
+                }
                 ZoneOffset shift = ZoneOffset.of(timezone);
                 localDateTime = localDateTime.atOffset(ZoneOffset.of("+00:00"))
                         .withOffsetSameInstant(shift).toLocalDateTime();
                 ZonedDateTime zonedDateTime = localDateTime.atZone(ZoneId.systemDefault());
                 date = Date.from(zonedDateTime.toInstant());
-
-
-//                date = dateUtl.addUnit(date, "hour",
-//                        -ZoneOffset.of(timezone).getTotalSeconds() / 3600);
-
-
                 value = format.format(date);
             }
             params.put(param.getParamName(), value);
