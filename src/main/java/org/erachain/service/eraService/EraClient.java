@@ -75,6 +75,9 @@ public class EraClient {
     
     private boolean FLAG_RECEIVING_IP_CHECK = true;
 
+    @Value("${BLOCKCHAIN_PORT}")
+    private int BLOCKCHAIN_PORT;
+
     @Autowired
     public EraClient(RestClient restClient, Logger logger) {
         this.restClient = restClient;
@@ -145,7 +148,7 @@ public class EraClient {
                 for (int i = 0; i < ERA_SERVICE_IPS_RANGE.size(); i++) {
                     String ip = ERA_SERVICE_IPS_RANGE.get(i).f0;
                     try {
-                        URL url = new URL("http", ip, 9067, "/api/broadcast");
+                        URL url = new URL("http", ip, BLOCKCHAIN_PORT, "/api/broadcast");
                         ERASERVICE_URL_API = url.toString();
                         result = restClient.getResult(ERASERVICE_URL_API + "/" + byteCode);
                         logger.debug("Send successful data to blockchain with ip = " + ip);
@@ -244,7 +247,7 @@ public class EraClient {
 
     private String checkIp(String signature, String eraservice_url_ip_response_except, String s) throws Exception {
         String result;
-        URL url = new URL("http", eraservice_url_ip_response_except, 9067, "/apirecords/get");
+        URL url = new URL("http", eraservice_url_ip_response_except, BLOCKCHAIN_PORT, "/apirecords/get");
         ERASERVICE_URL_SIGNATURE = url.toString();
         result = restClient.getResult(ERASERVICE_URL_SIGNATURE + "/" + signature);
         logger.debug(s);
