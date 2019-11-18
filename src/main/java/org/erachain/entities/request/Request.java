@@ -126,6 +126,7 @@ public class Request {
     }
 
     public boolean checkTime(DateUtl dateUtl, AccountProc accountProc, Logger logger) throws SQLException {
+        //todo checkpoint
         if (plannedTimeRun == null) {
             plannedTimeRun = Timestamp.valueOf(LocalDateTime.now());
             accountProc.updatePlannedTimeRun(this, plannedTimeRun);
