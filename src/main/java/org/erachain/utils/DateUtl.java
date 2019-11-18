@@ -143,4 +143,33 @@ public class DateUtl {
         return Date.from(zonedDateTime.toInstant());
     }
 
+    public long getmilliSecondsRunPeriod(String runPeriod) {
+        long result = 0;
+        String[] period = runPeriod.split("_");
+        int value = 1;
+        String periodRun = runPeriod;
+        if (period.length > 1) {
+            value = Integer.parseInt(period[0]);
+            periodRun = period[1];
+        }
+        switch (periodRun) {
+            case ("month"):
+                result = 60 * 60 * 24 * 30;
+                break;
+            case ("week"):
+                result = 60 * 60 * 24 * 7;
+                break;
+            case ("day"):
+                result = 60 * 60 * 24;
+                break;
+            case ("hour"):
+                result = 60 * 60;
+                break;
+            case ("minute"):
+                result = 60;
+                break;
+        }
+        return 1000 * result * value;
+    }
+
 }

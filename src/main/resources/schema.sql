@@ -58,11 +58,7 @@ create table IF NOT EXISTS Request
     submitPeriod       varchar(10) default 'month' not null,
     offUnit            varchar(10),
     offValue           int         default 0,
-    timezone           varchar(6)  default '+00:00',
-    enableTimeShifting bit         default true,
-    addRunPeriod       bit         default false,
-    plannedTimeRun     timestamp
-
+    timezone           varchar(6)  default '+00:00'
 );
 
 

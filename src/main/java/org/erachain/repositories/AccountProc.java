@@ -139,34 +139,4 @@ public class AccountProc {
         }
     }
 
-    public void setEnableTimeShifting(Request request, boolean value) throws SQLException {
-        try (Connection connection = jdbcTemplate.getDataSource().getConnection()) {
-            try (PreparedStatement stm = connection.prepareStatement(
-                    UPDATE_REQUEST_SET_ENABLE_TIME_DAILY_RUN)) {
-                stm.setBoolean(1, value);
-                stm.setInt(2, request.getId());
-                stm.executeUpdate();
-            }
-        }
-    }
-
-    public void setEnableAddRunPeriod(Request request, boolean value) throws SQLException {
-        try (Connection connection = jdbcTemplate.getDataSource().getConnection()) {
-            try (PreparedStatement stm = connection.prepareStatement(
-                    UPDATE_REQUEST_SET_ENABLE_ADD_RUN_PERIOD)) {
-                stm.setBoolean(1, value);
-                stm.setInt(2, request.getId());
-                stm.executeUpdate();
-            }
-        }
-    }
-
-    public void updatePlannedTimeRun(Request request, Timestamp timestamp) throws SQLException {
-        try (Connection connection = jdbcTemplate.getDataSource().getConnection()) {
-            PreparedStatement stm = connection.prepareStatement(UPDATE_REQUEST_PLANNED_TIME_RUN);
-            stm.setTimestamp(1, timestamp);
-            stm.setInt(2, request.getId());
-            stm.executeUpdate();
-        }
-    }
 }

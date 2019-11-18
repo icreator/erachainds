@@ -26,9 +26,6 @@ public class Request {
     private String offUnit;   // unit offset - hour day minute second
     private int offValue;     // offset from the beginning of period
     private String timezone;
-    private int enableTimeShifting;
-    private int addRunPeriod;
-    private Timestamp plannedTimeRun;
     // end of db values
 
     private String paramValue;
@@ -126,65 +123,41 @@ public class Request {
     }
 
     public boolean checkTime(DateUtl dateUtl, AccountProc accountProc, Logger logger) throws SQLException {
-        //todo checkpoint
-        if (plannedTimeRun == null) {
-            plannedTimeRun = Timestamp.valueOf(LocalDateTime.now());
-            accountProc.updatePlannedTimeRun(this, plannedTimeRun);
+        if (lastRun == null) {
+            return true;
         }
-        if (enableTimeShifting == 1) {
-            logger.debug("Enter mode remember time of start calcing...");
-            Date lastRunPlannedTime = new Date(plannedTimeRun.getTime());
-            String unitRunPeriod = getUnitRunPeriod();
-            Date reduceToLowerBoundDate = dateUtl.reduceToLowerBound(lastRunPlannedTime,
-                    Objects.requireNonNull(unitRunPeriod));
-            if (offUnit != null && offValue != 0) {
-                reduceToLowerBoundDate = dateUtl.addUnit(reduceToLowerBoundDate,
-                        offUnit, offValue);
-            }
-            LocalDateTime localDateTime = LocalDateTime.ofInstant(reduceToLowerBoundDate.toInstant(),
-                    ZoneId.systemDefault());
-            if (unitRunPeriod.equals("day") ||
-                    unitRunPeriod.equals("week") ||
-                    unitRunPeriod.equals("month")) {
-                ZoneOffset shift = ZoneOffset.of(timezone);
-                localDateTime = localDateTime.atOffset(ZoneOffset.of("+00:00"))
-                        .withOffsetSameInstant(shift).toLocalDateTime();
-            }
-            ZonedDateTime zonedDateTime = localDateTime.atZone(ZoneId.systemDefault());
-            Date date = Date.from(zonedDateTime.toInstant());
-            logger.debug("Calculated! localDateTime = " + localDateTime.toString());
-//            plannedTimeRun = Timestamp.valueOf(localDateTime.plusSeconds(TimeZone.getDefault().getRawOffset()/1000));
-            plannedTimeRun = new Timestamp(date.getTime());
-            accountProc.updatePlannedTimeRun(this, plannedTimeRun);
-            accountProc.setEnableTimeShifting(this, false);
-        }
-        if (addRunPeriod == 1) {
-            String[] period = runPeriod.split("_");
-            int value = 1;
-            String periodRun = runPeriod;
-            if (period.length > 1) {
-                value = Integer.parseInt(period[0]);
-                periodRun = period[1];
-            }
-            LocalDateTime localDateTime = plannedTimeRun.toLocalDateTime();
-            ZonedDateTime zonedDateTime = localDateTime.atZone(ZoneId.systemDefault());
-
-            Date date = dateUtl.addUnit(Date.from(zonedDateTime.toInstant()), periodRun, value);
-            localDateTime = LocalDateTime.ofInstant(date.toInstant(),
-                    ZoneId.systemDefault());
-            plannedTimeRun = Timestamp.valueOf(localDateTime);
-            accountProc.updatePlannedTimeRun(this, plannedTimeRun);
-            accountProc.setEnableAddRunPeriod(this, false);
-
-        }
-        if (plannedTimeRun != null && plannedTimeRun.before(new Date())) {
+        logger.debug("Enter start calcing...");
+        Date date = calcPlannedDate(dateUtl);
+        if (new Date().getTime() - date.getTime() > dateUtl.getmilliSecondsRunPeriod(runPeriod)) {
             logger.debug("start!");
             logger.debug("localDateTime now = " + LocalDateTime.now().toString());
-            accountProc.setEnableAddRunPeriod(this, true);
             return true;
         }
         return false;
     }
+
+    private Date calcPlannedDate(DateUtl dateUtl) {
+        Date lastRunPlannedTime = new Date(lastRun.getTime());
+        String unitRunPeriod = getUnitRunPeriod();
+        Date reduceToLowerBoundDate = dateUtl.reduceToLowerBound(lastRunPlannedTime,
+                Objects.requireNonNull(unitRunPeriod));
+        if (offUnit != null && offValue != 0) {
+            reduceToLowerBoundDate = dateUtl.addUnit(reduceToLowerBoundDate,
+                    offUnit, offValue);
+        }
+        LocalDateTime localDateTime = LocalDateTime.ofInstant(reduceToLowerBoundDate.toInstant(),
+                ZoneId.systemDefault());
+        if (unitRunPeriod.equals("day") ||
+                unitRunPeriod.equals("week") ||
+                unitRunPeriod.equals("month")) {
+            ZoneOffset shift = ZoneOffset.of(timezone);
+            localDateTime = localDateTime.atOffset(ZoneOffset.of("+00:00"))
+                    .withOffsetSameInstant(shift).toLocalDateTime();
+        }
+        ZonedDateTime zonedDateTime = localDateTime.atZone(ZoneId.systemDefault());
+        return Date.from(zonedDateTime.toInstant());
+    }
+
 
     private String getUnitRunPeriod() {
         if (runPeriod == null) {
@@ -231,7 +204,7 @@ public class Request {
         for (Params param : pars) {
             String value = param.getDefValue();
             if (param.getDataType().equals("date")) {
-                Date date = new Date(plannedTimeRun.getTime());
+                Date date = calcPlannedDate(dateUtl);
                 SimpleDateFormat format = new SimpleDateFormat(param.getFormat());
                 if (offUnit != null && offValue != 0) {
                     date = dateUtl.addUnit(date, offUnit, -offValue);
