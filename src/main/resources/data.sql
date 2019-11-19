@@ -44,7 +44,7 @@ VALUES ('ErachainDS',
 
 INSERT OR IGNORE INTO Account (id, accountUrl, accountRecipient, recipientPublicKey, user, password, identityName,
                                objectName,
-                               idSender)
+                               idSender,APIuser,APIpassword)
 VALUES (1,
         'https://app.yaenergetik.ru/api?v2',
         '7AjWLhrtBxxsw7zsoqT79FMU6VSY81NCr3',
@@ -53,7 +53,9 @@ VALUES (1,
         'erachain',
         'meter',
         'energyService',
-        'ErachainDS');
+        'ErachainDS',
+        'username',
+        'pass');
 
 INSERT OR IGNORE INTO Params (id, requestId, paramName, dataType, format, defValue, curValue)
 VALUES (1,

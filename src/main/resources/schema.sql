@@ -17,6 +17,8 @@ CREATE TABLE IF NOT EXISTS Account
     identityName       VARCHAR(20),
     objectName         VARCHAR(255),
     idSender           VARCHAR(255),
+    APIuser            VARCHAR(50),
+    APIpassword        VARCHAR(50),
     FOREIGN KEY (idSender) REFERENCES AccountSenders (idSender)
 );
 
@@ -50,15 +52,15 @@ create table IF NOT EXISTS DataEra
 
 create table IF NOT EXISTS Request
 (
-    id                 integer not null
+    id           integer not null
         primary key autoincrement,
-    accountId          int,
-    runPeriod          varchar(10),
-    lastRun            timestamp,
-    submitPeriod       varchar(10) default 'month' not null,
-    offUnit            varchar(10),
-    offValue           int         default 0,
-    timezone           varchar(6)  default '+00:00'
+    accountId    int,
+    runPeriod    varchar(10),
+    lastRun      timestamp,
+    submitPeriod varchar(10) default 'month' not null,
+    offUnit      varchar(10),
+    offValue     int         default 0,
+    timezone     varchar(6)  default '+00:00'
 );
 
 
