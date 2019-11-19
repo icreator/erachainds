@@ -137,6 +137,9 @@ public class Request {
     }
 
     private Date calcPlannedDate(DateUtl dateUtl) {
+        if (lastRun == null) {
+            lastRun = new Timestamp(new Date().getTime());
+        }
         Date lastRunPlannedTime = new Date(lastRun.getTime());
         String unitRunPeriod = getUnitRunPeriod();
         Date reduceToLowerBoundDate = dateUtl.reduceToLowerBound(lastRunPlannedTime,
