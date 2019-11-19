@@ -153,7 +153,8 @@ public class Request {
         if (unitRunPeriod.equals("day") ||
                 unitRunPeriod.equals("week") ||
                 unitRunPeriod.equals("month")) {
-            ZoneOffset shift = ZoneOffset.of(timezone);
+            String shiftTimezone = convertStringZoneToShift(timezone);
+            ZoneOffset shift = ZoneOffset.of(shiftTimezone);
             localDateTime = localDateTime.atOffset(ZoneOffset.of("+00:00"))
                     .withOffsetSameInstant(shift).toLocalDateTime();
         }
@@ -213,17 +214,17 @@ public class Request {
                     date = dateUtl.addUnit(date, offUnit, -offValue);
                 }
                 date = dateUtl.getAlign(date, submitPeriod);
-
                 LocalDateTime localDateTime = LocalDateTime.ofInstant(date.toInstant(),
                         ZoneId.systemDefault());
-                if (timezone.charAt(0) == '+') {
-                    timezone = "-" + timezone.substring(1);
-                } else if (timezone.charAt(0) == '-') {
-                    timezone = "+" + timezone.substring(1);
+                String timezoneShift = convertStringZoneToShift(timezone);
+                if (timezoneShift.charAt(0) == '+') {
+                    timezoneShift = "-" + timezoneShift.substring(1);
+                } else if (timezoneShift.charAt(0) == '-') {
+                    timezoneShift = "+" + timezoneShift.substring(1);
                 } else {
                     throw new IllegalArgumentException("Invalid setup timezone");
                 }
-                ZoneOffset shift = ZoneOffset.of(timezone);
+                ZoneOffset shift = ZoneOffset.of(timezoneShift);
                 localDateTime = localDateTime.atOffset(ZoneOffset.of("+00:00"))
                         .withOffsetSameInstant(shift).toLocalDateTime();
                 ZonedDateTime zonedDateTime = localDateTime.atZone(ZoneId.systemDefault());
@@ -233,6 +234,13 @@ public class Request {
             params.put(param.getParamName(), value);
         }
         return params;
+    }
+
+    private String convertStringZoneToShift(String timezone) {
+        LocalDateTime localDateTime = LocalDateTime.now();
+        ZonedDateTime helper = localDateTime.atZone(ZoneId.of(timezone));
+        ZoneOffset helperOffset = helper.getOffset();
+        return helperOffset.getId().replaceAll("Z", "+00:00");
     }
 
 
