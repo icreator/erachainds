@@ -60,7 +60,7 @@ create table IF NOT EXISTS Request
     submitPeriod varchar(10) default 'month' not null,
     offUnit      varchar(10),
     offValue     int         default 0,
-    timezone     varchar(6)  default '+00:00'
+    timezone     varchar(6)  default 'Europe/Moscow'
 );
 
 
