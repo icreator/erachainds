@@ -217,15 +217,18 @@ public class Request {
                 LocalDateTime localDateTime = LocalDateTime.ofInstant(date.toInstant(),
                         ZoneId.systemDefault());
                 String timezoneShift = convertStringZoneToShift(timezone);
-                if (timezoneShift.charAt(0) == '+') {
-                    timezoneShift = "-" + timezoneShift.substring(1);
-                } else if (timezoneShift.charAt(0) == '-') {
-                    timezoneShift = "+" + timezoneShift.substring(1);
-                } else {
-                    throw new IllegalArgumentException("Invalid setup timezone");
-                }
+//                if (timezoneShift.charAt(0) == '+') {
+//                    timezoneShift = "-" + timezoneShift.substring(1);
+//                } else if (timezoneShift.charAt(0) == '-') {
+//                    timezoneShift = "+" + timezoneShift.substring(1);
+//                } else {
+//                    throw new IllegalArgumentException("Invalid setup timezone");
+//                }
                 ZoneOffset shift = ZoneOffset.of(timezoneShift);
-                localDateTime = localDateTime.atOffset(ZoneOffset.of("+00:00"))
+                LocalDateTime now = LocalDateTime.now();
+                ZoneId zone = ZoneId.systemDefault();
+                ZoneOffset zoneOffSet = zone.getRules().getOffset(now);
+                localDateTime = localDateTime.atOffset(zoneOffSet)
                         .withOffsetSameInstant(shift).toLocalDateTime();
                 ZonedDateTime zonedDateTime = localDateTime.atZone(ZoneId.systemDefault());
                 date = Date.from(zonedDateTime.toInstant());

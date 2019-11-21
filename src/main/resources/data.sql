@@ -93,8 +93,8 @@ INSERT OR IGNORE INTO Request(id,
                               timezone)
 VALUES (1,
         1,
-        'day',
+        'hour',
         'minute',
         'minute',
         1,
-        'Europe/Moscow')
+        'Asia/Kabul')
