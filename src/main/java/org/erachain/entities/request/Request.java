@@ -140,8 +140,8 @@ public class Request {
         if (lastRun == null) {
             lastRun = new Timestamp(new Date().getTime());
         }
-        //Date date = forAutoDateParam ? new Timestamp(new Date().getTime()) : new Date(lastRun.getTime());
-        Date date = new Date(lastRun.getTime());
+        Date date = forAutoDateParam ? new Timestamp(new Date().getTime()) : new Date(lastRun.getTime());
+//        Date date = new Date(lastRun.getTime());
         String unitRunPeriod = getUnitRunPeriod();
         Date result = dateUtl.reduceToLowerBound(date, Objects.requireNonNull(unitRunPeriod));
         if (!forAutoDateParam && offUnit != null && offValue != 0) {
