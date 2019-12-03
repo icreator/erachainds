@@ -140,48 +140,29 @@ public class Request {
         if (lastRun == null) {
             lastRun = new Timestamp(new Date().getTime());
         }
-        Date date = forAutoDateParam ? new Timestamp(new Date().getTime()) : new Date(lastRun.getTime());
-//        Date date = new Date(lastRun.getTime());
+        Date date = forAutoDateParam
+                ? new Timestamp(new Date().getTime())
+                : new Date(lastRun.getTime());
         String unitRunPeriod = getUnitRunPeriod();
-        Date result = dateUtl.reduceToLowerBound(date, Objects.requireNonNull(unitRunPeriod));
-        if (!forAutoDateParam && offUnit != null && offValue != 0) {
-            result = dateUtl.addUnit(result, offUnit, offValue);
-        }
-
         if (forAutoDateParam || unitRunPeriod.equals("day") ||
                 unitRunPeriod.equals("week") ||
                 unitRunPeriod.equals("month")) {
 
-            result = Date
-                    .from(LocalDateTime.ofInstant(result.toInstant(), ZoneId.systemDefault())
+            date = dateUtl.reduceToLowerBound(date, Objects.requireNonNull(unitRunPeriod), ZoneId.of(timezone));
+            date = Date
+                    .from(LocalDateTime.ofInstant(date.toInstant(), ZoneId.systemDefault())
                             .atZone(ZoneId.of(timezone)).toInstant());
+        } else {
+            date = dateUtl.reduceToLowerBound(date, Objects.requireNonNull(unitRunPeriod), ZoneId.systemDefault());
         }
 
-        return result;
+        if (!forAutoDateParam && offUnit != null && offValue != 0) {
+            date = dateUtl.addUnit(date, offUnit, offValue);
+        }
 
+        return date;
 
-//        if (unitRunPeriod.equals("day") ||
-//                unitRunPeriod.equals("week") ||
-//                unitRunPeriod.equals("month")) {
-//            String shiftTimezone = convertStringZoneToShift(timezone);
-//            ZoneOffset shift = ZoneOffset.of(shiftTimezone);
-//            LocalDateTime now = LocalDateTime.now();
-//            ZoneId zone = ZoneId.systemDefault();
-//            ZoneOffset zoneOffSet = zone.getRules().getOffset(now);
-//            localDateTime = localDateTime.atOffset(zoneOffSet)
-//                    .withOffsetSameInstant(shift).toLocalDateTime();
-//        }
-//        ZonedDateTime zonedDateTime = localDateTime.atZone(ZoneId.of("Etc/UTC"));
-//        return Date.from(zonedDateTime.toInstant());
     }
-
-//    private Date convertDateToZone(Date date, boolean reverse) {
-//        ZoneId fromTZ = reverse ? ZoneId.of(timezone) : ZoneId.systemDefault();
-//        ZoneId toTZ = !reverse ? ZoneId.of(timezone) : ZoneId.systemDefault();
-//        LocalDateTime localDateTime = LocalDateTime.ofInstant(date.toInstant(), fromTZ);
-//        return Date.from(LocalDateTime.ofInstant(date.toInstant(), fromTZ).atZone(toTZ).toInstant());
-//    }
-
 
     private String getUnitRunPeriod() {
         if (runPeriod == null) {
@@ -230,58 +211,14 @@ public class Request {
             if (param.getDataType().equals("date") && param.getCurValue() == 1 ) {
 
                 Date date = calcPlannedDate(dateUtl,true);
-
-                //Date date = LocalDateTime.now().atZone(ZoneId.of(timezone));
-//                date = Date
-//                        .from(LocalDateTime.now().atZone(ZoneId.of(timezone))
-//                                .toInstant());
-
                 SimpleDateFormat format = new SimpleDateFormat(param.getFormat());
-//                if (offUnit != null && offValue != 0) {
-//                    date = dateUtl.addUnit(date, offUnit, -offValue);
-//                }
-                //format.setTimeZone(TimeZone.getTimeZone(timezone));
+                format.setTimeZone(TimeZone.getTimeZone(timezone));
                 value = format.format(date);
-
-//                Date date = calcPlannedDate(dateUtl);
-//                SimpleDateFormat format = new SimpleDateFormat(param.getFormat());
-//                if (offUnit != null && offValue != 0) {
-//                    date = dateUtl.addUnit(date, offUnit, -offValue);
-//                }
-//                date = dateUtl.getAlign(date, submitPeriod);
-//                LocalDateTime localDateTime = LocalDateTime.ofInstant(date.toInstant(),
-//                        ZoneId.systemDefault());
-//                String timezoneShift = convertStringZoneToShift(timezone);
-//                if (timezoneShift.charAt(0) == '+') {
-//                    timezoneShift = "-" + timezoneShift.substring(1);
-//                } else if (timezoneShift.charAt(0) == '-') {
-//                    timezoneShift = "+" + timezoneShift.substring(1);
-//                } else {
-//                    throw new IllegalArgumentException("Invalid setup timezone");
-//                }
-//                ZoneOffset shift = ZoneOffset.of(timezoneShift);
-//                LocalDateTime now = LocalDateTime.now();
-//                ZoneId zone = ZoneId.systemDefault();
-//                ZoneOffset zoneOffSet = zone.getRules().getOffset(now);
-//                localDateTime = localDateTime.atOffset(ZoneOffset.of("+00:00"))
-//                        .withOffsetSameInstant(shift).toLocalDateTime();
-//                ZonedDateTime zonedDateTime = localDateTime.atZone(ZoneId.systemDefault());
-//                date = Date.from(zonedDateTime.toInstant());
-//                format.setTimeZone(TimeZone.getTimeZone(ZoneId.of("Etc/UTC")));
-//                value = format.format(date);
             }
             params.put(param.getParamName(), value);
         }
         return params;
     }
-
-    private String convertStringZoneToShift(String timezone) {
-        LocalDateTime localDateTime = LocalDateTime.now();
-        ZonedDateTime helper = localDateTime.atZone(ZoneId.of(timezone));
-        ZoneOffset helperOffset = helper.getOffset();
-        return helperOffset.getId().replaceAll("Z", "+00:00");
-    }
-
 
     private Date getSubmitDate(DateUtl dateUtl, Date date, String submitPeriod) {
         String[] period = submitPeriod.split("_");

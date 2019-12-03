@@ -106,8 +106,10 @@ public class DateUtl {
         return date;
     }
 
-    public Date reduceToLowerBound(Date date, String unit) {
-        LocalDateTime result = LocalDateTime.ofInstant(date.toInstant(), ZoneId.systemDefault());
+    public Date reduceToLowerBound(Date date, String unit, ZoneId zoneId) {
+//        LocalDateTime result = LocalDateTime.ofInstant(date.toInstant(), ZoneId.systemDefault());
+        LocalDateTime result = LocalDateTime.ofInstant(date.toInstant(), zoneId);
+
         switch (unit) {
             case ("month"): {
                 Calendar calendar = Calendar.getInstance();
