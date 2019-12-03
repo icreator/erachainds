@@ -2,10 +2,8 @@ package org.erachain.repositories;
 
 import org.erachain.entities.account.Account;
 import org.erachain.entities.request.Request;
-import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.context.annotation.PropertySource;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
 
@@ -24,7 +22,6 @@ import java.util.concurrent.ConcurrentMap;
 //@PropertySource("classpath:queries.properties")
 public class AccountProc {
 
-    //    @Autowired
     private JdbcTemplate jdbcTemplate;
 
     @Value("${FETCH_ACCOUNTS}")
@@ -36,8 +33,15 @@ public class AccountProc {
     @Value("${UPDATE_REQUEST_AFTER_RUN}")
     private String UPDATE_REQUEST_AFTER_RUN;
 
-    @Autowired
-    private Logger logger;
+    @Value("${UPDATE_REQUEST_PLANNED_TIME_RUN}")
+    private String UPDATE_REQUEST_PLANNED_TIME_RUN;
+
+    @Value("${UPDATE_REQUEST_SET_ENABLE_TIME_DAILY_RUN}")
+    private String UPDATE_REQUEST_SET_ENABLE_TIME_DAILY_RUN;
+
+    @Value("${UPDATE_REQUEST_SET_ENABLE_ADD_RUN_PERIOD}")
+    private String UPDATE_REQUEST_SET_ENABLE_ADD_RUN_PERIOD;
+
 
     @Autowired
     private DbUtils dbUtils;
@@ -117,14 +121,22 @@ public class AccountProc {
 
     public void afterRun(Request request) throws SQLException {
         request.setLastRun(new Timestamp(System.currentTimeMillis()));
-//        dbUtils.getDataId(UPDATE_REQUEST_AFTER_RUN, request.getLastRun(), request.getId());
         try (Connection connection = jdbcTemplate.getDataSource().getConnection()) {
             PreparedStatement stm = connection.prepareStatement(UPDATE_REQUEST_AFTER_RUN);
             stm.setTimestamp(1, request.getLastRun());
             stm.setInt(2, request.getId());
             stm.executeUpdate();
             stm.close();
-            connection.close();
         }
     }
+
+    public void updateLastRun(Request request, Timestamp timestamp) throws SQLException {
+        try (Connection connection = jdbcTemplate.getDataSource().getConnection()) {
+            PreparedStatement stm = connection.prepareStatement(UPDATE_REQUEST_AFTER_RUN);
+            stm.setTimestamp(1, timestamp);
+            stm.setInt(2, request.getId());
+            stm.executeUpdate();
+        }
+    }
+
 }

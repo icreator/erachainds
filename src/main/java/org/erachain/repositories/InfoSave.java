@@ -70,15 +70,15 @@ public class InfoSave {
 
     private JdbcTemplate jdbcTemplate;
 
-    @Autowired
-    private Logger logger;
+    private final Logger logger;
 
     @Autowired
     private DbUtils dbUtils;
 
     @Autowired
-    public InfoSave(JdbcTemplate jdbcTemplate) {
+    public InfoSave(JdbcTemplate jdbcTemplate, Logger logger) {
         this.jdbcTemplate = jdbcTemplate;
+        this.logger = logger;
     }
 
     private static final Field[] fields = DataInfo.class.getDeclaredFields();
@@ -91,7 +91,7 @@ public class InfoSave {
         try {
             return dbUtils.checkData(CHECK_DATA_BY_ACTREQID.replace("?", Integer.toString(actRequestId)));
         } catch (SQLException e) {
-            logger.error(e.getMessage());
+            logger.error(e.getMessage(),e);
         }
         return 0;
     }
@@ -243,13 +243,24 @@ public class InfoSave {
                     stm.setString(++i, name);
                     stm.setString(++i, params.get(name));
                 }
-                stm.setString(++i, "1");
+                stm.setString(++i, "50");
                 try (ResultSet rs = stm.executeQuery()) {
-                    if (rs.next()) {
-                        json = new ResponseOnRequestJsonOnlyId(new String(rs.getBytes(2)),
-                                new Long(new String(rs.getBytes(1))),
-                                Integer.parseInt(new String(rs.getBytes(4))),
-                                Integer.parseInt(new String(rs.getBytes(5))));
+                    while (rs.next()) {
+                        if (rs.getBytes(2) == null) {
+                            continue;
+                        }
+
+                        if (rs.getInt(3) > 0) {
+                            json = new ResponseOnRequestJsonOnlyId(new String(rs.getBytes(2)),
+                                    new Long(new String(rs.getBytes(1))),
+                                    Integer.parseInt(new String(rs.getBytes(4))),
+                                    Integer.parseInt(new String(rs.getBytes(5))));
+                        } else {
+                            json = new ResponseOnRequestJsonOnlyId(new String(rs.getBytes(2)),
+                                    new Long(new String(rs.getBytes(1))));
+                        }
+
+                        break;
                     }
                 }
             }
@@ -313,10 +324,18 @@ public class InfoSave {
                 List<ResponseOnRequestJsonOnlyId> responseOnRequestJsonOnlyIds = result.getResponseOnRequestJsonOnlyIds();
                 try (ResultSet rs = stm.executeQuery()) {
                     while (rs.next()) {
-                        json = new ResponseOnRequestJsonOnlyId(new String(rs.getBytes(2)),
-                                new Long(new String(rs.getBytes(1))),
-                                Integer.parseInt(new String(rs.getBytes(4))),
-                                Integer.parseInt(new String(rs.getBytes(5))));
+                        if (rs.getBytes(2) == null) {
+                            continue;
+                        }
+                        if (rs.getInt(3) > 0) {
+                            json = new ResponseOnRequestJsonOnlyId(new String(rs.getBytes(2)),
+                                    new Long(new String(rs.getBytes(1))),
+                                    Integer.parseInt(new String(rs.getBytes(4))),
+                                    Integer.parseInt(new String(rs.getBytes(5))));
+                        } else {
+                            json = new ResponseOnRequestJsonOnlyId(new String(rs.getBytes(2)),
+                                    new Long(new String(rs.getBytes(1))));
+                        }
                         responseOnRequestJsonOnlyIds.add(json);
                     }
                 }

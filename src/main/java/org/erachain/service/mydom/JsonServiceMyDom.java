@@ -16,12 +16,14 @@ import java.util.Map;
 @Service
 public class JsonServiceMyDom {
 
-    @Autowired
-    private Logger logger;
+    private final Logger logger;
 
     @Autowired
     private JsonService jsonService;
 
+    public JsonServiceMyDom(Logger logger) {
+        this.logger = logger;
+    }
 
 
     public  JSONObject getAuth(String user, String password, String authToken) {

@@ -23,9 +23,6 @@ public class AccountSendersDAO {
     private String FETCH_ACCOUNTS_SENDERS;
 
     @Autowired
-    private Logger logger;
-
-    @Autowired
     private DbUtils dbUtils;
 
     @Autowired

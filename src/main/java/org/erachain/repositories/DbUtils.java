@@ -15,14 +15,14 @@ public class DbUtils {
 
     static String fetch = "SELECT * FROM ";
 
-    @Autowired
-    private Logger logger;
+    private final Logger logger;
 
     private JdbcTemplate jdbcTemplate;
 
     @Autowired
-    public DbUtils(JdbcTemplate jdbcTemplate) {
+    public DbUtils(JdbcTemplate jdbcTemplate, Logger logger) {
         this.jdbcTemplate = jdbcTemplate;
+        this.logger = logger;
     }
 
     private String getSql(String sql, Object... values) {
@@ -78,7 +78,7 @@ public class DbUtils {
     }
 
     public <T> T checkData(String sql) throws SQLException {
-        logger.debug(" sql " + sql);
+        logger.debug("Sql " + sql);
         try (Connection connection = jdbcTemplate.getDataSource().getConnection()) {
             PreparedStatement statement = connection.prepareStatement(sql);
             ResultSet resultset = statement.executeQuery();
@@ -89,12 +89,12 @@ public class DbUtils {
             }
             statement.close();
         }
-        return (T) null;
+        return null;
     }
 
     public <T> List<T> getDataList(String sql, Object... values) throws SQLException {
         sql = getSql(sql, values);
-        logger.debug(" sql " + sql);
+        logger.debug("Sql " + sql);
         List<T> list = new ArrayList<>();
         try (Connection connection = jdbcTemplate.getDataSource().getConnection()) {
             PreparedStatement statement = connection.prepareStatement(sql);
@@ -175,7 +175,7 @@ public class DbUtils {
                     } else
                         f.set(data, row.get(f.getName()));
                 } catch (IllegalAccessException e) {
-                    logger.error(e.getMessage());
+                    logger.error(e.getMessage(),e);
                 }
             }
         });
@@ -243,7 +243,7 @@ public class DbUtils {
             if (rs.next())
                 return rs.getInt(1);
         } catch (SQLException e) {
-            logger.error(e.getMessage());
+            logger.error(e.getMessage(),e);
         }
 
         return 0;
@@ -285,7 +285,7 @@ public class DbUtils {
             connection.close();
             return sArray;
         } catch (Exception e) {
-            logger.error(e.getMessage());
+            logger.error(e.getMessage(),e);
 
         }
         return null;

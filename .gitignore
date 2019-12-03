@@ -10,3 +10,4 @@ db/*
 !db/readme.txt
 CustomInfo/*
 !CustomInfo/readme.txt
+TestDBErachainDS

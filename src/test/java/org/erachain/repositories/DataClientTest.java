@@ -43,7 +43,7 @@ public class DataClientTest {
             int id = dataClient.getActRequestId(1, "value", "2019-07-05T17:31:44+0300");
             logger.info(" getActRequestId " + id);
         } catch (Exception e) {
-            logger.error(e.getMessage());
+            logger.error(e.getMessage(),e);
         }
     }
 

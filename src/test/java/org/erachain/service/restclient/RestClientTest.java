@@ -42,7 +42,7 @@ public class RestClientTest {
         try {
             result = restClient.getResult(EraService_Url_Signature + "/" + signature);
         } catch (Exception e) {
-            logger.error(e.getMessage());
+            logger.error(e.getMessage(),e);
         }
         int confirmations = jsonService.getValue(result, "confirmations");
         logger.info(  "confirmations " + confirmations );

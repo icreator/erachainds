@@ -95,7 +95,7 @@ public class DbDataTest {
             logger.info(jsonService.getDataMapList(list).toString());
 
         } catch (Exception e) {
-            logger.error(e.getMessage());
+            logger.error(e.getMessage(),e);
         }
 
     }
@@ -113,7 +113,7 @@ public class DbDataTest {
 
 
         } catch (SQLException e) {
-            logger.error(e.getMessage());
+            logger.error(e.getMessage(),e);
         }
     }
     @Test
@@ -126,7 +126,7 @@ public class DbDataTest {
             logger.info(" result " + result);
 
         } catch (SQLException e) {
-            logger.error(e.getMessage());
+            logger.error(e.getMessage(),e);
         }
     }
 

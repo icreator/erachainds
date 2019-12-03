@@ -12,9 +12,6 @@ import org.springframework.test.context.junit4.SpringRunner;
 public class JobMonitorTest {
 
     @Autowired
-    private Logger logger;
-
-    @Autowired
     private JobMonitor jobMonitor;
 
     @Test

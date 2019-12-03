@@ -1,20 +1,35 @@
 package org.erachain.jsons;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class ResponseOnRequestJsonOnlyId {
 
     private String tx;
 
     private long date;
 
-    private int partNo;
+    //    private int partNo;
+    private Integer pos;
 
-    private int pos;
+    private Integer size;
 
-    private int size;
+    public ResponseOnRequestJsonOnlyId(String tx, long date) {
+        this.tx = tx;
+        this.date = date;
+    }
+
 
     public ResponseOnRequestJsonOnlyId(String tx, long date, int pos, int size) {
         this.tx = tx;
         this.date = date;
+        this.pos = pos;
+        this.size = size;
+    }
+
+    public ResponseOnRequestJsonOnlyId(String tx, long date, int partNo, int pos, int size) {
+        this.tx = tx;
+        this.date = date;
+//        this.partNo = partNo;
         this.pos = pos;
         this.size = size;
     }
@@ -27,11 +42,15 @@ public class ResponseOnRequestJsonOnlyId {
         return date;
     }
 
-    public int getPos() {
+//    public int getPartNo() {
+//        return partNo;
+//    }
+
+    public Integer getPos() {
         return pos;
     }
 
-    public int getSize() {
+    public Integer getSize() {
         return size;
     }
 }

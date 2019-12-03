@@ -13,17 +13,16 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Repository;
 
-import java.sql.*;
+import java.sql.SQLException;
+import java.sql.Timestamp;
 import java.util.*;
-import java.util.Date;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
 @Repository
 public class DataClient {
 
-    @Autowired
-    private Logger logger;
+    private final Logger logger;
 
     @Value("${Service_Url}")
     private String Service_Url;
@@ -57,6 +56,10 @@ public class DataClient {
 
     private ConcurrentMap<String, String> dataMap = new ConcurrentHashMap<>();
 
+    public DataClient(Logger logger) {
+        this.logger = logger;
+    }
+
     private boolean checkDataTheSame(String ident, String data) {
         // check if send to blockchain anyway
         if ("Yes".equalsIgnoreCase(Same_Data_Option_Send))
@@ -66,19 +69,19 @@ public class DataClient {
                 byte[] dt = dbUtils.getData(GET_LAST_RECORD, ident);
                 if (dt != null) {
                     byte[] dat1 = data.getBytes("UTF8");
-                    if(Arrays.equals(dt, dat1))
+                    if (Arrays.equals(dt, dat1))
                         dataMap.putIfAbsent(ident, data);
-                        logger.debug(" set ident  " + ident + " data " + data);
-                        return true;
+                    logger.debug(" set ident  " + ident + " data " + data);
+                    return true;
                 }
             } catch (Exception e) {
-                logger.error(e.getMessage());
+                logger.error(e.getMessage(), e);
             }
             dataMap.putIfAbsent(ident, data);
             logger.debug(" set ident " + ident + " data " + data);
             return false;
         }
-        if(!dataMap.get(ident).equals(data)) {
+        if (!dataMap.get(ident).equals(data)) {
             dataMap.replace(ident, data);
             logger.debug(" replace ident " + ident + " data " + data);
             return false;
@@ -100,9 +103,9 @@ public class DataClient {
         ServiceInterface service = serviceFactory.getService(params.get(Service_Url));
         logger.info(" account service " + service);
 
-        Map<String, String> map = request.getParams(dbUtils, dateUtl);
+        Map<String, String> map = request.getParamsAndRecalcParams(dbUtils, dateUtl);
         map.keySet().forEach(name -> {
-            logger.debug(" name " + name + " value " + map.get(name));
+            logger.debug("Name: " + name + " value: " + map.get(name));
         });
         params.putAll(map);
 
@@ -110,14 +113,14 @@ public class DataClient {
         try {
             idents = service.getIdentityList(params);
         } catch (Exception e) {
-            logger.error(e.getMessage());
+            logger.error(e.getMessage(), e);
             throw e;
         }
 
         int debugIdents = 0;
 
         for (String ident : idents) {
-            if (activeProfile.contains("dev") && debugIdents++ >= 10){
+            if (activeProfile.contains("dev") && debugIdents++ >= 10) {
                 logger.debug(" limits idents in debug {}", debugIdents);
                 break;
             }
@@ -129,7 +132,7 @@ public class DataClient {
                 if (checkDataTheSame(ident, json))
                     continue;
             } catch (Exception e) {
-                logger.error(e.getMessage());
+                logger.error(e.getMessage(), e);
                 throw e;
             }
             if (json != null && !json.isEmpty()) {
@@ -146,27 +149,24 @@ public class DataClient {
     }
 
     private void setClientData(Request request, Map<String, byte[]> data) throws Exception {
-//        try {
-        logger.debug(" get act req id ");
+        logger.debug("Get act req id ");
         int actRequestId = 0;
         try {
             actRequestId = request.getActRequestId(this, dbUtils, dateUtl);
             if (actRequestId == 0) {
                 actRequestId = request.setActRequestId(dbUtils, dateUtl);
-                logger.info(" new act req id " + actRequestId);
+                logger.info("New act req id " + actRequestId);
                 setData(request, actRequestId, data);
             } else {
                 if (infoSave.checkDataWhere(actRequestId) > 0) {
-                    logger.info(" found act req id " + actRequestId);
+                    logger.info("Found act req id " + actRequestId);
                     updateData(request, actRequestId, data);
                 }
             }
         } catch (SQLException e) {
-            logger.error(" error setting client for request " + request.getId() + " " + e.getMessage());
+            logger.error("Error setting client for request " + request.getId() + " " + e.getMessage());
             throw e;
         }
-
-        return;
     }
 
     private void updateData(Request request, int actRequestId, Map<String, byte[]> data) throws SQLException {
@@ -183,8 +183,6 @@ public class DataClient {
                 throw e;
             }
         }
-//        accountProc.afterRun(request);
-        return;
     }
 
     private void setData(Request request, int actRequestId, Map<String, byte[]> data) throws SQLException {
@@ -203,13 +201,12 @@ public class DataClient {
                 throw e;
             }
         }
-//        accountProc.afterRun(request);
-        return;
-
     }
+
     public int getActRequestId(int requestId, String paramName, String paramValue) throws Exception {
-        logger.info(" paramName " + paramName + " paramValue " + paramValue);
-        List<ActParams> actParams = dbUtils.fetchDataValues(ActParams.class, FETCH_ACTREQ_ID_PARAM, paramName, paramValue);
+        logger.info("ParamName: " + paramName + " ParamValue: " + paramValue);
+        List<ActParams> actParams = dbUtils.fetchDataValues(
+                ActParams.class, FETCH_ACTREQ_ID_PARAM, paramName, paramValue);
         for (ActParams actParam : actParams) {
             ActRequest actRequest = dbUtils.fetchData(ActRequest.class, actParam.getActRequestId());
             if (actRequest != null && actRequest.getRequestId() == requestId) {

@@ -28,8 +28,7 @@ import java.util.*;
 @PropertySource("classpath:custom.properties")
 public class ServiceMonitor {
 
-    @Autowired
-    private Logger logger;
+    private final Logger logger;
 
     @Autowired
     private AccountProc accountProc;
@@ -61,15 +60,11 @@ public class ServiceMonitor {
     @Value("${CONFIRMATION_TO_ACCEPT}")
     private int CONFIRMATION_TO_ACCEPT;
 
-
-
     @Value("${FETCH_DATA_FOR_SUBMIT}")
     private String FETCH_DATA_FOR_SUBMIT;
 
     @Value("${FETCH_DATA_AFTER_SUBMIT}")
     private String FETCH_DATA_AFTER_SUBMIT;
-
-
 
     @Value("${FETCH_DATA_AFTER_ACCEPT}")
     private String FETCH_DATA_AFTER_ACCEPT;
@@ -77,6 +72,10 @@ public class ServiceMonitor {
 
     @Value("${FETCH_DATA_AFTER_SEND_TO_CLIENT}")
     private String FETCH_DATA_AFTER_SEND_TO_CLIENT;
+
+    public ServiceMonitor(Logger logger) {
+        this.logger = logger;
+    }
 
 
     public void checkDataSubmit()throws Exception {
@@ -90,21 +89,21 @@ public class ServiceMonitor {
         if(getSize(dataInfos) < TRANS_MINSIZE) {
             String data = getData(dataInfos);
             logger.info(" data to chain " + data);
-            signature = eraClient.getSignForData(account, data);
+            signature = eraClient.sendingToBlockchain(account, data);
         }
         int offset = 0;
         for (DataInfo dataInfo : dataInfos) {
             if (dataInfo.getRunDate() != null && dataInfo.getSubDate() == null && dataInfo.getAccountId() == accountId) {
                 try {
-                    eraClient.setSignature(dataInfo, account, signature, offset);
+                    eraClient.saveToBlockchainAndWriteDataEraInDb(dataInfo, account, signature, offset);
                 } catch (Exception e) {
-                    logger.error(e.getMessage());
+                    logger.error(e.getMessage(),e);
                     throw e;
                 }
                 try {
                     infoSave.afterSubmit(dataInfo);
                 } catch (SQLException e) {
-                    logger.error(e.getMessage());
+                    logger.error(e.getMessage(),e);
                     throw e;
                 }
                 offset += dataInfo.getData().length;
@@ -127,7 +126,7 @@ public class ServiceMonitor {
             try {
                 stringBuffer.append(new String(dataInfo.getData(), "UTF8"));
             } catch (UnsupportedEncodingException e) {
-                logger.error(e.getMessage());
+                logger.error(e.getMessage(),e);
             }
         }
         return stringBuffer.toString();
@@ -145,7 +144,7 @@ public class ServiceMonitor {
                     try {
                         result = eraClient.checkChain(dataEra);
                     } catch (Exception e) {
-                        logger.error(e.getMessage());
+                        logger.error(e.getMessage(),e);
                         throw e;
                     }
                     confirmations = jsonService.getValue(result, "confirmations");
@@ -168,7 +167,7 @@ public class ServiceMonitor {
                     if (unConfirmed == 0 && confirmed > 0)
                         infoSave.afterAccept(dataInfo);
                 } catch (SQLException e) {
-                    logger.error(e.getMessage());
+                    logger.error(e.getMessage(),e);
                 }
             }
         }
@@ -194,13 +193,13 @@ public class ServiceMonitor {
                 try {
                     service.setIdentityValues(params);
                 } catch (Exception e) {
-                    logger.error(e.getMessage());
+                    logger.error(e.getMessage(),e);
                     continue;
                 }
                 try {
                     infoSave.afterSendToClient(dataInfo);
                 } catch (SQLException e) {
-                    logger.error(e.getMessage());
+                    logger.error(e.getMessage(),e);
                 }
             }
         }
@@ -225,13 +224,13 @@ public class ServiceMonitor {
                     if (!service.checkIdentityValues(params))
                         continue;
                 } catch (Exception e) {
-                    logger.error(e.getMessage());
+                    logger.error(e.getMessage(),e);
                     continue;
                 }
                 try {
                     infoSave.afterAcceptedByClient(dataInfo);
                 } catch (SQLException e) {
-                    logger.error(e.getMessage());
+                    logger.error(e.getMessage(),e);
                 }
             }
         }

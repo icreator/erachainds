@@ -12,8 +12,7 @@ import java.util.Map;
 
 @Service
 public class ClientMyDom {
-    @Autowired
-    private Logger logger;
+    private final Logger logger;
 
     @Autowired
     private RestClient restClient;
@@ -30,6 +29,10 @@ public class ClientMyDom {
     final private String loginPath = "/auth/v1/login";
 
     private String accessToken ="";
+
+    public ClientMyDom(Logger logger) {
+        this.logger = logger;
+    }
 
 
     public void clientLogin(Map<String, String> params) throws Exception {

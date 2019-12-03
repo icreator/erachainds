@@ -1,45 +1,53 @@
 package org.erachain.utils;
 
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.TimeZone;
-
 import org.apache.commons.lang3.time.DateUtils;
 import org.slf4j.Logger;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
+import java.time.temporal.ChronoUnit;
+import java.util.Calendar;
+import java.util.Date;
 
 @Component
 public class DateUtl {
 
-    @Autowired
-    private Logger logger;
+    private final Logger logger;
 
-    public  Date getFirst(Date date, String unit){
-        Calendar cal = Calendar.getInstance();
-        cal.setTime(date);
+    private SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd");
+
+    private SimpleDateFormat simpleDateTimeFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
+
+    public DateUtl(Logger logger) {
+        this.logger = logger;
+    }
+
+    public Date getFirst(Date date, String unit) {
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTime(date);
         switch (unit) {
-            case ("month") :
-                cal.set(Calendar.DAY_OF_MONTH, cal.getActualMinimum(Calendar.DAY_OF_MONTH));
+            case ("month"):
+                calendar.set(Calendar.DAY_OF_MONTH, calendar.getActualMinimum(Calendar.DAY_OF_MONTH));
                 break;
-            case ("week") :
-                cal.set(Calendar.DAY_OF_WEEK, cal.getActualMinimum(Calendar.DAY_OF_WEEK));
+            case ("week"):
+                calendar.set(Calendar.DAY_OF_WEEK, calendar.getActualMinimum(Calendar.DAY_OF_WEEK));
                 break;
-            case ("day") :
-                cal.set(Calendar.HOUR_OF_DAY, cal.getActualMinimum(Calendar.HOUR_OF_DAY));
+            case ("day"):
+                calendar.set(Calendar.HOUR_OF_DAY, calendar.getActualMinimum(Calendar.HOUR_OF_DAY));
                 break;
-            case ("hour") :
-                cal.set(Calendar.MINUTE, cal.getActualMinimum(Calendar.MINUTE));
-                cal.set(Calendar.SECOND, cal.getActualMinimum(Calendar.SECOND));
+            case ("hour"):
+                calendar.set(Calendar.MINUTE, calendar.getActualMinimum(Calendar.MINUTE));
+                calendar.set(Calendar.SECOND, calendar.getActualMinimum(Calendar.SECOND));
                 break;
-            case ("minute") :
-                cal.set(Calendar.SECOND, cal.getActualMinimum(Calendar.SECOND));
+            case ("minute"):
+                calendar.set(Calendar.SECOND, calendar.getActualMinimum(Calendar.SECOND));
                 break;
         }
-
-        return cal.getTime();
+        return calendar.getTime();
     }
 
     public Date getAlign(Date date, String unit) {
@@ -50,55 +58,120 @@ public class DateUtl {
         }
         return date;
     }
+
     public Date addUnit(Date date, String unit, int value) {
-        Date res = null;
+        Date result = null;
         switch (unit) {
-            case ("month") :
-                res = DateUtils.addMonths(date, value);
+            case ("month"):
+                result = DateUtils.addMonths(date, value);
                 break;
-            case ("week") :
-                res = DateUtils.addWeeks(date, value);
+            case ("week"):
+                result = DateUtils.addWeeks(date, value);
                 break;
-            case ("day") :
-                res = DateUtils.addDays(date, value);
+            case ("day"):
+                result = DateUtils.addDays(date, value);
                 break;
-            case ("hour") :
-                res = DateUtils.addHours(date, value);
+            case ("hour"):
+                result = DateUtils.addHours(date, value);
                 break;
-            case ("minute") :
-                res = DateUtils.addMinutes(date, value);
+            case ("minute"):
+                result = DateUtils.addMinutes(date, value);
                 break;
         }
-//        logger.info(" addUnit res " + res);
-        return res;
+        return result;
     }
-    static SimpleDateFormat simpleDateTimeFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
-    static SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd");
-    static int offset = TimeZone.getDefault().getRawOffset();
-    public Date stringToDate(String strDate) throws Exception {
 
-        Date date = null;
+    public Date stringToDate(String strDate) throws Exception {
+        Date date;
         try {
             if (strDate.length() == 10) {
-                if(strDate.contains("-"))
+                if (strDate.contains("-"))
                     date = simpleDateFormat.parse(strDate);
-                else {   // Unix epoch time in seconds
+                else {
                     long time = Long.parseLong(strDate);
                     date = new Date(time + 1000);
                 }
             } else {
-                if(strDate.contains("-"))
+                if (strDate.contains("-"))
                     date = simpleDateTimeFormat.parse(strDate);
-                else {  // // Unix epoch time in milliseconds
+                else {
                     long time = Long.parseLong(strDate);
                     date = new Date(time);
                 }
             }
         } catch (ParseException ex) {
-            logger.error("Exception " + ex);
+            logger.error("Exception parse date", ex);
             throw new Exception(ex.getMessage());
         }
         return date;
-//        return new Date(date.getTime() + offset);
     }
+
+    public Date reduceToLowerBound(Date date, String unit, ZoneId zoneId) {
+//        LocalDateTime result = LocalDateTime.ofInstant(date.toInstant(), ZoneId.systemDefault());
+        LocalDateTime result = LocalDateTime.ofInstant(date.toInstant(), zoneId);
+
+        switch (unit) {
+            case ("month"): {
+                Calendar calendar = Calendar.getInstance();
+                calendar.setTime(date);
+                calendar.set(Calendar.HOUR_OF_DAY, 0);
+                calendar.clear(Calendar.MINUTE);
+                calendar.clear(Calendar.SECOND);
+                calendar.clear(Calendar.MILLISECOND);
+                calendar.set(Calendar.DAY_OF_MONTH, 1);
+                return calendar.getTime();
+            }
+            case ("week"): {
+                Calendar calendar = Calendar.getInstance();
+                calendar.setTime(date);
+                calendar.set(Calendar.HOUR_OF_DAY, 0);
+                calendar.clear(Calendar.MINUTE);
+                calendar.clear(Calendar.SECOND);
+                calendar.clear(Calendar.MILLISECOND);
+                calendar.set(Calendar.DAY_OF_WEEK, calendar.getFirstDayOfWeek());
+                return calendar.getTime();
+            }
+            case ("day"):
+                result = result.truncatedTo(ChronoUnit.DAYS);
+                break;
+            case ("hour"):
+                result = result.truncatedTo(ChronoUnit.HOURS);
+                break;
+            case ("minute"):
+                result = result.truncatedTo(ChronoUnit.MINUTES);
+                break;
+        }
+        ZonedDateTime zonedDateTime = result.atZone(ZoneId.systemDefault());
+        return Date.from(zonedDateTime.toInstant());
+    }
+
+    public long getmilliSecondsRunPeriod(String runPeriod) {
+        long result = 0;
+        String[] period = runPeriod.split("_");
+        int value = 1;
+        String periodRun = runPeriod;
+        if (period.length > 1) {
+            value = Integer.parseInt(period[0]);
+            periodRun = period[1];
+        }
+        switch (periodRun) {
+            case ("month"):
+                result = 60 * 60 * 24 * 30;
+                break;
+            case ("week"):
+                result = 60 * 60 * 24 * 7;
+                break;
+            case ("day"):
+                result = 60 * 60 * 24;
+                break;
+            case ("hour"):
+                result = 60 * 60;
+                break;
+            case ("minute"):
+                result = 60;
+                break;
+        }
+        return 1000 * result * value;
+    }
+
 }

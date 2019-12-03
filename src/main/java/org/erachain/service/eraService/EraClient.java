@@ -31,8 +31,8 @@ import java.util.stream.Collectors;
 @Service
 @PropertySource("classpath:custom.properties")
 public class EraClient {
-    @Autowired
-    private Logger logger;
+
+    private final Logger logger;
 
     @Autowired
     private AccountSendersDAO accountSenders;
@@ -61,9 +61,8 @@ public class EraClient {
     @Autowired
     private DbUtils dbUtils;
 
-    @Value("${TRANS_MAXSIZE}")
-    private int TRANS_MAXSIZE;
-
+    @Value("${TRANSACTION_MAXSIZE_BYTE}")
+    private int TRANSACTION_MAXSIZE_BYTE;
 
     @Value("${ENCRYPT}")
     private boolean ENCRYPT;
@@ -71,12 +70,18 @@ public class EraClient {
     private RestClient restClient;
 
     private String ERASERVICE_URL_IP_RESPONSE_EXCEPT;
+
     private boolean FLAG_RECEIVING_IP = true;
+    
     private boolean FLAG_RECEIVING_IP_CHECK = true;
 
+    @Value("${BLOCKCHAIN_PORT}")
+    private int BLOCKCHAIN_PORT;
+
     @Autowired
-    public EraClient(RestClient restClient) {
+    public EraClient(RestClient restClient, Logger logger) {
         this.restClient = restClient;
+        this.logger = logger;
     }
 
     @PostConstruct
@@ -84,20 +89,19 @@ public class EraClient {
         ERA_SERVICE_IPS_RANGE = ERA_SERVICE_IPS.stream().map((ip) -> Tuple2.of(ip, 0L)).collect(Collectors.toList());
     }
 
-    public void setSignature(DataInfo dataInfo, Account account, String signiture, int offset) throws Exception {
-
+    public void saveToBlockchainAndWriteDataEraInDb(DataInfo dataInfo, Account account, String signature, int offset) throws Exception {
         List<DataEra> dataEras = new ArrayList<>();
-        for (byte[] dt : dataInfo.getData(dbUtils, TRANS_MAXSIZE)) {
+        for (byte[] dt : dataInfo.getDataSplit(TRANSACTION_MAXSIZE_BYTE)) {
             String data = new String(dt, StandardCharsets.UTF_8);
-            logger.debug(" data to client " + data);
+            logger.debug("Data to client " + data);
             DataEra dataEra = new DataEra();
             dataEra.setDataInfoId(dataInfo.getId());
-            if (signiture != null) {
-                dataEra.setSignature(signiture);
+            if (signature != null) {
+                dataEra.setSignature(signature);
                 dataEra.setOffset(offset);
-                dataEra.setLengh(dataInfo.getData().length);
+                dataEra.setLength(dataInfo.getData().length);
             } else {
-                dataEra.setSignature(getSignForData(account, data));
+                dataEra.setSignature(sendingToBlockchain(account, data));
             }
             dataEras.add(dataEra);
         }
@@ -108,8 +112,8 @@ public class EraClient {
         }
     }
 
-    public String getSignForData(Account account, String data) throws Exception {
-        logger.debug("Sending by API...");
+    public String sendingToBlockchain(Account account, String data) throws Exception {
+        logger.debug("Sending by API to blockchain...");
         String result = null;
         SendTX tx;
         try {
@@ -144,7 +148,7 @@ public class EraClient {
                 for (int i = 0; i < ERA_SERVICE_IPS_RANGE.size(); i++) {
                     String ip = ERA_SERVICE_IPS_RANGE.get(i).f0;
                     try {
-                        URL url = new URL("http", ip, 9067, "/api/broadcast");
+                        URL url = new URL("http", ip, BLOCKCHAIN_PORT, "/api/broadcast");
                         ERASERVICE_URL_API = url.toString();
                         result = restClient.getResult(ERASERVICE_URL_API + "/" + byteCode);
                         logger.debug("Send successful data to blockchain with ip = " + ip);
@@ -184,7 +188,7 @@ public class EraClient {
             throw new Exception(ERASERVICE_URL_API + " status = " + status);
         }
         String signature = Base58.encode(tx.getSignature());
-        logger.debug(" Acquire signature for " + account.getId() + " : " + signature);
+        logger.debug("Acquire signature for " + account.getId() + " : " + signature);
         return signature;
     }
 
@@ -243,7 +247,7 @@ public class EraClient {
 
     private String checkIp(String signature, String eraservice_url_ip_response_except, String s) throws Exception {
         String result;
-        URL url = new URL("http", eraservice_url_ip_response_except, 9067, "/apirecords/get");
+        URL url = new URL("http", eraservice_url_ip_response_except, BLOCKCHAIN_PORT, "/apirecords/get");
         ERASERVICE_URL_SIGNATURE = url.toString();
         result = restClient.getResult(ERASERVICE_URL_SIGNATURE + "/" + signature);
         logger.debug(s);

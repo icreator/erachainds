@@ -16,8 +16,11 @@ import java.util.*;
 @Service
 public class JsonService {
 
-    @Autowired
-    private Logger logger;
+    private final Logger logger;
+
+    public JsonService(Logger logger) {
+        this.logger = logger;
+    }
 
     public <T> T getValue(String jsonString, String key) throws JSONException {
         JSONObject jsonObject = new JSONObject(jsonString);
@@ -44,7 +47,7 @@ public class JsonService {
                     Files.readAllBytes(resource.toPath()));
             //    logger.info(payStr);
         } catch (IOException e) {
-            logger.error(e.getMessage());
+            logger.error(e.getMessage(),e);
         }
         return new JSONObject(payStr);
     }

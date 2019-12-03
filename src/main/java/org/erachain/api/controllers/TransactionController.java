@@ -1,4 +1,4 @@
-package org.erachain.controllers;
+package org.erachain.api.controllers;
 
 
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -7,9 +7,7 @@ import org.erachain.jsons.ListResponseOnRequestJsonOnlyId;
 import org.erachain.jsons.ResponseOnRequestJsonOnlyId;
 import org.erachain.repositories.InfoSave;
 import org.erachain.utils.DateUtl;
-import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
@@ -25,9 +23,6 @@ public class TransactionController {
 
     @Autowired
     private DateUtl dateUtl;
-
-    @Autowired
-    private Logger logger;
 
     /**
      * Формта возвращаемого значения
@@ -67,7 +62,7 @@ public class TransactionController {
             Date runDate = (date == null ? new Date() : dateUtl.stringToDate(date));
             result = infoSave.fetchDataByIdLastBlockDataParams(ident, params, runDate.getTime(), principal.getName());
         } catch (Exception e) {
-            return "{\"error\"=\"" + e.getMessage() + "\"}";
+            return "{\"error\" : \"" + "Not found" + "\"}";
         }
         ObjectMapper mapper = new ObjectMapper();
         if (result.isPresent()) {
@@ -96,7 +91,7 @@ public class TransactionController {
             Date runDate = (date == null ? new Date() : dateUtl.stringToDate(date));
             result = infoSave.fetchDataByIdDataLastBlockDataParams(ident, params, runDate.getTime(), principal.getName());
         } catch (Exception e) {
-            return "{\"error\"=\"" + e.getMessage() + "\"}";
+            return "{\"error\" : \"" + "Not found" + "\"}";
         }
         return result.orElse("{\"error\" : \"" + "Not found" + "\"}");
 
@@ -123,7 +118,7 @@ public class TransactionController {
             int lim = (limit == null ? 50 : Integer.parseInt(limit));
             result = infoSave.fetchDataByIdHistoryBlockDataParams(ident, params, runDate.getTime(), lim, principal.getName());
         } catch (Exception e) {
-            return "{\"error\"=\"" + e.getMessage() + "\"}";
+            return "{\"error\" : \"" + "Not found" + "\"}";
         }
         ObjectMapper mapper = new ObjectMapper();
         return mapper.writeValueAsString(result.orElseThrow(IllegalArgumentException::new));
