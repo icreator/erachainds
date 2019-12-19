@@ -152,7 +152,7 @@ public class DataClient {
         logger.debug("Get act req id ");
         int actRequestId = 0;
         try {
-            actRequestId = request.getActRequestId(this, dbUtils, dateUtl);
+//            actRequestId = request.getActRequestId(this, dbUtils, dateUtl);
             if (actRequestId == 0) {
                 actRequestId = request.setActRequestId(dbUtils, dateUtl);
                 logger.info("New act req id " + actRequestId);

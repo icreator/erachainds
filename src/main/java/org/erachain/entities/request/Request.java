@@ -184,21 +184,21 @@ public class Request {
         }
     }
 
-    public void setupParameterDate(DateUtl dateUtl) {
-        paramName = "date";
-//        paramName = "forUniquePurposesDate";
-        Date date = new Date();
-        SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssZ");
-        if (offUnit != null && offValue != 0) {
-            date = dateUtl.addUnit(date, offUnit, -offValue);
-        }
-        date = dateUtl.getAlign(date, submitPeriod);
-        paramValue = format.format(date);
-    }
-
-    public void putArtificiallyParameterDate() {
-        params.put(paramName, paramValue);
-    }
+//    public void setupParameterDate(DateUtl dateUtl) {
+//        paramName = "date";
+////        paramName = "forUniquePurposesDate";
+//        Date date = new Date();
+//        SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssZ");
+//        if (offUnit != null && offValue != 0) {
+//            date = dateUtl.addUnit(date, offUnit, -offValue);
+//        }
+//        date = dateUtl.getAlign(date, submitPeriod);
+//        paramValue = format.format(date);
+//    }
+//
+//    public void putArtificiallyParameterDate() {
+//        params.put(paramName, paramValue);
+//    }
 
     public Map<String, String> getParamsAndRecalcParams(DbUtils dbUtils, DateUtl dateUtl) {
         if (params != null) {
@@ -232,13 +232,13 @@ public class Request {
         return submitDate;
     }
 
-    public int getActRequestId(DataClient dataClient, DbUtils dbUtils, DateUtl dateUtl) throws Exception {
-        recalcSubmitDate(dateUtl);
-        setupParameterDate(dateUtl);
-        params = getParamsAndRecalcParams(dbUtils, dateUtl);
-        putArtificiallyParameterDate();
-        return dataClient.getActRequestId(id, paramName, paramValue);
-    }
+//    public int getActRequestId(DataClient dataClient, DbUtils dbUtils, DateUtl dateUtl) throws Exception {
+//        recalcSubmitDate(dateUtl);
+//        setupParameterDate(dateUtl);
+//        params = getParamsAndRecalcParams(dbUtils, dateUtl);
+//        putArtificiallyParameterDate();
+//        return dataClient.getActRequestId(id, paramName, paramValue);
+//    }
 
     public int setActRequestId(DbUtils dbUtils, DateUtl dateUtl) throws Exception {
         int actRequestId = 0;
@@ -246,6 +246,7 @@ public class Request {
         actRequest.setRequestId(getId());
         actRequest.setPeriod(getRunPeriod());
         actRequest.setDateRun(new Timestamp(System.currentTimeMillis()));
+        recalcSubmitDate(dateUtl);
         if (submitDate != null)
             actRequest.setDateSubmit(new Timestamp(submitDate.getTime()));
         try {
@@ -254,6 +255,8 @@ public class Request {
             throw new SQLException("Create ActRequest " + e.getMessage());
         }
         actRequest.setId(actRequestId);
+
+        params = getParamsAndRecalcParams(dbUtils, dateUtl);
 
         for (String name : params.keySet()) {
             ActParams actParams = new ActParams();
