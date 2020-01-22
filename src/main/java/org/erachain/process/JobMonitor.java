@@ -169,7 +169,7 @@ public class JobMonitor implements InitializingBean {
             if (!request.checkTime(dateUtl,accountProc, logger)) {
                 continue;
             }
-            request.recalcSubmitDate(dateUtl);
+//            request.recalcSubmitDate(dateUtl);
 //            request.setupParameterDate(dateUtl);
             request.getParamsAndRecalcParams(dbUtils,dateUtl);
             ActiveJob activeJob = new ActiveJob(sequenceNumber.incrementAndGet(), account.getId());

@@ -57,7 +57,7 @@ create table IF NOT EXISTS Request
     accountId    int,
     runPeriod    varchar(10),
     lastRun      timestamp,
-    submitPeriod varchar(10) default 'month' not null,
+--    submitPeriod varchar(10) default 'month' not null,
     offUnit      varchar(10),
     offValue     int         default 0,
     timezone     varchar(6)  default 'Europe/Moscow'
@@ -82,8 +82,8 @@ create table IF NOT EXISTS ActRequest
         primary key autoincrement,
     requestId  int,
     period     varchar(10),
-    DateRun    timestamp,
-    DateSubmit timestamp
+    DateRun    timestamp
+--    DateSubmit timestamp
 );
 
 create table IF NOT EXISTS ActParams

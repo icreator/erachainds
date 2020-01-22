@@ -22,7 +22,7 @@ public class Request {
     private int accountId;
     private String runPeriod;  // hour day minute second
     private Timestamp lastRun;
-    private String submitPeriod;  // hour day minute second
+//    private String submitPeriod;  // hour day minute second
     private String offUnit;   // unit offset - hour day minute second
     private int offValue;     // offset from the beginning of period
     private String timezone;
@@ -32,7 +32,7 @@ public class Request {
 
     private String paramName;
 
-    private Date submitDate;
+//    private Date submitDate;
 
 
     public boolean isCurrentDate() {
@@ -52,13 +52,13 @@ public class Request {
         return paramValue;
     }
 
-    public String getSubmitPeriod() {
-        return submitPeriod;
-    }
-
-    public void setSubmitPeriod(String submitPeriod) {
-        this.submitPeriod = submitPeriod;
-    }
+//    public String getSubmitPeriod() {
+//        return submitPeriod;
+//    }
+//
+//    public void setSubmitPeriod(String submitPeriod) {
+//        this.submitPeriod = submitPeriod;
+//    }
 
     public String getOffUnit() {
         return offUnit;
@@ -176,13 +176,13 @@ public class Request {
         return periodRun;
     }
 
-    public void recalcSubmitDate(DateUtl dateUtl) {
-        Date date = new Date();
-        submitDate = getSubmitDate(dateUtl, date, submitPeriod);
-        if (offUnit != null && offValue != 0) {
-            submitDate = dateUtl.addUnit(submitDate, offUnit, offValue - 1);
-        }
-    }
+//    public void recalcSubmitDate(DateUtl dateUtl) {
+//        Date date = new Date();
+//        submitDate = getSubmitDate(dateUtl, date, submitPeriod);
+//        if (offUnit != null && offValue != 0) {
+//            submitDate = dateUtl.addUnit(submitDate, offUnit, offValue - 1);
+//        }
+//    }
 
 //    public void setupParameterDate(DateUtl dateUtl) {
 //        paramName = "date";
@@ -220,17 +220,17 @@ public class Request {
         return params;
     }
 
-    private Date getSubmitDate(DateUtl dateUtl, Date date, String submitPeriod) {
-        String[] period = submitPeriod.split("_");
-        int value = 1;
-        String periodRun = submitPeriod;
-        if (period.length > 1) {
-            value = Integer.parseInt(period[0]);
-            periodRun = period[1];
-        }
-        submitDate = dateUtl.addUnit(date, periodRun, value);
-        return submitDate;
-    }
+//    private Date getSubmitDate(DateUtl dateUtl, Date date, String submitPeriod) {
+//        String[] period = submitPeriod.split("_");
+//        int value = 1;
+//        String periodRun = submitPeriod;
+//        if (period.length > 1) {
+//            value = Integer.parseInt(period[0]);
+//            periodRun = period[1];
+//        }
+//        submitDate = dateUtl.addUnit(date, periodRun, value);
+//        return submitDate;
+//    }
 
 //    public int getActRequestId(DataClient dataClient, DbUtils dbUtils, DateUtl dateUtl) throws Exception {
 //        recalcSubmitDate(dateUtl);
@@ -246,9 +246,9 @@ public class Request {
         actRequest.setRequestId(getId());
         actRequest.setPeriod(getRunPeriod());
         actRequest.setDateRun(new Timestamp(System.currentTimeMillis()));
-        recalcSubmitDate(dateUtl);
-        if (submitDate != null)
-            actRequest.setDateSubmit(new Timestamp(submitDate.getTime()));
+//        recalcSubmitDate(dateUtl);
+//        if (submitDate != null)
+//            actRequest.setDateSubmit(new Timestamp(submitDate.getTime()));
         try {
             actRequestId = dbUtils.setDbObj(actRequest, "ActRequest", true);
         } catch (SQLException e) {
