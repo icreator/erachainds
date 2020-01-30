@@ -23,7 +23,18 @@ public class DataInfo {
     private int    actRequestId;
     private Timestamp sendToClientDate;
     private Timestamp acceptClientDate;
+    private int try_num;
     // end db
+
+    public int getTry_num() {
+        return try_num;
+    }
+
+    public void setTry_num(int try_num) {
+        this.try_num = try_num;
+    }
+
+
 
     public Timestamp getAcceptClientDate() {
         return acceptClientDate;

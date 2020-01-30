@@ -73,6 +73,9 @@ public class ServiceMonitor {
     @Value("${FETCH_DATA_AFTER_SEND_TO_CLIENT}")
     private String FETCH_DATA_AFTER_SEND_TO_CLIENT;
 
+    @Value("${UPDATE_DATA_NOT_ACCEPTED_BY_CLIENT}")
+    private String UPDATE_DATA_NOT_ACCEPTED_BY_CLIENT;
+
     public ServiceMonitor(Logger logger) {
         this.logger = logger;
     }
@@ -221,8 +224,12 @@ public class ServiceMonitor {
                     params.put(actParam.getParamName(), actParam.getParamValue());
                 });
                 try {
-                    if (!service.checkIdentityValues(params))
+                    if (!service.checkIdentityValues(params)) {
+                        int try_num = dataInfo.getTry_num();
+                        logger.debug(" number of tries " + try_num + " for ident " + dataInfo.getIdentity());
+                        dbUtils.getDataUpd(UPDATE_DATA_NOT_ACCEPTED_BY_CLIENT, ++ try_num, dataInfo.getId());
                         continue;
+                    }
                 } catch (Exception e) {
                     logger.error(e.getMessage(),e);
                     continue;

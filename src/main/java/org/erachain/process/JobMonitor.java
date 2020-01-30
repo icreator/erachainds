@@ -40,6 +40,9 @@ public class JobMonitor implements InitializingBean {
     @Value("${CHECK_DATA_AFTER_SEND_TO_CLIENT}")
     private String CHECK_DATA_AFTER_SEND_TO_CLIENT;
 
+    @Value("${MAX_TRY}")
+    private int MAX_TRY;
+
     @Autowired
     private DbUtils dbUtils;
 
@@ -181,7 +184,7 @@ public class JobMonitor implements InitializingBean {
 
     public void checkData(BlockingQueue<ActiveJob> queue) {
         String[] sqls = {CHECK_DATA_FOR_SUBMIT.replace("?", Long.toString(new Date().getTime())),
-                CHECK_DATA_AFTER_SUBMIT, CHECK_DATA_AFTER_ACCEPT, CHECK_DATA_AFTER_SEND_TO_CLIENT};
+                CHECK_DATA_AFTER_SUBMIT, CHECK_DATA_AFTER_ACCEPT, CHECK_DATA_AFTER_SEND_TO_CLIENT.replace("?", Integer.toString(MAX_TRY))};
         for (int i = sqls.length; i > 0; i--) {
             String sql = sqls[i - 1];
             int records = 0;

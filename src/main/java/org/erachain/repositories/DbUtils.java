@@ -290,4 +290,34 @@ public class DbUtils {
         }
         return null;
     }
+    public int getDataUpd(String sql, Object... values) throws Exception {
+        return getDataId(sql, values);
+    }
+    public int getDataId(String sql, Object... values) throws Exception {
+        Connection connection = jdbcTemplate.getDataSource().getConnection();
+        return getDataId(sql, connection, values);
+    }
+    private int getDataId(String sql, Connection connection,  Object... values) throws Exception {
+        logger.debug("sql = " + sql);
+        boolean isSelect = sql.toLowerCase().contains("select") ? true : false;
+        try (PreparedStatement statement = connection.prepareStatement(sql)) {
+            int i = 0;
+            for (Object value : values) {
+                statement.setObject(++ i, value);
+            }
+            if (isSelect) {
+                ResultSet resultset = statement.executeQuery();
+
+                if (resultset != null && !resultset.isClosed() && resultset.next()) {
+                    return resultset.getInt(1);
+                }
+            } else {
+                return   statement.executeUpdate();
+            }
+        } catch (SQLException e) {
+            logger.error(e.getMessage());
+//            throw new Exception(Error_Message);
+        }
+        return 0;
+    }
 }

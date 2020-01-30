@@ -34,7 +34,8 @@ create table IF NOT EXISTS DataInfo
     accDate          timestamp,
     actRequestId     int,
     sendToClientDate timestamp,
-    acceptClientDate timestamp
+    acceptClientDate timestamp,
+    try_num          int default 0
 );
 
 create table IF NOT EXISTS DataEra
